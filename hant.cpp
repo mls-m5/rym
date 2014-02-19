@@ -1,12 +1,16 @@
 #include "hant.h"
 
+#define KEYCOUNT 500
 namespace hant
 {
-    int key[256];
+    int key[KEYCOUNT];
 }
 
 void hant::init()
 {
+	for (int i = 0; i < KEYCOUNT; ++i){
+		key[KEYCOUNT] = 0;
+	}
     graf::init();
 }
 

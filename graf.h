@@ -42,26 +42,27 @@ namespace graf
     {
         class enhet;
         
-        void add(enhet *e);  //Lägger till objektet i listan
+        void add(enhet *e);  //LÃ¤gger till objektet i listan
         void rem(enhet *e);  //Tar bort objektet ur listan
         void remd(enhet *e); //Tar bort objektet helt
-        enhet *Koll(vector, enhet *ign); //ign står för det objektet som skall ignoreras
-        enhet *Naer(vector p, float lim, enhet *ign); //Hittar det närmaste objektet
+        void flushRem(); //Tar bort objekt som kÃ¶ats
+        void flushDel(); //anropar del pÃ¥ kÃ¶ade objekt
+        enhet *Koll(vector, enhet *ign); //ign stÃ¥r fÃ¶r det objektet som skall ignoreras
+        enhet *Naer(vector p, float lim, enhet *ign); //Hittar det nÃ¤rmaste objektet
         
         class enhet
         {
         public:
             vector pos, vel;
+            enhet() {};
+            virtual ~enhet() {};
             
             virtual void Tid(float t) {};
             virtual void Rendera() {};
             virtual bool Koll(vector &p) {return 0;};  //kollisionstestning
-            virtual float Dist(vector &p) {return 0;};  //Hitta avståndet
+            virtual float Dist(vector &p) {return 0;};  //Hitta avstï¿½ndet
             virtual void Force(vector f) {};
-            virtual bool Skada(float d) {}; //Sant om enheten går sönder
-            
-            //enhet() {};
-            //~enhet() {rem(this);};
+            virtual bool Skada(float d) {return 0;}; //Sant om enheten gï¿½r sï¿½nder
         };
         
         class skepp: public enhet
@@ -76,7 +77,7 @@ namespace graf
             void Rendera();
         };
         
-        class star: public enhet  //Stjärna
+        class star: public enhet  //Stjï¿½rna
         {
         public:
             //vector pos;
@@ -128,7 +129,7 @@ namespace graf
             void Rendera();
         };
         
-        class part: public enhet //skräp som mest flyger omkring
+        class part: public enhet //skrÃ¤p som mest flyger omkring
         {
         public:
             //vector pos, vel;
@@ -141,13 +142,13 @@ namespace graf
             
         };
         
-        class linjrok: public enhet //Rök som ser ut som en linje
+        class linjrok: public enhet //RÃ¶k som ser ut som en linje
         {
         public:
-            //Vel används som den andra positionen
+            //Vel anvÃ¤nds som den andra positionen
             float varand, varandmax;
             
-            linjrok(vector p1, vector p1);
+            linjrok(vector p1, vector p2);
             void Tid(float t);
             void Rendera();
         };

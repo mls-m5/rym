@@ -8,15 +8,15 @@ LINKOBJ  = main.o hant.o graf.o vektorer.o
 LIBS =  -lSDL -lGL -lGLU
 INCS =  
 CXXINCS = 
-BIN  = ../rym
-CXXFLAGS = $(CXXINCS)   -fexpensive-optimizations -O3
-CFLAGS = $(INCS)   -fexpensive-optimizations -O3
+BIN  = rym
+CXXFLAGS = $(CXXINCS)   -fexpensive-optimizations -O3 -std=c++11 -g
+CFLAGS = $(INCS)   -fexpensive-optimizations -O3 -std=c++11
 RM = rm -f
 
 .PHONY: all all-before all-after clean clean-custom
 
-all: clean $(OBJ) $(BIN)
-#all-before ../rym all-after
+all: $(OBJ) $(BIN)
+#all-before rym all-after
 
 
 clean: clean-custom
@@ -35,4 +35,4 @@ vektorer.o: vektorer.cpp vektorer.h
 	$(CPP) -c vektorer.cpp -o vektorer.o $(CXXFLAGS)
 
 $(BIN): $(OBJ)
-	$(CPP) $(LINKOBJ) -o "../rym" $(LIBS)
+	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)

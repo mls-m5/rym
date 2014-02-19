@@ -1,5 +1,8 @@
 
 #include "graf.h"
+#include <list>
+
+using std::list;
 
 namespace graf
 {
@@ -7,7 +10,9 @@ namespace graf
     {
         int enhant; //antalet enheter
         int cenh; //Det objektet som behandlas för tillfället
-        enhet **enh; //lista med enheter
+        list<enhet *> enh;
+        list<enhet *> remq;
+        list<enhet *> delq;
     }
 }
 
@@ -24,8 +29,12 @@ int kont::get(controlnum kontn)
 void graf::Tid(float t)
 {
     //notera användningen av cenh
-    for (obj::cenh = 1; obj::cenh < obj::enhant; obj::cenh++) 
-       obj::enh[obj::cenh]->Tid(t);
+	for (auto it: obj::enh){
+		it->Tid(t);
+	}
+
+	obj::flushDel();
+	obj::flushRem();
 }
 
 void graf::Rendera()
@@ -37,15 +46,15 @@ void graf::Rendera()
     glVertex2f(0,0);
     glEnd();
     
-    for (int i = 1; i< obj::enhant; i++) obj::enh[i]->Rendera();
+    for (auto it: obj::enh){
+    	it->Rendera();
+    }
     glPopMatrix();
 }
 
 void graf::init()
 {
     obj::enhant = 1;
-    obj::enh = new obj::enhet*[1];
-    obj::enh[0] = 0; //det första objektet är tomt
     
     for(int i= 1; i<500; i++)
     {
@@ -63,11 +72,9 @@ void graf::init()
 
 void graf::avsl()
 {
-    for (int i = 1; i<obj::enhant; i++)
-    {
-        delete obj::enh[i];
-    }
-    delete [] obj::enh;
+    obj::delq = obj::remq = obj::enh;
+    obj::flushDel();
+    obj::flushRem();
 }
 
 //________________________oega__________________________________________
@@ -104,75 +111,56 @@ void graf::oega::transform()
 
 void graf::obj::add(enhet *e)
 {
-    //gör först en my lista med element
-    enhet **nenh = new enhet *[enhant +1];
-    //fyller sedan upp den
-    for (int i=0; i<enhant; i++) 
-       nenh[i] = enh[i];
-    nenh[enhant] = e;
-    
-    delete [] enh; //tar bort den gamla listan
-    enh = nenh; //byter pekare
-    nenh = 0; //ej nödvändigt, men snyggt
-    
-    enhant += 1;
+	enh.push_back(e);
 }
 
 void graf::obj::rem(enhet *e)
 {
-    
-    //gör först en my lista med element
-    enhet **nenh = new enhet *[enhant -1];
-    int i, f;
-    
-    //hittar objektet som ska tas bort
-    f = 0;
-    for (i = 1; i<enhant; i++)
-        if (enh[i] == e) 
-        {
-            f = i; 
-            break;
-        }
-    if (!f) return;
-    
-    //listan kopieras, men ett objekt hoppas över
-    for (i = 1; i<f; i++)
-        nenh[i] = enh[i];
-    for (i = f; i<enhant-1; i++)
-        nenh[i] = enh[i+1];
-    
-    delete [] enh; //Tar bort den ursprungliga listan
-    enh = nenh; //byter pekare
-    nenh = 0;
-    enhant -= 1;
-    
-    if (f <= cenh) cenh -= 1; //Rättar till position
+	remq.push_back(e);
+	remq.sort();
+	remq.unique();
 }
 
 void graf::obj::remd(enhet *e)
 {
     rem(e);
-    delete e;
+    delq.push_back(e);
+    delq.sort();
+    delq.unique();
 }
 
 graf::obj::enhet *graf::obj::Koll(vector p, enhet *ign)
 {
     if (ign)  //Är det något objekt som skall ignoreras?
     {
-        for (int i = 1; i<enhant; i++)
+    	for (auto it: enh)
         {
-            if (enh[i]->Koll(p) && enh[i] != ign) return enh[i];
+            if (it->Koll(p) && it != ign) return it;
         }
         return 0;
     }
     else //inget objekt ignoreras
     {
-        for (int i = 1; i<enhant; i++)
+    	for (auto it: enh)
         {
-            if (enh[i]->Koll(p)) return enh[i];
+            if (it->Koll(p)) return it;
         }
         return 0;
     }
+}
+
+void graf::obj::flushRem() {
+	for (auto it: remq){
+		enh.remove(it);
+	}
+	remq.clear();
+}
+
+void graf::obj::flushDel() {
+	for (auto it: delq){
+		delete it;
+	}
+	delq.clear();
 }
 
 graf::obj::enhet *graf::obj::Naer(vector p, float lim, enhet *ign)
@@ -180,14 +168,14 @@ graf::obj::enhet *graf::obj::Naer(vector p, float lim, enhet *ign)
     float d = lim; //Det närmsta objektet som påträffats
     float dm;  //det senast mätta värdet
     enhet *e = 0;  //Det närmast mätta objektet
-    for (int i = 1; i<enhant; i++)
+    for (auto it: enh)
     {
-        if (ign != enh[i]) //Om objektet inte skall ignoreras
+        if (ign != it) //Om objektet inte skall ignoreras
         {
-            dm = enh[i]->Dist(p);
+            dm = it->Dist(p);
             if (dm < d && dm > 0)
             {
-                e = enh[i];
+                e = it;
                 d = dm;
             }
         }
@@ -330,8 +318,7 @@ bool graf::obj::komet::Skada(float d)
     liv -= d;
     if (liv <= 0)
     {
-        rem(this);
-        delete this;
+        remd(this);
         return 1;
     }
     else
@@ -396,16 +383,13 @@ void graf::obj::projekt::Tid(float t)
         e->Skada(.4);
         
         add(new exp1(pos,.5));
-        rem(this);
-        delete this;
+        remd(this);
     }
     else if (varand <0)
     {
-        
-        rem(this);
-        delete this;
+        remd(this);
     }
-    else if (e=obj::Naer(pos,20,this)) 
+    else if ((e=obj::Naer(pos,20,this)))
     {
         vector v;
         v = pos - e->pos;
@@ -435,17 +419,17 @@ void graf::obj::projekt::Rendera()
     glPopMatrix();
 }
 
-graf::obj::projekt::projekt(vector p, vector v)
+graf::obj::projekt::projekt(vector p, vector v):
+		rot(0),
+		ang(-atan2(v.x, v.y)),
+		varand(60)
 {
-    pos = p;
-    vel = v;
-    ang = -atan2(v.x, v.y);
-    varand = 60;
+	pos = p;
+	vel = v;
 }
 
 graf::obj::projekt::~projekt()
 {
-    
 }
 
 //____________________________Explosion_________________________________________
@@ -524,12 +508,12 @@ graf::obj::part::part(vector p)
     varandmax = varand;
 }
 
-graf::obj::part::part(vector p, vector v)
+graf::obj::part::part(vector p, vector v):
+		varand(2),
+		varandmax(varand)
 {
-    pos = p;
-    vel = vel;
-    varand = 2;
-    varandmax = varand;
+	pos = p;
+	vel = v;
 }
 
 //___________________Rök på linje_______________________________________________
