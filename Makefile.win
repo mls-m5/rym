@@ -1,0 +1,45 @@
+# Project: rym
+# Makefile created by Dev-C++ 4.9.9.2
+
+CPP  = g++.exe
+CC   = gcc.exe
+WINDRES = windres.exe
+RES  = rym_private.res
+OBJ  = main.o hant.o graf.o vektorer.o "../../../Teste\ 14\ bil/bitmap.o" $(RES)
+LINKOBJ  = main.o hant.o graf.o vektorer.o "../../../Teste 14 bil/bitmap.o" $(RES)
+LIBS =  -L"e:/program/Dev-Cpp/lib" -mwindows -lopengl32  
+INCS =  -I"e:/program/Dev-Cpp/include" 
+CXXINCS =  -I"e:/program/Dev-Cpp/lib/gcc/mingw32/3.4.2/include"  -I"e:/program/Dev-Cpp/include/c++/3.4.2/backward"  -I"e:/program/Dev-Cpp/include/c++/3.4.2/mingw32"  -I"e:/program/Dev-Cpp/include/c++/3.4.2"  -I"e:/program/Dev-Cpp/include" 
+BIN  = ../rym.exe
+CXXFLAGS = $(CXXINCS)   -fexpensive-optimizations -O3
+CFLAGS = $(INCS)   -fexpensive-optimizations -O3
+RM = rm -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before ../rym.exe all-after
+
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CPP) $(LINKOBJ) -o "..\rym.exe" $(LIBS)
+
+main.o: main.cpp
+	$(CPP) -c main.cpp -o main.o $(CXXFLAGS)
+
+hant.o: hant.cpp
+	$(CPP) -c hant.cpp -o hant.o $(CXXFLAGS)
+
+graf.o: graf.cpp
+	$(CPP) -c graf.cpp -o graf.o $(CXXFLAGS)
+
+vektorer.o: vektorer.cpp
+	$(CPP) -c vektorer.cpp -o vektorer.o $(CXXFLAGS)
+
+"../../../Teste\ 14\ bil/bitmap.o": ../../../Teste\ 14\ bil/bitmap.cpp
+	$(CPP) -c "../../../Teste 14 bil/bitmap.cpp" -o "../../../Teste 14 bil/bitmap.o" $(CXXFLAGS)
+
+rym_private.res: rym_private.rc 
+	$(WINDRES) -i rym_private.rc --input-format=rc -o rym_private.res -O coff 

@@ -1,0 +1,231 @@
+/**************************
+ * Includes
+ *
+ **************************/
+
+#include <windows.h>
+#include <gl/gl.h>
+#include "graf.h"
+#include "hant.h"
+
+
+/**************************
+ * Function Declarations
+ *
+ **************************/
+
+LRESULT CALLBACK WndProc (HWND hWnd, UINT message,
+WPARAM wParam, LPARAM lParam);
+void EnableOpenGL (HWND hWnd, HDC *hDC, HGLRC *hRC);
+void InitTexture ();
+void DisableOpenGL (HWND hWnd, HDC hDC, HGLRC hRC);
+
+
+/**************************
+ * WinMain
+ *
+ **************************/
+
+int WINAPI WinMain (HINSTANCE hInstance,
+                    HINSTANCE hPrevInstance,
+                    LPSTR lpCmdLine,
+                    int iCmdShow)
+{
+    WNDCLASS wc;
+    HWND hWnd;
+    HDC hDC;
+    HGLRC hRC;        
+    MSG msg;
+    BOOL bQuit = FALSE;
+
+    /* register window class */
+    wc.style = CS_OWNDC;
+    wc.lpfnWndProc = WndProc;
+    wc.cbClsExtra = 0;
+    wc.cbWndExtra = 0;
+    wc.hInstance = hInstance;
+    wc.hIcon = LoadIcon (NULL, IDI_APPLICATION);
+    wc.hCursor = LoadCursor (NULL, IDC_ARROW);
+    wc.hbrBackground = (HBRUSH) GetStockObject (BLACK_BRUSH);
+    wc.lpszMenuName = NULL;
+    wc.lpszClassName = "GLSample";
+    RegisterClass (&wc);
+
+    /* create main window */
+    hWnd = CreateWindow (
+      "GLSample", "OpenGL Sample", 
+      WS_POPUPWINDOW | WS_VISIBLE,
+      0, 0, 256*3, 256*3,
+      NULL, NULL, hInstance, NULL);
+
+    /* enable OpenGL for the window */
+    EnableOpenGL (hWnd, &hDC, &hRC);
+    
+    hant::init();
+    
+    /* program main loop */
+    while (!bQuit)
+    {
+        /* check for messages */
+        if (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
+        {
+            /* handle or dispatch messages */
+            if (msg.message == WM_QUIT)
+            {
+                bQuit = TRUE;
+            }
+            else
+            {
+                TranslateMessage (&msg);
+                DispatchMessage (&msg);
+            }
+        }
+        else
+        {
+            graf::Tid(.1);
+            
+            /* OpenGL animation code goes here */
+
+            glClearColor (0.0f, 0.0f, 0.0f, 0.0f);
+            glClear (GL_COLOR_BUFFER_BIT);
+            
+            graf::Rendera();
+            
+            SwapBuffers (hDC);
+
+            Sleep (1);
+        }
+    }
+    
+    hant::avsl();
+    
+    /* shutdown OpenGL */
+    DisableOpenGL (hWnd, hDC, hRC);
+
+    /* destroy the window explicitly */
+    DestroyWindow (hWnd);
+
+    return msg.wParam;
+}
+
+
+/********************
+ * Window Procedure
+ *
+ ********************/
+
+LRESULT CALLBACK WndProc (HWND hWnd, UINT message,
+                          WPARAM wParam, LPARAM lParam)
+{
+
+    switch (message)
+    {
+    case WM_CREATE:
+        return 0;
+    case WM_CLOSE:
+        PostQuitMessage (0);
+        return 0;
+
+    case WM_DESTROY:
+        return 0;
+
+    case WM_KEYDOWN:
+        switch (wParam)
+        {
+        case VK_ESCAPE:
+            PostQuitMessage(0);
+            return 0;
+        default:
+            hant::setkey(wParam, 1);
+            return 0;
+        }
+        return 0;
+    case WM_KEYUP:
+        hant::setkey(wParam, 0);
+        return 0;
+    default:
+        return DefWindowProc (hWnd, message, wParam, lParam);
+    }
+}
+
+
+/*******************
+ * Enable OpenGL
+ *
+ *******************/
+
+void EnableOpenGL (HWND hWnd, HDC *hDC, HGLRC *hRC)
+{
+    PIXELFORMATDESCRIPTOR pfd;
+    int iFormat;
+
+    /* get the device context (DC) */
+    *hDC = GetDC (hWnd);
+
+    /* set the pixel format for the DC */
+    ZeroMemory (&pfd, sizeof (pfd));
+    pfd.nSize = sizeof (pfd);
+    pfd.nVersion = 1;
+    pfd.dwFlags = PFD_DRAW_TO_WINDOW | 
+      PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    pfd.iPixelType = PFD_TYPE_RGBA;
+    pfd.cColorBits = 24;
+    pfd.cDepthBits = 16;
+    pfd.iLayerType = PFD_MAIN_PLANE;
+    iFormat = ChoosePixelFormat (*hDC, &pfd);
+    SetPixelFormat (*hDC, iFormat, &pfd);
+
+    /* create and enable the render context (RC) */
+    *hRC = wglCreateContext( *hDC );
+    wglMakeCurrent( *hDC, *hRC );
+    
+    //Alphablend
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
+    
+    InitTexture();
+}
+
+
+/*******************
+ * Enable OpenGL
+ *
+ *******************/
+
+void InitTexture()
+{
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    //clampgrejset kan vara GL_CLAMP eller GL_REPEAT
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    //Parametergrejset bestämmer hur texturen ska filtreras
+    //Detta kan vara GL_LINEAR eller GL_DEAREST
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+        GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, 
+        GL_NEAREST);
+    //glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+    //Decal används när man inte vill att färgen skall användas
+    //Även MODULATE DECAL BLEND och REPLACE finns
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glEnable(GL_TEXTURE_2D);
+    
+    
+    glEnable(GL_CULL_FACE);
+
+    glFrontFace(GL_CW);
+    glCullFace(GL_BACK);
+}
+
+
+/******************
+ * Disable OpenGL
+ *
+ ******************/
+
+void DisableOpenGL (HWND hWnd, HDC hDC, HGLRC hRC)
+{
+    wglMakeCurrent (NULL, NULL);
+    wglDeleteContext (hRC);
+    ReleaseDC (hWnd, hDC);
+}

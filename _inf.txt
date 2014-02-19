@@ -1,0 +1,25 @@
+rym
+Ett litet spel som jag påbörjade för att jag kände för att börja på ett 
+nytt spel.
+
+080802
+Spelet påbörjas. Jag kommer på att det kvittar om jag skriver hant (som
+i t.ex NinjaTeste) Programmet kan se ungefär likadant ut i alla fall.
+
+Kontrollhantering är tillagt. En skeppklass och en stjärnklass är tillagd.
+
+080818
+Avståndsmätningsfunktion är tillagd (Dist(...)) Funktion för mätning av det
+närmaste objektet (Naer(...)) är tillagd. Till båda dessa är pekaren *ign
+tillagd för att hoppa över ett bestämt objekt.
+
+InitTexture är tillagd i main.cpp. Bittmap.cpp .h är tillagda till projektet
+
+Jag börjar bli sugen på att generera egna texturer
+
+080820
+
+vektorerna pos och vel ligger numera i den ärvda klassen graf::obj::enhet för
+bättre åtkomst
+
+Skada(d) är tillagd som virtuell funktion i graf::obj::enhet.
