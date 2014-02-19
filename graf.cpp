@@ -8,9 +8,9 @@ namespace graf
 {
     namespace obj
     {
-        int enhant; //antalet enheter
         int cenh; //Det objektet som behandlas för tillfället
         list<enhet *> enh;
+        list<enhet *> sol; //enheter som kan kollisionstestas
         list<enhet *> remq;
         list<enhet *> delq;
     }
@@ -28,7 +28,9 @@ int kont::get(controlnum kontn)
 
 void graf::Tid(float t)
 {
-    //notera användningen av cenh
+	for (auto it: obj::sol){
+		it->Tid(t);
+	}
 	for (auto it: obj::enh){
 		it->Tid(t);
 	}
@@ -46,6 +48,9 @@ void graf::Rendera()
     glVertex2f(0,0);
     glEnd();
     
+    for (auto it: obj::sol){
+    	it->Rendera();
+    }
     for (auto it: obj::enh){
     	it->Rendera();
     }
@@ -54,8 +59,6 @@ void graf::Rendera()
 
 void graf::init()
 {
-    obj::enhant = 1;
-    
     for(int i= 1; i<500; i++)
     {
         obj::add(new obj::star);
@@ -111,7 +114,12 @@ void graf::oega::transform()
 
 void graf::obj::add(enhet *e)
 {
-	enh.push_back(e);
+	if (e->isSolid()){
+		sol.push_back(e);
+	}
+	else{
+		enh.push_back(e);
+	}
 }
 
 void graf::obj::rem(enhet *e)
@@ -133,7 +141,7 @@ graf::obj::enhet *graf::obj::Koll(vector p, enhet *ign)
 {
     if (ign)  //Är det något objekt som skall ignoreras?
     {
-    	for (auto it: enh)
+    	for (auto it: sol)
         {
             if (it->Koll(p) && it != ign) return it;
         }
@@ -141,7 +149,7 @@ graf::obj::enhet *graf::obj::Koll(vector p, enhet *ign)
     }
     else //inget objekt ignoreras
     {
-    	for (auto it: enh)
+    	for (auto it: sol)
         {
             if (it->Koll(p)) return it;
         }
@@ -151,6 +159,7 @@ graf::obj::enhet *graf::obj::Koll(vector p, enhet *ign)
 
 void graf::obj::flushRem() {
 	for (auto it: remq){
+		sol.remove(it);
 		enh.remove(it);
 	}
 	remq.clear();
@@ -168,7 +177,7 @@ graf::obj::enhet *graf::obj::Naer(vector p, float lim, enhet *ign)
     float d = lim; //Det närmsta objektet som påträffats
     float dm;  //det senast mätta värdet
     enhet *e = 0;  //Det närmast mätta objektet
-    for (auto it: enh)
+    for (auto it: sol)
     {
         if (ign != it) //Om objektet inte skall ignoreras
         {

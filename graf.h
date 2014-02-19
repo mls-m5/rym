@@ -63,6 +63,7 @@ namespace graf
             virtual float Dist(vector &p) {return 0;};  //Hitta avst�ndet
             virtual void Force(vector f) {};
             virtual bool Skada(float d) {return 0;}; //Sant om enheten g�r s�nder
+            virtual bool isSolid() {return 0;};
         };
         
         class skepp: public enhet
@@ -104,6 +105,7 @@ namespace graf
             float Dist(vector &p);
             void Force(vector f);
             bool Skada(float d);
+            bool isSolid() { return true; };
         };
         
         class projekt: public enhet //En projektil

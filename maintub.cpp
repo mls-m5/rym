@@ -68,7 +68,7 @@ void mainLoop() {
 void setupOpengl() {
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
-    glEnable(GL_DEPTH_TEST);
+//    glEnable(GL_DEPTH_TEST);
     gluPerspective(45, (float)width/height, .1, 100);
     glMatrixMode(GL_MODELVIEW);
 		
