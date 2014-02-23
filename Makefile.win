@@ -1,45 +1,41 @@
 # Project: rym
-# Makefile created by Dev-C++ 4.9.9.2
+# Makefile created by Dev-C++ 5.6.1
 
-CPP  = g++.exe
-CC   = gcc.exe
-WINDRES = windres.exe
-RES  = rym_private.res
-OBJ  = main.o hant.o graf.o vektorer.o "../../../Teste\ 14\ bil/bitmap.o" $(RES)
-LINKOBJ  = main.o hant.o graf.o vektorer.o "../../../Teste 14 bil/bitmap.o" $(RES)
-LIBS =  -L"e:/program/Dev-Cpp/lib" -mwindows -lopengl32  
-INCS =  -I"e:/program/Dev-Cpp/include" 
-CXXINCS =  -I"e:/program/Dev-Cpp/lib/gcc/mingw32/3.4.2/include"  -I"e:/program/Dev-Cpp/include/c++/3.4.2/backward"  -I"e:/program/Dev-Cpp/include/c++/3.4.2/mingw32"  -I"e:/program/Dev-Cpp/include/c++/3.4.2"  -I"e:/program/Dev-Cpp/include" 
-BIN  = ../rym.exe
-CXXFLAGS = $(CXXINCS)   -fexpensive-optimizations -O3
-CFLAGS = $(INCS)   -fexpensive-optimizations -O3
-RM = rm -f
+CPP      = g++.exe
+CC       = gcc.exe
+WINDRES  = windres.exe
+RES      = winbuild/rym_private.res
+OBJ      = winbuild/main.o winbuild/hant.o winbuild/graf.o winbuild/vektorer.o $(RES)
+LINKOBJ  = winbuild/main.o winbuild/hant.o winbuild/graf.o winbuild/vektorer.o $(RES)
+LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib32" -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib32" -static-libgcc -mwindows -lopengl32 -m32
+INCS     = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.8.1/include"
+CXXINCS  = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.8.1/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.8.1/include/c++"
+BIN      = winbuild/rym.exe
+CXXFLAGS = $(CXXINCS) -m32 -std=c++11
+CFLAGS   = $(INCS) -m32
+RM       = rm.exe -f
 
 .PHONY: all all-before all-after clean clean-custom
 
-all: all-before ../rym.exe all-after
-
+all: all-before $(BIN) all-after
 
 clean: clean-custom
 	${RM} $(OBJ) $(BIN)
 
 $(BIN): $(OBJ)
-	$(CPP) $(LINKOBJ) -o "..\rym.exe" $(LIBS)
+	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)
 
-main.o: main.cpp
-	$(CPP) -c main.cpp -o main.o $(CXXFLAGS)
+winbuild/main.o: main.cpp
+	$(CPP) -c main.cpp -o winbuild/main.o $(CXXFLAGS)
 
-hant.o: hant.cpp
-	$(CPP) -c hant.cpp -o hant.o $(CXXFLAGS)
+winbuild/hant.o: hant.cpp
+	$(CPP) -c hant.cpp -o winbuild/hant.o $(CXXFLAGS)
 
-graf.o: graf.cpp
-	$(CPP) -c graf.cpp -o graf.o $(CXXFLAGS)
+winbuild/graf.o: graf.cpp
+	$(CPP) -c graf.cpp -o winbuild/graf.o $(CXXFLAGS)
 
-vektorer.o: vektorer.cpp
-	$(CPP) -c vektorer.cpp -o vektorer.o $(CXXFLAGS)
+winbuild/vektorer.o: vektorer.cpp
+	$(CPP) -c vektorer.cpp -o winbuild/vektorer.o $(CXXFLAGS)
 
-"../../../Teste\ 14\ bil/bitmap.o": ../../../Teste\ 14\ bil/bitmap.cpp
-	$(CPP) -c "../../../Teste 14 bil/bitmap.cpp" -o "../../../Teste 14 bil/bitmap.o" $(CXXFLAGS)
-
-rym_private.res: rym_private.rc 
-	$(WINDRES) -i rym_private.rc --input-format=rc -o rym_private.res -O coff 
+winbuild/rym_private.res: rym_private.rc 
+	$(WINDRES) -i rym_private.rc -F pe-i386 --input-format=rc -o winbuild/rym_private.res -O coff 

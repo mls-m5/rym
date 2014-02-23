@@ -9,7 +9,7 @@ LIBS =  -lSDL -lGL -lGLU
 INCS =  
 CXXINCS = 
 BIN  = rym
-CXXFLAGS = $(CXXINCS)   -fexpensive-optimizations -O3 -std=c++11 -g
+CXXFLAGS = $(CXXINCS)   -O3 -std=c++11 -g #-fexpensive-optimizations 
 CFLAGS = $(INCS)   -fexpensive-optimizations -O3 -std=c++11
 RM = rm -f
 

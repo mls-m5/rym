@@ -58,7 +58,9 @@ void mainLoop() {
  
         SDL_GL_SwapBuffers(); // Update screen
 				
-				while (SDL_GetTicks() < ttime) {processEvents();}
+        while (SDL_GetTicks() < ttime) {
+        	processEvents();
+        }
         // Increase degree of rotation to spin QUAD
  
     }
@@ -76,6 +78,12 @@ void setupOpengl() {
     //Alphablend
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
+
+    //Line antialiasing
+    glEnable( GL_LINE_SMOOTH );
+    glEnable( GL_POLYGON_SMOOTH );
+    glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
+    glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
 }
  
 // Init everything

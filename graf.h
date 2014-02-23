@@ -2,23 +2,34 @@
 #define graf_h
 
 #include "vektorer.h"
-//#include "windows.h"
 #include "hant.h"
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <SDL/SDL.h>
 #include "math.h"
-//#include "bitmap.h"
+#include <list>
 const float pi = 3.1415926535897932384626433832795;
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+#include "windows.h"
 enum controlnum
 {
-    cn_up = SDLK_UP /*VK_UP*/,
-    cn_down = SDLK_DOWN /*VK_DOWN*/,
-    cn_left = SDLK_LEFT /*VK_LEFT*/,
-    cn_right = SDLK_RIGHT /*VK_RIGHT*/,
-    cn_eld =  SDLK_SPACE /*VK_SPACE*/
+    cn_up = VK_UP,
+    cn_down = VK_DOWN,
+    cn_left = VK_LEFT,
+    cn_right = VK_RIGHT,
+    cn_eld =  VK_SPACE
 };
+#else
+#include <SDL/SDL.h>
+enum controlnum
+{
+    cn_up = SDLK_UP,
+    cn_down = SDLK_DOWN,
+    cn_left = SDLK_LEFT,
+    cn_right = SDLK_RIGHT,
+    cn_eld =  SDLK_SPACE
+};
+#endif
 
 namespace kont
 {
@@ -41,10 +52,13 @@ namespace graf
     namespace obj
     {
         class enhet;
+    	typedef std::list<enhet *>::iterator enhet_list_iterator_t;
         
-        void add(enhet *e);  //Lägger till objektet i listan
+        enhet_list_iterator_t add(enhet *e);  //Lägger till objektet i listan
         void rem(enhet *e);  //Tar bort objektet ur listan
+        void rem(enhet_list_iterator_t it); //Tar bort iterator ur listan (snabbare)
         void remd(enhet *e); //Tar bort objektet helt
+        void remd(enhet_list_iterator_t it); //Tar bort iteratorns objekt helt (snabbare)
         void flushRem(); //Tar bort objekt som köats
         void flushDel(); //anropar del på köade objekt
         enhet *Koll(vector, enhet *ign); //ign står för det objektet som skall ignoreras
@@ -54,16 +68,21 @@ namespace graf
         {
         public:
             vector pos, vel;
-            enhet() {};
+            enhet(): hasIterator(false) {};
             virtual ~enhet() {};
             
             virtual void Tid(float t) {};
             virtual void Rendera() {};
             virtual bool Koll(vector &p) {return 0;};  //kollisionstestning
-            virtual float Dist(vector &p) {return 0;};  //Hitta avst�ndet
+            virtual float Dist(vector &p) {return 0;};  //Hitta avståndet
             virtual void Force(vector f) {};
-            virtual bool Skada(float d) {return 0;}; //Sant om enheten g�r s�nder
+            virtual bool Skada(float d) {return 0;}; //Sant om enheten går sönder
             virtual bool isSolid() {return 0;};
+            void setIterator(enhet_list_iterator_t);
+
+        protected:
+            bool hasIterator;
+            enhet_list_iterator_t iterator; //En iterator för att snabbare kunna ta bort röken
         };
         
         class skepp: public enhet

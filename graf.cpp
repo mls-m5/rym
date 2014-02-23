@@ -13,6 +13,7 @@ namespace graf
         list<enhet *> sol; //enheter som kan kollisionstestas
         list<enhet *> remq;
         list<enhet *> delq;
+        list<enhet_list_iterator_t> remqit_nonsol; //En speciell lista med iteratorer för att snabba på processen
     }
 }
 
@@ -112,29 +113,80 @@ void graf::oega::transform()
 
 //_________________________objekt --- -... .--- . -.- - ________________
 
-void graf::obj::add(enhet *e)
+graf::obj::enhet_list_iterator_t graf::obj::add(enhet *e)
 {
 	if (e->isSolid()){
 		sol.push_back(e);
+		auto it = --sol.end();
+		e->setIterator(it);
+		return it;
 	}
 	else{
 		enh.push_back(e);
+		auto it = --enh.end();
+		e->setIterator(it);
+		return it;
 	}
 }
 
 void graf::obj::rem(enhet *e)
 {
+	for (auto it: remq){
+		if (it == e){
+			return; //Objektet redan i kö
+		}
+	}
 	remq.push_back(e);
-	remq.sort();
-	remq.unique();
+}
+
+void graf::obj::rem(enhet_list_iterator_t it)
+{
+	for (auto tit: remqit_nonsol){
+		if (tit == it){
+			return; //enheten är redan i kö
+		}
+	}
+	remqit_nonsol.push_back(it);
 }
 
 void graf::obj::remd(enhet *e)
 {
+	for (auto it: delq){
+		if (it == e){
+			return; //Objektet redan i kö
+		}
+	}
     rem(e);
     delq.push_back(e);
-    delq.sort();
-    delq.unique();
+}
+
+void graf::obj::remd(enhet_list_iterator_t it){
+	for (auto tit: remqit_nonsol){
+		if (tit == it){
+			return; //Objektet redan i kö
+		}
+	}
+	rem(it);
+	delq.push_back(*it);
+}
+
+void graf::obj::flushRem() {
+	for (auto it: remq){
+		sol.remove(it);
+		enh.remove(it);
+	}
+	remq.clear();
+	for (auto it: remqit_nonsol){
+		enh.erase(it);
+	}
+	remqit_nonsol.clear();
+}
+
+void graf::obj::flushDel() {
+	for (auto it: delq){
+		delete it;
+	}
+	delq.clear();
 }
 
 graf::obj::enhet *graf::obj::Koll(vector p, enhet *ign)
@@ -155,21 +207,6 @@ graf::obj::enhet *graf::obj::Koll(vector p, enhet *ign)
         }
         return 0;
     }
-}
-
-void graf::obj::flushRem() {
-	for (auto it: remq){
-		sol.remove(it);
-		enh.remove(it);
-	}
-	remq.clear();
-}
-
-void graf::obj::flushDel() {
-	for (auto it: delq){
-		delete it;
-	}
-	delq.clear();
 }
 
 graf::obj::enhet *graf::obj::Naer(vector p, float lim, enhet *ign)
@@ -379,7 +416,12 @@ void graf::obj::projekt::Tid(float t)
     
     enhet * e;
     
-    add(new linjrok(pos-vel, pos));
+    {
+    	auto linj = new linjrok(pos-vel, pos);
+    	auto it = add(linj);
+    	linj->setIterator(it);
+    }
+
     
     e = obj::Koll(pos, this);
     if (e) 
@@ -392,11 +434,11 @@ void graf::obj::projekt::Tid(float t)
         e->Skada(.4);
         
         add(new exp1(pos,.5));
-        remd(this);
+        remd(iterator);
     }
     else if (varand <0)
     {
-        remd(this);
+        remd(iterator);
     }
     else if ((e=obj::Naer(pos,20,this)))
     {
@@ -448,7 +490,7 @@ void graf::obj::exp1::Tid(float t)
     stlk /= (1+t);
     if (stlk < .01)
     {
-        remd(this);
+        remd(iterator);
     }
     
 }
@@ -485,7 +527,7 @@ void graf::obj::part::Tid(float t)
     varand -= t;
     if (varand < 0) 
     {
-        remd(this);
+        remd(iterator);
     }
 }
 
@@ -532,7 +574,7 @@ void graf::obj::linjrok::Tid(float t)
     varand -= t;
     if (varand < 0) 
     {
-        remd(this);
+    	remd(iterator);
     }
 }
 
@@ -551,4 +593,9 @@ graf::obj::linjrok::linjrok(vector p1, vector p2)
     vel = p2;
     varand = 12;
     varandmax = varand;
+}
+
+void graf::obj::enhet::setIterator(enhet_list_iterator_t it) {
+	iterator = it;
+	hasIterator = true;
 }

@@ -23,3 +23,11 @@ vektorerna pos och vel ligger numera i den ärvda klassen graf::obj::enhet för
 bättre åtkomst
 
 Skada(d) är tillagd som virtuell funktion i graf::obj::enhet.
+
+140219
+
+Projektet återupptogs :) Nu med lite fräshare kunskaper
+
+140223
+
+Prestandaoptimeringar. Nu kan man ta bort objekt med deras iterator, och add() returnerar iteratorn för det senast tillagda objektet.

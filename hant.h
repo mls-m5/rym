@@ -11,11 +11,6 @@ namespace hant
     
     int getkey(int key);
     void setkey(int key, bool val);
-    
-    namespace tex
-    {
-        
-    }
 }
 
 #endif

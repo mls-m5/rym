@@ -1,9 +1,9 @@
 [Project]
 FileName=rym.dev
 Name=rym
-UnitCount=10
+UnitCount=8
 Type=0
-Ver=1
+Ver=2
 ObjFiles=
 Includes=
 Libs=
@@ -11,12 +11,12 @@ PrivateResource=rym_private.rc
 ResourceIncludes=
 MakeIncludes=
 Compiler=
-CppCompiler=
+CppCompiler=-std=c++11_@@_
 Linker=-lopengl32_@@_
 IsCpp=1
 Icon=rym.ico
-ExeOutput=..\
-ObjectOutput=
+ExeOutput=winbuild
+ObjectOutput=winbuild
 OverrideOutput=0
 OverrideOutputName=rym.exe
 HostApplication=
@@ -26,8 +26,10 @@ UseCustomMakefile=0
 CustomMakefile=
 IncludeVersionInfo=1
 SupportXPThemes=0
-CompilerSet=0
-CompilerSettings=0000000001001000000000
+CompilerSet=3
+CompilerSettings=0000000100000000000000000
+LogOutput=
+LogOutputEnabled=0
 
 [Unit2]
 FileName=hant.cpp
@@ -96,7 +98,7 @@ Build=1
 LanguageID=1033
 CharsetID=1252
 CompanyName=Mattias Larsson Sköld
-FileVersion=
+FileVersion=0.1.1.1
 FileDescription=ett fint rymdspel
 InternalName=
 LegalCopyright=
@@ -105,6 +107,7 @@ OriginalFilename=rym.exe
 ProductName=rym
 ProductVersion=
 AutoIncBuildNr=0
+SyncProduct=0
 
 [Unit7]
 FileName=vektorer.h

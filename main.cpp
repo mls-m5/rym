@@ -198,15 +198,15 @@ void InitTexture()
     //clampgrejset kan vara GL_CLAMP eller GL_REPEAT
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    //Parametergrejset bestämmer hur texturen ska filtreras
+    //Parametergrejset bestï¿½mmer hur texturen ska filtreras
     //Detta kan vara GL_LINEAR eller GL_DEAREST
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
         GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, 
         GL_NEAREST);
     //glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-    //Decal används när man inte vill att färgen skall användas
-    //Även MODULATE DECAL BLEND och REPLACE finns
+    //Decal anvï¿½nds nï¿½r man inte vill att fï¿½rgen skall anvï¿½ndas
+    //ï¿½ven MODULATE DECAL BLEND och REPLACE finns
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     glEnable(GL_TEXTURE_2D);
     
