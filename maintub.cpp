@@ -58,8 +58,9 @@ void mainLoop() {
  
         SDL_GL_SwapBuffers(); // Update screen
 				
-        while (SDL_GetTicks() < ttime) {
-        	processEvents();
+        processEvents();
+        if (SDL_GetTicks() < ttime) {
+        	SDL_Delay(ttime - SDL_GetTicks());
         }
         // Increase degree of rotation to spin QUAD
  
