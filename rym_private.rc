@@ -16,7 +16,7 @@ FILETYPE VFT_APP
 {
   BLOCK "StringFileInfo"
   {
-    BLOCK "040904E4"
+    BLOCK "041D04E4"
     {
       VALUE "CompanyName", "Mattias Larsson Sköld"
       VALUE "FileVersion", "0.1.1.1"
@@ -31,6 +31,6 @@ FILETYPE VFT_APP
   }
   BLOCK "VarFileInfo"
   {
-    VALUE "Translation", 0x0409, 1252
+    VALUE "Translation", 0x041D, 1252
   }
 }

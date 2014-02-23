@@ -182,7 +182,13 @@ void EnableOpenGL (HWND hWnd, HDC *hDC, HGLRC *hRC)
     //Alphablend
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
-    
+
+    //Line antialiasing
+    glEnable( GL_LINE_SMOOTH );
+    glEnable( GL_POLYGON_SMOOTH );
+    glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
+    glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
+
     InitTexture();
 }
 
