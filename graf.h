@@ -3,8 +3,8 @@
 
 #include "vektorer.h"
 #include "hant.h"
-#include <GL/gl.h>
-#include <GL/glu.h>
+//#include <GL/gl.h>
+//#include <GL/glu.h>
 #include "math.h"
 #include <list>
 const float pi = 3.1415926535897932384626433832795;
@@ -18,6 +18,15 @@ enum controlnum
     cn_left = VK_LEFT,
     cn_right = VK_RIGHT,
     cn_eld =  VK_SPACE
+};
+#elif defined(__ANDROID__)
+enum controlnum
+{
+    cn_up = 1,
+    cn_down = 2,
+    cn_left = 3,
+    cn_right = 4,
+    cn_eld =  5
 };
 #else
 #include <SDL/SDL.h>
@@ -42,18 +51,18 @@ namespace graf
     void Rendera();
     void init();
     void avsl();
-    
+
     namespace oega
     {
         void move(vector v, float a);
         void transform();
     }
-    
+
     namespace obj
     {
         class enhet;
     	typedef std::list<enhet *>::iterator enhet_list_iterator_t;
-        
+
         enhet_list_iterator_t add(enhet *e);  //Lägger till objektet i listan
         void rem(enhet *e);  //Tar bort objektet ur listan
         void rem(enhet_list_iterator_t it); //Tar bort iterator ur listan (snabbare)
@@ -63,14 +72,14 @@ namespace graf
         void flushDel(); //anropar del på köade objekt
         enhet *Koll(vector, enhet *ign); //ign står för det objektet som skall ignoreras
         enhet *Naer(vector p, float lim, enhet *ign); //Hittar det närmaste objektet
-        
+
         class enhet
         {
         public:
             vector pos, vel;
             enhet(): hasIterator(false) {};
             virtual ~enhet() {};
-            
+
             virtual void Tid(float t) {};
             virtual void Rendera() {};
             virtual bool Koll(vector &p) {return 0;};  //kollisionstestning
@@ -84,29 +93,29 @@ namespace graf
             bool hasIterator;
             enhet_list_iterator_t iterator; //En iterator för att snabbare kunna ta bort röken
         };
-        
+
         class skepp: public enhet
         {
         public:
             //vector pos, vel;
             float ang, rot;
             float skott;
-            
+
             skepp();
             void Tid(float t);
             void Rendera();
         };
-        
+
         class star: public enhet  //Stj�rna
         {
         public:
             //vector pos;
-            
+
             star();
             void Tid(float t);
             void Rendera();
         };
-        
+
         class komet: public enhet  //komet
         {
         public:
@@ -114,7 +123,7 @@ namespace graf
             float ang, rot;
             float rad; //kometens radie
             float liv;
-            
+
             komet();
             komet(vector p, vector v, float r);
             ~komet();
@@ -126,54 +135,54 @@ namespace graf
             bool Skada(float d);
             bool isSolid() { return true; };
         };
-        
+
         class projekt: public enhet //En projektil
         {
         public:
             //vector pos, vel;
             float ang, rot, varand;
-            
+
             projekt(vector p, vector v);
             ~projekt();
             void Tid(float t);
             void Rendera();
         };
-        
+
         class exp1: public enhet //En explosion
         {
         public:
             //vector pos;
             float stlk;
-            
+
             exp1(vector p, float stlk);
             void Tid(float t);
             void Rendera();
         };
-        
+
         class part: public enhet //skräp som mest flyger omkring
         {
         public:
             //vector pos, vel;
             float varand, varandmax;
-            
+
             part(vector p);
             part(vector p, vector v);
             void Tid(float t);
             void Rendera();
-            
+
         };
-        
+
         class linjrok: public enhet //Rök som ser ut som en linje
         {
         public:
             //Vel används som den andra positionen
             float varand, varandmax;
-            
+
             linjrok(vector p1, vector p2);
             void Tid(float t);
             void Rendera();
         };
-        
+
     }
 }
 

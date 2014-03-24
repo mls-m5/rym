@@ -1,6 +1,8 @@
 
+#include "draw.h"
 #include "graf.h"
 #include <list>
+#include <stdlib.h>
 
 using std::list;
 
@@ -42,20 +44,15 @@ void graf::Tid(float t)
 
 void graf::Rendera()
 {
-    glPushMatrix();
-    oega::transform();
-    
-    glBegin(GL_POINTS);
-    glVertex2f(0,0);
-    glEnd();
-    
+
+    camTransform();
     for (auto it: obj::sol){
     	it->Rendera();
     }
     for (auto it: obj::enh){
     	it->Rendera();
     }
-    glPopMatrix();
+    flushDraw();
 }
 
 void graf::init()
@@ -64,13 +61,13 @@ void graf::init()
     {
         obj::add(new obj::star);
     }
-    
-    
+
+
     for (int i = 0; i<50; i++)
     {
         obj::add(new obj::komet);
     }
-    
+
     obj::add(new obj::skepp);
 }
 
@@ -96,19 +93,21 @@ void graf::oega::move(vector v, float a)
 {
     pos = v;
     ang = a;
+    setCam(v, a);
 }
 
 void graf::oega::transform()
 {
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glScalef(.1,.1,.1);
-    
-    glFrustum(-.1,.1, -.1, .1, 1.f, 50.f);
-    glRotatef(-10,1,0,0);
-    glRotatef(-ang / pi* 180.,0,0,1);
-    glTranslatef(-pos.x, -pos.y, -pos.z-20);
-    glMatrixMode(GL_MODELVIEW);
+//    glMatrixMode(GL_PROJECTION);
+//    glLoadIdentity();
+//    glScalef(.1,.1,.1);
+//
+//    glFrustum(-.1,.1, -.1, .1, 1.f, 50.f);
+//    glRotatef(-10,1,0,0);
+//    glRotatef(-ang / pi* 180.,0,0,1);
+//    glTranslatef(-pos.x, -pos.y, -pos.z-20);
+//    glMatrixMode(GL_MODELVIEW);
+	camTransform();
 }
 
 //_________________________objekt --- -... .--- . -.- - ________________
@@ -245,33 +244,22 @@ void graf::obj::skepp::Tid(float t)
     }
     else
     {
-        if (kont::get(cn_eld)) 
+        if (kont::get(cn_eld))
         {
             obj::add(new projekt(pos, vel + Vector(-sin(ang)/4, cos(ang)/4)));
             skott = .3;
         }
     }
-    
+
     pos += vel;
     ang += rot;
-    
-    
-    
+
     oega::move(pos + Vector(-sin(ang)*10, cos(ang)*10) , ang);
 }
 
 void graf::obj::skepp::Rendera()
 {
-    glPushMatrix();
-    glTranslatef(pos.x,pos.y,pos.z);
-    glRotatef(ang/pi*180,0,0,1);
-    glBegin(GL_TRIANGLES);
-    glVertex2f(0,1);
-    glVertex2f(.5, -1);
-    glVertex2f(-.5, -1);
-    glEnd();
-    
-    glPopMatrix();
+	drawShip(pos, ang);
 }
 
 graf::obj::skepp::skepp()
@@ -286,16 +274,17 @@ graf::obj::skepp::skepp()
 
 void graf::obj::star::Tid(float t)
 {
-    
+
 }
 
 void graf::obj::star::Rendera()
 {
-    glPointSize(2);
-    glBegin(GL_POINTS);
-    glColor3f(1,1,1);
-    glVertex3fv((float*)&pos);
-    glEnd();
+	drawStar(pos);
+//    glPointSize(2);
+//    glBegin(GL_POINTS);
+//    glColor3f(1,1,1);
+//    glVertex3fv((float*)&pos);
+//    glEnd();
 }
 
 graf::obj::star::star()
@@ -313,20 +302,21 @@ void graf::obj::komet::Tid(float t)
 
 void graf::obj::komet::Rendera()
 {
-    glPushMatrix();
-    glTranslatef(pos.x, pos.y, pos.z);
-    glRotatef(ang, 0,0,1);
-    glScalef(rad,rad,rad);
-    
-    glBegin(GL_QUADS);
-    glColor3f(6.,.6,1);
-    glVertex2f(-1,1);
-    glVertex2f(1,1);
-    glVertex2f(1,-1);
-    glVertex2f(-1,-1);
-    glEnd();
-    
-    glPopMatrix();
+//    glPushMatrix();
+//    glTranslatef(pos.x, pos.y, pos.z);
+//    glRotatef(ang, 0,0,1);
+//    glScalef(rad,rad,rad);
+//
+//    glBegin(GL_QUADS);
+//    glColor3f(6.,.6,1);
+//    glVertex2f(-1,1);
+//    glVertex2f(1,1);
+//    glVertex2f(1,-1);
+//    glVertex2f(-1,-1);
+//    glEnd();
+//
+//    glPopMatrix();
+	drawComet(pos, ang, rad);
 }
 
 bool graf::obj::komet::Koll(vector &p)
@@ -349,7 +339,7 @@ float graf::obj::komet::Dist(vector &p)
     float dx, dy;
     dx = pos.x -p.x;
     dy = pos.y -p.y;
-    
+
     return sqrt(dx*dx+dy*dy);
 }
 
@@ -413,26 +403,26 @@ void graf::obj::projekt::Tid(float t)
     pos += vel;
     ang += rot;
     varand -= t;
-    
+
     enhet * e;
-    
+
     {
     	auto linj = new linjrok(pos-vel, pos);
     	auto it = add(linj);
     	linj->setIterator(it);
     }
 
-    
+
     e = obj::Koll(pos, this);
-    if (e) 
+    if (e)
     {
         e->Force(vel*.01);
         //vel = Vector(1,0);
         //rem(e);
         //delete e;
-        
+
         e->Skada(.4);
-        
+
         add(new exp1(pos,.5));
         remd(iterator);
     }
@@ -448,26 +438,27 @@ void graf::obj::projekt::Tid(float t)
         v = v / -(v*v);
         v = v *.05;
         vel += v;
-        
+
     }
 }
 
 void graf::obj::projekt::Rendera()
 {
-    glPushMatrix();
-    glTranslatef(pos.x, pos.y, pos.z);
-    glRotatef(ang/pi*180, 0,0,1);
-    glScalef(.1,.1,.4);
-    
-    glBegin(GL_QUADS);
-    glColor3f(1,.3,.3);
-    glVertex2f(0,1);
-    glVertex2f(1,0);
-    glVertex2f(0,-2);
-    glVertex2f(-1,0);
-    glEnd();
-    
-    glPopMatrix();
+//    glPushMatrix();
+//    glTranslatef(pos.x, pos.y, pos.z);
+//    glRotatef(ang/pi*180, 0,0,1);
+//    glScalef(.1,.1,.4);
+//
+//    glBegin(GL_QUADS);
+//    glColor3f(1,.3,.3);
+//    glVertex2f(0,1);
+//    glVertex2f(1,0);
+//    glVertex2f(0,-2);
+//    glVertex2f(-1,0);
+//    glEnd();
+//
+//    glPopMatrix();
+	drawProjectile(pos, ang, .1);
 }
 
 graf::obj::projekt::projekt(vector p, vector v):
@@ -492,22 +483,23 @@ void graf::obj::exp1::Tid(float t)
     {
         remd(iterator);
     }
-    
+
 }
 
 void graf::obj::exp1::Rendera()
 {
-    glPushMatrix();
-    glTranslatef(pos.x,pos.y,pos.z);
-    glScalef(stlk, stlk, stlk);
-    glBegin(GL_QUADS);
-    glColor3f(6.,.6,1);
-    glVertex2f(-1,1);
-    glVertex2f(1,1);
-    glVertex2f(1,-1);
-    glVertex2f(-1,-1);
-    glEnd();
-    glPopMatrix();
+//    glPushMatrix();
+//    glTranslatef(pos.x,pos.y,pos.z);
+//    glScalef(stlk, stlk, stlk);
+//    glBegin(GL_QUADS);
+//    glColor3f(6.,.6,1);
+//    glVertex2f(-1,1);
+//    glVertex2f(1,1);
+//    glVertex2f(1,-1);
+//    glVertex2f(-1,-1);
+//    glEnd();
+//    glPopMatrix();
+	drawExplosion(pos, stlk);
 }
 
 graf::obj::exp1::exp1(vector p, float s)
@@ -525,7 +517,7 @@ void graf::obj::part::Tid(float t)
     pos += vel;
     add(new linjrok(pos-vel, pos));
     varand -= t;
-    if (varand < 0) 
+    if (varand < 0)
     {
         remd(iterator);
     }
@@ -533,11 +525,12 @@ void graf::obj::part::Tid(float t)
 
 void graf::obj::part::Rendera()
 {
-    glPointSize(2.2);
-    glBegin(GL_POINTS);
-    glColor3f(varand / varandmax,varand / varandmax,varand / varandmax);
-    glVertex3fv((float*)&pos);
-    glEnd();
+	//Is visible through the smoke
+//    glPointSize(2.2);
+//    glBegin(GL_POINTS);
+//    glColor3f(varand / varandmax,varand / varandmax,varand / varandmax);
+//    glVertex3fv((float*)&pos);
+//    glEnd();
 }
 
 graf::obj::part::part(vector p)
@@ -572,7 +565,7 @@ graf::obj::part::part(vector p, vector v):
 void graf::obj::linjrok::Tid(float t)
 {
     varand -= t;
-    if (varand < 0) 
+    if (varand < 0)
     {
     	remd(iterator);
     }
@@ -580,11 +573,12 @@ void graf::obj::linjrok::Tid(float t)
 
 void graf::obj::linjrok::Rendera()
 {
-    glBegin(GL_LINES);
-    glColor4f(1,1,1,varand / varandmax);
-    glVertex3fv((float*)&pos);
-    glVertex3fv((float*)&vel);
-    glEnd();
+//    glBegin(GL_LINES);
+//    glColor4f(1,1,1,varand / varandmax);
+//    glVertex3fv((float*)&pos);
+//    glVertex3fv((float*)&vel);
+//    glEnd();
+    drawSmoke(pos, vel, varand/varandmax);
 }
 
 graf::obj::linjrok::linjrok(vector p1, vector p2)

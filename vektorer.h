@@ -1,6 +1,9 @@
-
+#pragma once
 struct vector
 {
+	vector (float x, float y, float z): x(x), y(y), z(z) {}
+	vector (float x, float y) : x(x), y(y), z(0) {}
+	vector (): x(0), y(0), z(0) {};
     float x,y,z;
 };
 

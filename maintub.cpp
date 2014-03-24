@@ -3,6 +3,8 @@
 #include <GL/glu.h>
 #include <SDL/SDL.h>
 
+#include "draw.h"
+
 #include "graf.h"
  
 using namespace std;
@@ -92,6 +94,7 @@ int main(int argc, char* argv[]) {
     SDL_Init(SDL_INIT_VIDEO);
     SDL_SetVideoMode(width, height, 24, SDL_OPENGL | SDL_GL_DOUBLEBUFFER);
     setupOpengl();
+	initDrawModule(width / height);
 		
     hant::init();
 		

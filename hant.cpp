@@ -21,7 +21,9 @@ void hant::avsl()
 
 int hant::getkey(int keyn)
 {
-    if (key[keyn]) key[keyn] = 1;
+    if (key[keyn]){
+    	key[keyn] = 1;
+    }
     return key[keyn];
 }
 

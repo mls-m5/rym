@@ -3,13 +3,13 @@
 
 CPP  = g++
 CC   = gcc
-OBJ  = main.o hant.o graf.o vektorer.o 
-LINKOBJ  = main.o hant.o graf.o vektorer.o 
+OBJ  = main.o hant.o graf.o vektorer.o draw.o shaderprogram.o
+LINKOBJ  = main.o hant.o graf.o vektorer.o draw.o shaderprogram.o
 LIBS =  -lSDL -lGL -lGLU
 INCS =  
 CXXINCS = 
 BIN  = rym
-CXXFLAGS = $(CXXINCS)   -std=c++11 -g -Ofast 
+CXXFLAGS = $(CXXINCS)   -std=c++0x -g -Ofast 
 RM = rm -f
 
 .PHONY: all all-before all-after clean clean-custom
