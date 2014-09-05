@@ -28,7 +28,7 @@ struct colorDataStruct{
 static std::vector<vertexDataStruct> cometVertexData;
 static std::vector<colorDataStruct> cometColorData;
 
-GLfloat glColors[] = {1, 1, 1, 1, 1, 1, 1, 1, .1, 1, 1, 1,1 ,1 ,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+static GLfloat glColors[] = {1, 1, 1, 1, 1, 1, 1, 1, .1, 1, 1, 1,1 ,1 ,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 
 
 static const char gVertexShader[] =
@@ -60,7 +60,7 @@ inline void identityMatrix(GLfloat *matrix){
 	}
 }
 
-void modelTransform(vector p, double a, double scale){
+void modelTransform(vec p, double a, double scale){
 	identityMatrix(transformMatrix);
 
 	transformMatrix[0] = cos(a) * scale;
@@ -79,7 +79,7 @@ void resetTransform(){
 	identityMatrix(transformMatrix);
     glUniformMatrix4fv(transformMatrixPointer, 1, GL_FALSE, transformMatrix);
 }
-void setCam(vector p, double a){
+void setCam(vec p, double a){
 	identityMatrix(cameraMatrix);
 
 	const double size = .05;
@@ -100,7 +100,7 @@ void camTransform(){
 }
 
 static const GLfloat gShipVertices[] = { 0.f, 1.f, .5f, -1.f, -.5f, -1.f };
-void drawShip(vector p, double a){
+void drawShip(vec p, double a){
 	modelTransform(p, a, 1);
 
     glVertexAttribPointer(shaderVecPointer, 2, GL_FLOAT, GL_FALSE, 0, gShipVertices);
@@ -116,7 +116,7 @@ void drawShip(vector p, double a){
     checkGlError("ship");
 
 }
-void drawStar(vector p){
+void drawStar(vec p){
 	drawComet(p, 0, .01);
 }
 
@@ -128,7 +128,7 @@ static const GLfloat gCometColors[] = {
 		.8, .8, 1., .8,
 		.8, .8, 1., .8,
 };
-void drawComet(vector p, double a, double r){
+void drawComet(vec p, double a, double r){
 	modelTransform(p, a / 180., r);
     glVertexAttribPointer(shaderVecPointer, 2, GL_FLOAT, GL_FALSE, 0, gCometVertices);
     glEnableVertexAttribArray(shaderVecPointer);
@@ -141,15 +141,15 @@ void drawComet(vector p, double a, double r){
     resetTransform();
 }
 
-void drawProjectile(vector p, double a, double scale){
+void drawProjectile(vec p, double a, double scale){
 	drawComet(p, a + 3.1415 / 4., scale);
 }
 
-void drawExplosion(vector pos, double size){
+void drawExplosion(vec pos, double size){
 	drawComet(pos, 0., size);
 }
 
-void pushSmoke(vector &p1, vector &p2, double alpha){
+void pushSmoke(vec &p1, vec &p2, double alpha){
 	smokeVertexData.push_back(p1.x);
 	smokeVertexData.push_back(p1.y);
 	smokeVertexData.push_back(p2.x);
@@ -165,7 +165,7 @@ void pushSmoke(vector &p1, vector &p2, double alpha){
 	smokeColorData.push_back(alpha);
 }
 
-void drawSmoke(vector p1, vector p2, double alpha){
+void drawSmoke(vec p1, vec p2, double alpha){
 	pushSmoke(p1, p2, alpha);
 }
 

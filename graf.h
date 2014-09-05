@@ -45,47 +45,47 @@ namespace kont
     int get(controlnum kontn);
 }
 
-namespace graf
+namespace game
 {
-    void Tid(float t);
+    void Update(float t);
     void Rendera();
     void init();
     void avsl();
-
-    namespace oega
+    
+    namespace eye
     {
-        void move(vector v, float a);
+        void move(vec v, float a);
         void transform();
     }
 
     namespace obj
     {
-        class enhet;
-    	typedef std::list<enhet *>::iterator enhet_list_iterator_t;
-
-        enhet_list_iterator_t add(enhet *e);  //Lägger till objektet i listan
-        void rem(enhet *e);  //Tar bort objektet ur listan
+        class Unit;
+    	typedef std::list<Unit *>::iterator enhet_list_iterator_t;
+        
+        enhet_list_iterator_t add(Unit *e);  //Lägger till objektet i listan
+        void rem(Unit *e);  //Tar bort objektet ur listan
         void rem(enhet_list_iterator_t it); //Tar bort iterator ur listan (snabbare)
-        void remd(enhet *e); //Tar bort objektet helt
+        void remd(Unit *e); //Tar bort objektet helt
         void remd(enhet_list_iterator_t it); //Tar bort iteratorns objekt helt (snabbare)
         void flushRem(); //Tar bort objekt som köats
         void flushDel(); //anropar del på köade objekt
-        enhet *Koll(vector, enhet *ign); //ign står för det objektet som skall ignoreras
-        enhet *Naer(vector p, float lim, enhet *ign); //Hittar det närmaste objektet
-
-        class enhet
+        Unit *Koll(vec, Unit *ign); //ign står för det objektet som skall ignoreras
+        Unit *Near(vec p, float lim, Unit *ign); //Hittar det närmaste objektet
+        
+        class Unit
         {
         public:
-            vector pos, vel;
-            enhet(): hasIterator(false) {};
-            virtual ~enhet() {};
-
-            virtual void Tid(float t) {};
-            virtual void Rendera() {};
-            virtual bool Koll(vector &p) {return 0;};  //kollisionstestning
-            virtual float Dist(vector &p) {return 0;};  //Hitta avståndet
-            virtual void Force(vector f) {};
-            virtual bool Skada(float d) {return 0;}; //Sant om enheten går sönder
+            vec pos, vel;
+            Unit(): hasIterator(false) {};
+            virtual ~Unit() {};
+            
+            virtual void Update(float t) {};
+            virtual void Render() {};
+            virtual bool Koll(vec &p) {return 0;};  //kollisionstestning
+            virtual float Distance(vec &p) {return 0;};  //Hitta avståndet
+            virtual void Force(vec f) {};
+            virtual bool Damage(float d) {return 0;}; //Sant om enheten går sönder
             virtual bool isSolid() {return 0;};
             void setIterator(enhet_list_iterator_t);
 
@@ -93,94 +93,94 @@ namespace graf
             bool hasIterator;
             enhet_list_iterator_t iterator; //En iterator för att snabbare kunna ta bort röken
         };
-
-        class skepp: public enhet
+        
+        class Ship: public Unit
         {
         public:
             //vector pos, vel;
             float ang, rot;
             float skott;
-
-            skepp();
-            void Tid(float t);
-            void Rendera();
+            
+            Ship();
+            void Update(float t);
+            void Render();
         };
-
-        class star: public enhet  //Stj�rna
+        
+        class star: public Unit  //Stj�rna
         {
         public:
             //vector pos;
 
             star();
-            void Tid(float t);
-            void Rendera();
+            void Update(float t);
+            void Render();
         };
-
-        class komet: public enhet  //komet
+        
+        class Comet: public Unit  //komet
         {
         public:
             //vector pos, vel;
             float ang, rot;
             float rad; //kometens radie
             float liv;
-
-            komet();
-            komet(vector p, vector v, float r);
-            ~komet();
-            void Tid(float t);
-            void Rendera();
-            bool Koll(vector &p);
-            float Dist(vector &p);
-            void Force(vector f);
-            bool Skada(float d);
+            
+            Comet();
+            Comet(vec p, vec v, float r);
+            ~Comet();
+            void Update(float t);
+            void Render();
+            bool Koll(vec &p);
+            float Distance(vec &p);
+            void Force(vec f);
+            bool Damage(float d);
             bool isSolid() { return true; };
         };
-
-        class projekt: public enhet //En projektil
+        
+        class Projectile: public Unit //En projektil
         {
         public:
             //vector pos, vel;
             float ang, rot, varand;
-
-            projekt(vector p, vector v);
-            ~projekt();
-            void Tid(float t);
-            void Rendera();
+            
+            Projectile(vec p, vec v);
+            ~Projectile();
+            void Update(float t);
+            void Render();
         };
-
-        class exp1: public enhet //En explosion
+        
+        class Explosion: public Unit //En explosion
         {
         public:
             //vector pos;
             float stlk;
-
-            exp1(vector p, float stlk);
-            void Tid(float t);
-            void Rendera();
+            
+            Explosion(vec p, float stlk);
+            void Update(float t);
+            void Render();
         };
-
-        class part: public enhet //skräp som mest flyger omkring
+        
+        class Particle: public Unit //skräp som mest flyger omkring
         {
         public:
             //vector pos, vel;
-            float varand, varandmax;
-
-            part(vector p);
-            part(vector p, vector v);
-            void Tid(float t);
-            void Rendera();
-
+            float duration, maxDuration;
+            
+            Particle(vec p);
+            Particle(vec p, vec v);
+            void Update(float t);
+            void Render();
+            
         };
-
-        class linjrok: public enhet //Rök som ser ut som en linje
+        
+        class LineSmoke: public Unit //Rök som ser ut som en linje
         {
         public:
             //Vel används som den andra positionen
             float varand, varandmax;
-
-            linjrok(vector p1, vector p2);
-            void Tid(float t);
-            void Rendera();
+            
+            LineSmoke(vec p1, vec p2);
+            void Update(float t);
+            void Render();
         };
 
     }

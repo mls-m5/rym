@@ -9,16 +9,16 @@
 #define GL_CODE_H_
 
 #include "vektorer.h"
-void modelTransform(vector p, double a, double scale = 1);
+void modelTransform(vec p, double a, double scale = 1);
 void resetTransform();
-void setCam(vector p, double a);
+void setCam(vec p, double a);
 void camTransform();
-void drawShip(vector p, double a);
-void drawStar(vector p);
-void drawComet(vector p, double a, double r);
-void drawProjectile(vector p, double a, double scale);
-void drawExplosion(vector pos, double size);
-void drawSmoke(vector p1, vector p2, double alpha);
+void drawShip(vec p, double a);
+void drawStar(vec p);
+void drawComet(vec p, double a, double r);
+void drawProjectile(vec p, double a, double scale);
+void drawExplosion(vec pos, double size);
+void drawSmoke(vec p1, vec p2, double alpha);
 bool initDrawModule(double perspective);
 void flushDraw();
 

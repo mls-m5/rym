@@ -1,5 +1,4 @@
 # Project: rym
-# Makefile created by Dev-C++ 4.9.9.2
 
 CPP  = g++
 CC   = gcc

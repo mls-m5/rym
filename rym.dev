@@ -11,7 +11,7 @@ PrivateResource=rym_private.rc
 ResourceIncludes=
 MakeIncludes=
 Compiler=
-CppCompiler=-std=c++11_@@_
+CppCompiler=-std=c++11_@@_-Ofast_@@_
 Linker=-lopengl32_@@_
 IsCpp=1
 Icon=rym.ico
@@ -95,7 +95,7 @@ Major=0
 Minor=1
 Release=1
 Build=1
-LanguageID=1033
+LanguageID=1053
 CharsetID=1252
 CompanyName=Mattias Larsson Sköld
 FileVersion=0.1.1.1

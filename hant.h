@@ -9,7 +9,7 @@ namespace hant
     void init();
     void avsl();
     
-    int getkey(int key);
+    int getKey(int key);
     void setkey(int key, bool val);
 }
 

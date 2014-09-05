@@ -6,15 +6,15 @@
 
 using std::list;
 
-namespace graf
+namespace game
 {
     namespace obj
     {
         int cenh; //Det objektet som behandlas för tillfället
-        list<enhet *> enh;
-        list<enhet *> sol; //enheter som kan kollisionstestas
-        list<enhet *> remq;
-        list<enhet *> delq;
+        list<Unit *> enh;
+        list<Unit *> sol; //enheter som kan kollisionstestas
+        list<Unit *> remq;
+        list<Unit *> delq;
         list<enhet_list_iterator_t> remqit_nonsol; //En speciell lista med iteratorer för att snabba på processen
     }
 }
@@ -24,38 +24,38 @@ namespace graf
 
 int kont::get(controlnum kontn)
 {
-    return hant::getkey(kontn);
+    return hant::getKey(kontn);
 }
 
 //_______________________graf_________________________________________
 
-void graf::Tid(float t)
+void game::Update(float t)
 {
 	for (auto it: obj::sol){
-		it->Tid(t);
+		it->Update(t);
 	}
 	for (auto it: obj::enh){
-		it->Tid(t);
+		it->Update(t);
 	}
 
 	obj::flushDel();
 	obj::flushRem();
 }
 
-void graf::Rendera()
+void game::Rendera()
 {
-
     camTransform();
+
     for (auto it: obj::sol){
-    	it->Rendera();
+    	it->Render();
     }
     for (auto it: obj::enh){
-    	it->Rendera();
+    	it->Render();
     }
     flushDraw();
 }
 
-void graf::init()
+void game::init()
 {
     for(int i= 1; i<500; i++)
     {
@@ -65,13 +65,13 @@ void graf::init()
 
     for (int i = 0; i<50; i++)
     {
-        obj::add(new obj::komet);
+        obj::add(new obj::Comet);
     }
-
-    obj::add(new obj::skepp);
+    
+    obj::add(new obj::Ship);
 }
 
-void graf::avsl()
+void game::avsl()
 {
     obj::delq = obj::remq = obj::enh;
     obj::flushDel();
@@ -80,23 +80,23 @@ void graf::avsl()
 
 //________________________oega__________________________________________
 
-namespace graf
+namespace game
 {
-    namespace oega
+    namespace eye
     {
-        vector pos;
+        vec pos;
         float ang;
     }
 }
 
-void graf::oega::move(vector v, float a)
+void game::eye::move(vec v, float a)
 {
     pos = v;
     ang = a;
     setCam(v, a);
 }
 
-void graf::oega::transform()
+void game::eye::transform()
 {
 //    glMatrixMode(GL_PROJECTION);
 //    glLoadIdentity();
@@ -112,7 +112,7 @@ void graf::oega::transform()
 
 //_________________________objekt --- -... .--- . -.- - ________________
 
-graf::obj::enhet_list_iterator_t graf::obj::add(enhet *e)
+game::obj::enhet_list_iterator_t game::obj::add(Unit *e)
 {
 	if (e->isSolid()){
 		sol.push_back(e);
@@ -128,7 +128,7 @@ graf::obj::enhet_list_iterator_t graf::obj::add(enhet *e)
 	}
 }
 
-void graf::obj::rem(enhet *e)
+void game::obj::rem(Unit *e)
 {
 	for (auto it: remq){
 		if (it == e){
@@ -138,7 +138,7 @@ void graf::obj::rem(enhet *e)
 	remq.push_back(e);
 }
 
-void graf::obj::rem(enhet_list_iterator_t it)
+void game::obj::rem(enhet_list_iterator_t it)
 {
 	for (auto tit: remqit_nonsol){
 		if (tit == it){
@@ -148,7 +148,7 @@ void graf::obj::rem(enhet_list_iterator_t it)
 	remqit_nonsol.push_back(it);
 }
 
-void graf::obj::remd(enhet *e)
+void game::obj::remd(Unit *e)
 {
 	for (auto it: delq){
 		if (it == e){
@@ -159,7 +159,7 @@ void graf::obj::remd(enhet *e)
     delq.push_back(e);
 }
 
-void graf::obj::remd(enhet_list_iterator_t it){
+void game::obj::remd(enhet_list_iterator_t it){
 	for (auto tit: remqit_nonsol){
 		if (tit == it){
 			return; //Objektet redan i kö
@@ -169,7 +169,7 @@ void graf::obj::remd(enhet_list_iterator_t it){
 	delq.push_back(*it);
 }
 
-void graf::obj::flushRem() {
+void game::obj::flushRem() {
 	for (auto it: remq){
 		sol.remove(it);
 		enh.remove(it);
@@ -181,14 +181,14 @@ void graf::obj::flushRem() {
 	remqit_nonsol.clear();
 }
 
-void graf::obj::flushDel() {
+void game::obj::flushDel() {
 	for (auto it: delq){
 		delete it;
 	}
 	delq.clear();
 }
 
-graf::obj::enhet *graf::obj::Koll(vector p, enhet *ign)
+game::obj::Unit *game::obj::Koll(vec p, Unit *ign)
 {
     if (ign)  //Är det något objekt som skall ignoreras?
     {
@@ -208,16 +208,16 @@ graf::obj::enhet *graf::obj::Koll(vector p, enhet *ign)
     }
 }
 
-graf::obj::enhet *graf::obj::Naer(vector p, float lim, enhet *ign)
+game::obj::Unit *game::obj::Near(vec p, float lim, Unit *ign)
 {
     float d = lim; //Det närmsta objektet som påträffats
     float dm;  //det senast mätta värdet
-    enhet *e = 0;  //Det närmast mätta objektet
+    Unit *e = 0;  //Det närmast mätta objektet
     for (auto it: sol)
     {
         if (ign != it) //Om objektet inte skall ignoreras
         {
-            dm = it->Dist(p);
+            dm = it->Distance(p);
             if (dm < d && dm > 0)
             {
                 e = it;
@@ -230,7 +230,7 @@ graf::obj::enhet *graf::obj::Naer(vector p, float lim, enhet *ign)
 
 //---------skepp-------------------------------------------------------
 
-void graf::obj::skepp::Tid(float t)
+void game::obj::Ship::Update(float t)
 {
     rot /= 1.2;
     vel.x *= .9;
@@ -246,23 +246,24 @@ void graf::obj::skepp::Tid(float t)
     {
         if (kont::get(cn_eld))
         {
-            obj::add(new projekt(pos, vel + Vector(-sin(ang)/4, cos(ang)/4)));
+            obj::add(new Projectile(pos, vel + Vector(-sin(ang)/4, cos(ang)/4)));
             skott = .3;
         }
     }
 
     pos += vel;
     ang += rot;
-
-    oega::move(pos + Vector(-sin(ang)*10, cos(ang)*10) , ang);
+    
+    
+    eye::move(pos + Vector(-sin(ang)*10, cos(ang)*10) , ang);
 }
 
-void graf::obj::skepp::Rendera()
+void game::obj::Ship::Render()
 {
 	drawShip(pos, ang);
 }
 
-graf::obj::skepp::skepp()
+game::obj::Ship::Ship()
 {
     pos = Vector(0,0,0);
     vel = Vector(0,0,0);
@@ -272,12 +273,12 @@ graf::obj::skepp::skepp()
 
 //_______________________star________________________________________
 
-void graf::obj::star::Tid(float t)
+void game::obj::star::Update(float t)
 {
 
 }
 
-void graf::obj::star::Rendera()
+void game::obj::star::Render()
 {
 	drawStar(pos);
 //    glPointSize(2);
@@ -287,20 +288,20 @@ void graf::obj::star::Rendera()
 //    glEnd();
 }
 
-graf::obj::star::star()
+game::obj::star::star()
 {
     pos = Vector(rand() % 1000 -500,rand() % 1000 -500, -rand()%100 / 10.);
 }
 
 //________________________komet______________________________________
 
-void graf::obj::komet::Tid(float t)
+void game::obj::Comet::Update(float t)
 {
     pos += vel;
     ang += rot;
 }
 
-void graf::obj::komet::Rendera()
+void game::obj::Comet::Render()
 {
 //    glPushMatrix();
 //    glTranslatef(pos.x, pos.y, pos.z);
@@ -319,7 +320,7 @@ void graf::obj::komet::Rendera()
 	drawComet(pos, ang, rad);
 }
 
-bool graf::obj::komet::Koll(vector &p)
+bool game::obj::Comet::Koll(vec &p)
 {
     float dx, dy;
     dx = pos.x - p.x;
@@ -334,7 +335,7 @@ bool graf::obj::komet::Koll(vector &p)
     }
 }
 
-float graf::obj::komet::Dist(vector &p)
+float game::obj::Comet::Distance(vec &p)
 {
     float dx, dy;
     dx = pos.x -p.x;
@@ -343,13 +344,13 @@ float graf::obj::komet::Dist(vector &p)
     return sqrt(dx*dx+dy*dy);
 }
 
-void graf::obj::komet::Force(vector f)
+void game::obj::Comet::Force(vec f)
 {
-    vector fo = f * .1;
+    vec fo = f * .1;
     vel += fo;
 }
 
-bool graf::obj::komet::Skada(float d)
+bool game::obj::Comet::Damage(float d)
 {
     liv -= d;
     if (liv <= 0)
@@ -363,7 +364,7 @@ bool graf::obj::komet::Skada(float d)
     }
 }
 
-graf::obj::komet::komet()
+game::obj::Comet::Comet()
 {
     //static float x = 0;
     //pos = Vector(++x,x);
@@ -375,7 +376,7 @@ graf::obj::komet::komet()
     liv = rad;
 }
 
-graf::obj::komet::komet(vector p, vector v, float r)
+game::obj::Comet::Comet(vec p, vec v, float r)
 {
     pos = p;
     vel = v;
@@ -385,29 +386,29 @@ graf::obj::komet::komet(vector p, vector v, float r)
     liv = rad;
 }
 
-graf::obj::komet::~komet()
+game::obj::Comet::~Comet()
 {
     if (rad > .2)
     {
         for (int i=0; i<3; i++)
         {
-            add(new komet(pos,vel+Vector((rand()%11-5)/100.,(rand()%11-5)/100.),rad / 1.5));
+            add(new Comet(pos,vel+Vector((rand()%11-5)/100.,(rand()%11-5)/100.),rad / 1.5));
         }
     }
 }
 
 //_______________projekt_______________________________________________
 
-void graf::obj::projekt::Tid(float t)
+void game::obj::Projectile::Update(float t)
 {
     pos += vel;
     ang += rot;
     varand -= t;
-
-    enhet * e;
-
+    
+    Unit * e;
+    
     {
-    	auto linj = new linjrok(pos-vel, pos);
+    	auto linj = new LineSmoke(pos-vel, pos);
     	auto it = add(linj);
     	linj->setIterator(it);
     }
@@ -420,19 +421,19 @@ void graf::obj::projekt::Tid(float t)
         //vel = Vector(1,0);
         //rem(e);
         //delete e;
-
-        e->Skada(.4);
-
-        add(new exp1(pos,.5));
+        
+        e->Damage(.4);
+        
+        add(new Explosion(pos,.5));
         remd(iterator);
     }
     else if (varand <0)
     {
         remd(iterator);
     }
-    else if ((e=obj::Naer(pos,20,this)))
+    else if ((e=obj::Near(pos,20,this)))
     {
-        vector v;
+        vec v;
         v = pos - e->pos;
         //vel *= .99;
         v = v / -(v*v);
@@ -442,7 +443,7 @@ void graf::obj::projekt::Tid(float t)
     }
 }
 
-void graf::obj::projekt::Rendera()
+void game::obj::Projectile::Render()
 {
 //    glPushMatrix();
 //    glTranslatef(pos.x, pos.y, pos.z);
@@ -461,7 +462,7 @@ void graf::obj::projekt::Rendera()
 	drawProjectile(pos, ang, .1);
 }
 
-graf::obj::projekt::projekt(vector p, vector v):
+game::obj::Projectile::Projectile(vec p, vec v):
 		rot(0),
 		ang(-atan2(v.x, v.y)),
 		varand(60)
@@ -470,13 +471,13 @@ graf::obj::projekt::projekt(vector p, vector v):
 	vel = v;
 }
 
-graf::obj::projekt::~projekt()
+game::obj::Projectile::~Projectile()
 {
 }
 
 //____________________________Explosion_________________________________________
 
-void graf::obj::exp1::Tid(float t)
+void game::obj::Explosion::Update(float t)
 {
     stlk /= (1+t);
     if (stlk < .01)
@@ -486,7 +487,7 @@ void graf::obj::exp1::Tid(float t)
 
 }
 
-void graf::obj::exp1::Rendera()
+void game::obj::Explosion::Render()
 {
 //    glPushMatrix();
 //    glTranslatef(pos.x,pos.y,pos.z);
@@ -502,28 +503,28 @@ void graf::obj::exp1::Rendera()
 	drawExplosion(pos, stlk);
 }
 
-graf::obj::exp1::exp1(vector p, float s)
+game::obj::Explosion::Explosion(vec p, float s)
 {
     pos = p;
     stlk = s;
-    for (int i=1; i<20; i++)  add(new part(pos));
+    for (int i=1; i<20; i++)  add(new Particle(pos));
 }
 
 //________________________________Partikel______________________________________
 
 
-void graf::obj::part::Tid(float t)
+void game::obj::Particle::Update(float t)
 {
     pos += vel;
-    add(new linjrok(pos-vel, pos));
-    varand -= t;
-    if (varand < 0)
+    add(new LineSmoke(pos-vel, pos));
+    duration -= t;
+    if (duration < 0) 
     {
         remd(iterator);
     }
 }
 
-void graf::obj::part::Rendera()
+void game::obj::Particle::Render()
 {
 	//Is visible through the smoke
 //    glPointSize(2.2);
@@ -533,7 +534,7 @@ void graf::obj::part::Rendera()
 //    glEnd();
 }
 
-graf::obj::part::part(vector p)
+game::obj::Particle::Particle(vec p)
 {
     pos = p;
     float vx = 0;
@@ -548,13 +549,13 @@ graf::obj::part::part(vector p)
     vel.x = vx / 12000.;
     vel.y = vy / 12000.;
     vel.z = vz / 12000.;
-    varand = 2+rand()%20/20;
-    varandmax = varand;
+    duration = 2+rand()%20/20;
+    maxDuration = duration;
 }
 
-graf::obj::part::part(vector p, vector v):
-		varand(2),
-		varandmax(varand)
+game::obj::Particle::Particle(vec p, vec v):
+		duration(2),
+		maxDuration(duration)
 {
 	pos = p;
 	vel = v;
@@ -562,7 +563,7 @@ graf::obj::part::part(vector p, vector v):
 
 //___________________Rök på linje_______________________________________________
 
-void graf::obj::linjrok::Tid(float t)
+void game::obj::LineSmoke::Update(float t)
 {
     varand -= t;
     if (varand < 0)
@@ -571,7 +572,7 @@ void graf::obj::linjrok::Tid(float t)
     }
 }
 
-void graf::obj::linjrok::Rendera()
+void game::obj::LineSmoke::Render()
 {
 //    glBegin(GL_LINES);
 //    glColor4f(1,1,1,varand / varandmax);
@@ -581,7 +582,7 @@ void graf::obj::linjrok::Rendera()
     drawSmoke(pos, vel, varand/varandmax);
 }
 
-graf::obj::linjrok::linjrok(vector p1, vector p2)
+game::obj::LineSmoke::LineSmoke(vec p1, vec p2)
 {
     pos = p1;
     vel = p2;
@@ -589,7 +590,7 @@ graf::obj::linjrok::linjrok(vector p1, vector p2)
     varandmax = varand;
 }
 
-void graf::obj::enhet::setIterator(enhet_list_iterator_t it) {
+void game::obj::Unit::setIterator(enhet_list_iterator_t it) {
 	iterator = it;
 	hasIterator = true;
 }
