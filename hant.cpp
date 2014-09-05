@@ -11,15 +11,15 @@ void hant::init()
 	for (int i = 0; i < KEYCOUNT; ++i){
 		key[KEYCOUNT] = 0;
 	}
-    graf::init();
+    game::init();
 }
 
 void hant::avsl()
 {
-    graf::avsl();
+    game::avsl();
 }
 
-int hant::getkey(int keyn)
+int hant::getKey(int keyn)
 {
     if (key[keyn]) key[keyn] = 1;
     return key[keyn];

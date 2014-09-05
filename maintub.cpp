@@ -49,12 +49,12 @@ void mainLoop() {
         processEvents();
 				
 				
-        graf::Tid(.1);
+        game::Update(.1);
  
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT); // Clear color and depth buffer
-				glLoadIdentity();
+        glLoadIdentity();
         
-        graf::Rendera();
+        game::Rendera();
  
         SDL_GL_SwapBuffers(); // Update screen
 				
@@ -62,8 +62,6 @@ void mainLoop() {
         if (SDL_GetTicks() < ttime) {
         	SDL_Delay(ttime - SDL_GetTicks());
         }
-        // Increase degree of rotation to spin QUAD
- 
     }
 }
  
