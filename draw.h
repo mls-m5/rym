@@ -18,7 +18,7 @@ void drawStar(vec p);
 void drawComet(vec p, double a, double r);
 void drawProjectile(vec p, double a, double scale);
 void drawExplosion(vec pos, double size);
-void drawSmoke(vec p1, vec p2, double alpha);
+void drawSmoke(vec p1, vec p2, double alpha1, double alpha2);
 bool initDrawModule(double perspective);
 void flushDraw();
 

@@ -11,6 +11,7 @@ GLuint transformMatrixPointer;
 GLuint cameraMatrixPointer;
 static GLfloat transformMatrix[16];
 static GLfloat cameraMatrix[16];
+static vec camPos;
 static double camPerspective;
 ShaderProgram *shaderProgram;
 
@@ -30,6 +31,37 @@ static std::vector<colorDataStruct> cometColorData;
 
 static GLfloat glColors[] = {1, 1, 1, 1, 1, 1, 1, 1, .1, 1, 1, 1,1 ,1 ,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 
+constexpr double pi = 3.1415926535897932384626433832795028841971693;
+constexpr double pi2 = pi * 2;
+
+class SineClass{
+public:
+	static const int tableLength = 1024;
+	SineClass(){
+		table = new double [tableLength + 1];
+		for (int i = 0; i < tableLength; ++i){
+			table[i] = sin((double)i / tableLength * pi2);
+		}
+	}
+
+	~SineClass(){
+		delete table;
+	}
+
+	inline double operator()(double a){
+		a /= pi2;
+		a -= floor(a);
+
+		return table[(int)(tableLength * a)];
+	}
+
+	double cos(double a){
+		return (*this)(a + pi / 2);
+	}
+
+	double *table;
+
+} Sine;
 
 static const char gVertexShader[] =
     "attribute vec4 vPosition;\n"
@@ -62,11 +94,15 @@ inline void identityMatrix(GLfloat *matrix){
 
 void modelTransform(vec p, double a, double scale){
 	identityMatrix(transformMatrix);
+	auto s = Sine(a);
+	auto c = Sine.cos(a);
+//	auto s = sin(a);
+//	auto c = cos(a);
 
-	transformMatrix[0] = cos(a) * scale;
-	transformMatrix[1] = sin(a) * scale;
-	transformMatrix[4] = -sin(a) * scale;
-	transformMatrix[5] = cos(a) * scale;
+	transformMatrix[0] = c * scale;
+	transformMatrix[1] = s * scale;
+	transformMatrix[4] = -s * scale;
+	transformMatrix[5] = c * scale;
 
 	transformMatrix[12] = p.x;
 	transformMatrix[13] = p.y;
@@ -92,6 +128,8 @@ void setCam(vec p, double a){
 
 	cameraMatrix[12] =  (-p.x * sy + p.y * sx) * size / camPerspective;
 	cameraMatrix[13] =  (-p.y * sy - p.x * sx) * size;
+
+	camPos = p;
 //	cameraMatrix[14] = -p.z;
 }
 
@@ -129,6 +167,13 @@ static const GLfloat gCometColors[] = {
 		.8, .8, 1., .8,
 };
 void drawComet(vec p, double a, double r){
+	auto dx = p.x - camPos.x;
+	auto dy = p.y - camPos.y;
+
+	if (dx * dx + dy * dy > 1000){
+		return;
+	}
+
 	modelTransform(p, a / 180., r);
     glVertexAttribPointer(shaderVecPointer, 2, GL_FLOAT, GL_FALSE, 0, gCometVertices);
     glEnableVertexAttribArray(shaderVecPointer);
@@ -149,7 +194,7 @@ void drawExplosion(vec pos, double size){
 	drawComet(pos, 0., size);
 }
 
-void pushSmoke(vec &p1, vec &p2, double alpha){
+void pushSmoke(vec &p1, vec &p2, double alpha1, double alpha2){
 	smokeVertexData.push_back(p1.x);
 	smokeVertexData.push_back(p1.y);
 	smokeVertexData.push_back(p2.x);
@@ -157,16 +202,16 @@ void pushSmoke(vec &p1, vec &p2, double alpha){
 	smokeColorData.push_back(1);
 	smokeColorData.push_back(1);
 	smokeColorData.push_back(1);
-	smokeColorData.push_back(alpha);
+	smokeColorData.push_back(alpha1);
 
 	smokeColorData.push_back(1);
 	smokeColorData.push_back(1);
 	smokeColorData.push_back(1);
-	smokeColorData.push_back(alpha);
+	smokeColorData.push_back(alpha2);
 }
 
-void drawSmoke(vec p1, vec p2, double alpha){
-	pushSmoke(p1, p2, alpha);
+void drawSmoke(vec p1, vec p2, double alpha1, double alpha2){
+	pushSmoke(p1, p2, alpha1, alpha2);
 }
 
 bool initDrawModule(double perspective) {

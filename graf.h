@@ -106,12 +106,12 @@ namespace game
             void Render();
         };
         
-        class star: public Unit  //Stj�rna
+        class Star: public Unit  //Stj�rna
         {
         public:
             //vector pos;
 
-            star();
+            Star();
             void Update(float t);
             void Render();
         };
@@ -163,7 +163,9 @@ namespace game
         {
         public:
             //vector pos, vel;
+        	vec start;
             float duration, maxDuration;
+            float alpha1, alpha2;
             
             Particle(vec p);
             Particle(vec p, vec v);
@@ -176,7 +178,7 @@ namespace game
         {
         public:
             //Vel används som den andra positionen
-            float varand, varandmax;
+            float duration, maxDuration;
             
             LineSmoke(vec p1, vec p2);
             void Update(float t);
