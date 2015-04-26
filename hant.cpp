@@ -3,7 +3,7 @@
 #define KEYCOUNT 500
 namespace hant
 {
-    int key[KEYCOUNT];
+    int key[KEYCOUNT + 1];
 }
 
 void hant::init()

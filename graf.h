@@ -19,7 +19,7 @@ enum controlnum
     cn_right = VK_RIGHT,
     cn_eld =  VK_SPACE
 };
-#elif defined(__ANDROID__)
+#elif defined(__ANDROID__) || defined(__APPLE__)
 enum controlnum
 {
     cn_up = 1,

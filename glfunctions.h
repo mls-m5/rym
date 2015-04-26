@@ -11,8 +11,16 @@
 #else
 #define GL_GLEXT_PROTOTYPES 1
 #define GL3_PROTOTYPES 1
+
+#if __APPLE__
+#include <OpenGLES/ES3/glext.h>
+#else
+
 #include <GL/gl.h>
 #include <GL/glext.h>
+
+#endif //apple
+
 #include <stdio.h>
 
 
@@ -23,13 +31,13 @@
 
 static void printGLString(const char *name, GLenum s) {
     const char *v = (const char *) glGetString(s);
-    LOGI("GL %s = %s\n", name, v);
+    LOGE("GL %s = %s\n", name, v);
 }
 
 static void checkGlError(const char* op) {
     for (GLint error = glGetError(); error; error
             = glGetError()) {
-        LOGI("after %s() glError (0x%x)\n", op, error);
+        LOGE("after %s() glError (0x%x)\n", op, error);
     }
 }
 
