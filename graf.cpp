@@ -59,7 +59,7 @@ void game::init()
 {
     for(int i= 1; i<500; i++)
     {
-        obj::add(new obj::star);
+        obj::add(new obj::Star);
     }
 
 
@@ -273,12 +273,12 @@ game::obj::Ship::Ship()
 
 //_______________________star________________________________________
 
-void game::obj::star::Update(float t)
+void game::obj::Star::Update(float t)
 {
 
 }
 
-void game::obj::star::Render()
+void game::obj::Star::Render()
 {
 	drawStar(pos);
 //    glPointSize(2);
@@ -288,7 +288,7 @@ void game::obj::star::Render()
 //    glEnd();
 }
 
-game::obj::star::star()
+game::obj::Star::Star()
 {
     pos = Vector(rand() % 1000 -500,rand() % 1000 -500, -rand()%100 / 10.);
 }
@@ -381,7 +381,7 @@ game::obj::Comet::Comet(vec p, vec v, float r)
     pos = p;
     vel = v;
     ang = 0;
-    rot = 0;
+    rot = rand()%1000 / 1000. - .5;
     rad = r;
     liv = rad;
 }
@@ -515,12 +515,19 @@ game::obj::Explosion::Explosion(vec p, float s)
 
 void game::obj::Particle::Update(float t)
 {
-    pos += vel;
-    add(new LineSmoke(pos-vel, pos));
-    duration -= t;
+	constexpr float step = 1. / 80;
+//    add(new LineSmoke(pos-vel, pos));
+	alpha1 -= step;
     if (duration < 0) 
     {
-        remd(iterator);
+        alpha2 -= step;
+        if (alpha2 <= 0) {
+        	remd(iterator);
+        }
+    }
+    else {
+    	duration -= t;
+    	pos += vel;
     }
 }
 
@@ -532,14 +539,17 @@ void game::obj::Particle::Render()
 //    glColor3f(varand / varandmax,varand / varandmax,varand / varandmax);
 //    glVertex3fv((float*)&pos);
 //    glEnd();
+    drawSmoke(start, pos, alpha1, alpha2);
 }
 
 game::obj::Particle::Particle(vec p)
 {
     pos = p;
+    start = p;
     float vx = 0;
     float vy = 0;
     float vz = 0;
+    alpha1 = alpha2 = 1;
     for (int i=0; i<6;i++)
     {
         vx += rand() % 1000 - 500;
@@ -565,8 +575,8 @@ game::obj::Particle::Particle(vec p, vec v):
 
 void game::obj::LineSmoke::Update(float t)
 {
-    varand -= t;
-    if (varand < 0)
+    duration -= t;
+    if (duration < 0)
     {
     	remd(iterator);
     }
@@ -579,15 +589,15 @@ void game::obj::LineSmoke::Render()
 //    glVertex3fv((float*)&pos);
 //    glVertex3fv((float*)&vel);
 //    glEnd();
-    drawSmoke(pos, vel, varand/varandmax);
+    drawSmoke(pos, vel, duration/maxDuration, duration/maxDuration);
 }
 
 game::obj::LineSmoke::LineSmoke(vec p1, vec p2)
 {
     pos = p1;
     vel = p2;
-    varand = 12;
-    varandmax = varand;
+    duration = 12;
+    maxDuration = duration;
 }
 
 void game::obj::Unit::setIterator(enhet_list_iterator_t it) {
