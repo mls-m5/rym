@@ -2,13 +2,13 @@
 
 CPP  = g++
 CC   = gcc
-OBJ  = main.o hant.o graf.o vektorer.o draw.o shaderprogram.o
-LINKOBJ  = main.o hant.o graf.o vektorer.o draw.o shaderprogram.o
+OBJ  = main.o hant.o graf.o vektorer.o draw.o shaderprogram.o roamingbroadphase.o
+LINKOBJ  = ${OBJ}
 LIBS =  -lSDL -lGL -lGLU
 INCS =  
 CXXINCS = 
 BIN  = rym
-CXXFLAGS = $(CXXINCS)   -std=c++0x -g -Ofast 
+CXXFLAGS = $(CXXINCS)   -std=c++1y -g  -Ofast
 RM = rm -f
 
 .PHONY: all all-before all-after clean clean-custom
@@ -31,6 +31,8 @@ graf.o: graf.cpp graf.h
 
 vektorer.o: vektorer.cpp vektorer.h
 	$(CPP) -c vektorer.cpp -o vektorer.o $(CXXFLAGS)
+	
+%.o: %.cpp %.h graf.h
 
 $(BIN): $(OBJ)
 	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)

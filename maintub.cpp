@@ -56,14 +56,14 @@ void mainLoop() {
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT); // Clear color and depth buffer
         glLoadIdentity();
         
-        game::Rendera();
+        game::Render();
  
         SDL_GL_SwapBuffers(); // Update screen
 				
         processEvents();
-        if (SDL_GetTicks() < ttime) {
-        	SDL_Delay(ttime - SDL_GetTicks());
-        }
+//        if (SDL_GetTicks() < ttime) {
+//        	SDL_Delay(ttime - SDL_GetTicks());
+//        }
     }
 }
  
