@@ -11,7 +11,7 @@ GLuint transformMatrixPointer;
 GLuint cameraMatrixPointer;
 static GLfloat transformMatrix[16];
 static GLfloat cameraMatrix[16];
-static vec camPos;
+static Vec camPos;
 static double camPerspective;
 ShaderProgram *shaderProgram;
 
@@ -31,8 +31,6 @@ static std::vector<colorDataStruct> cometColorData;
 
 static GLfloat glColors[] = {1, 1, 1, 1, 1, 1, 1, 1, .1, 1, 1, 1,1 ,1 ,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 
-constexpr double pi = 3.1415926535897932384626433832795028841971693;
-constexpr double pi2 = pi * 2;
 
 class SineClass{
 public:
@@ -64,23 +62,32 @@ public:
 } Sine;
 
 static const char gVertexShader[] =
-    "attribute vec4 vPosition;\n"
-    "attribute vec4 vColor;\n"
-//    "uniform	 mat4	 pers_matrix;    //Perspective matrix \n"
-    "uniform	 mat4	 mvp_matrix;	 // model-view-projection matrix\n"
-    "uniform	 mat4	 proj_matrix;	 // camera matrix\n"
-    "varying vec4 fColor;"
-    "void main() {\n"
-    "  gl_Position = proj_matrix * mvp_matrix * vPosition;\n"
-    "  fColor = vColor;\n"
-    "}\n";
+    R"apa(
+attribute vec4 vPosition;
+attribute vec4 vColor;
+//    uniform	 mat4	 pers_matrix;    //Perspective matrix 
+uniform	 mat4	 mvp_matrix;	 // model-view-projection matrix
+uniform	 mat4	 proj_matrix;	 // camera matrix
+varying vec4 fColor;
+void main() {
+  gl_Position = proj_matrix * mvp_matrix * vPosition;
+  float perspective = (gl_Position.z + gl_Position.y / 5.);
+  gl_Position.x /= perspective;
+  gl_Position.y /= perspective;
+  fColor = vColor;
+})apa";
 
 static const char gFragmentShader[] =
-    "precision mediump float;\n"
-    "varying vec4 fColor;\n"
-    "void main() {\n"
-    "  gl_FragColor = fColor; \n"
-    "}\n";
+    R"apa(
+precision mediump float;
+varying vec4 fColor;
+void main() {
+  if (gl_FragCoord.z < .1) {
+    discard;
+  }
+  gl_FragColor = fColor;
+}
+)apa";
 
 
 inline void identityMatrix(GLfloat *matrix){
@@ -92,7 +99,7 @@ inline void identityMatrix(GLfloat *matrix){
 	}
 }
 
-void modelTransform(vec p, double a, double scale){
+void modelTransform(Vec p, double a, double scale){
 	identityMatrix(transformMatrix);
 	auto s = Sine(a);
 	auto c = Sine.cos(a);
@@ -115,10 +122,10 @@ void resetTransform(){
 	identityMatrix(transformMatrix);
     glUniformMatrix4fv(transformMatrixPointer, 1, GL_FALSE, transformMatrix);
 }
-void setCam(vec p, double a){
+void setCam(Vec p, double a){
 	identityMatrix(cameraMatrix);
 
-	const double size = .05;
+	const double size = .05;// / 19; //todo: testing
 	double sx, sy;
 
 	cameraMatrix[0] = (sy = cos(-a)) * size / camPerspective;
@@ -128,6 +135,7 @@ void setCam(vec p, double a){
 
 	cameraMatrix[12] =  (-p.x * sy + p.y * sx) * size / camPerspective;
 	cameraMatrix[13] =  (-p.y * sy - p.x * sx) * size;
+	cameraMatrix[14] = 1; //z - translation
 
 	camPos = p;
 //	cameraMatrix[14] = -p.z;
@@ -138,7 +146,7 @@ void camTransform(){
 }
 
 static const GLfloat gShipVertices[] = { 0.f, 1.f, .5f, -1.f, -.5f, -1.f };
-void drawShip(vec p, double a){
+void drawShip(Vec p, double a){
 	modelTransform(p, a, 1);
 
     glVertexAttribPointer(shaderVecPointer, 2, GL_FLOAT, GL_FALSE, 0, gShipVertices);
@@ -154,7 +162,7 @@ void drawShip(vec p, double a){
     checkGlError("ship");
 
 }
-void drawStar(vec p){
+void drawStar(Vec p){
 	drawComet(p, 0, .01);
 }
 
@@ -166,11 +174,11 @@ static const GLfloat gCometColors[] = {
 		.8, .8, 1., .8,
 		.8, .8, 1., .8,
 };
-void drawComet(vec p, double a, double r){
+void drawComet(Vec p, double a, double r){
 	auto dx = p.x - camPos.x;
 	auto dy = p.y - camPos.y;
 
-	if (dx * dx + dy * dy > 1000){
+	if (dx * dx + dy * dy > 1500){
 		return;
 	}
 
@@ -186,15 +194,32 @@ void drawComet(vec p, double a, double r){
     resetTransform();
 }
 
-void drawProjectile(vec p, double a, double scale){
+
+void drawArea(Vec p, double a, double r){
+	auto dx = p.x - camPos.x;
+	auto dy = p.y - camPos.y;
+
+	modelTransform(p, a / 180., r);
+    glVertexAttribPointer(shaderVecPointer, 2, GL_FLOAT, GL_FALSE, 0, gCometVertices);
+    glEnableVertexAttribArray(shaderVecPointer);
+
+    glVertexAttribPointer(shaderColorPointer, 4, GL_FLOAT, GL_FALSE, 0, gCometColors);
+    glEnableVertexAttribArray(shaderColorPointer);
+
+    glDrawArrays(GL_LINE_LOOP, 0, 4);
+
+    resetTransform();
+}
+
+void drawProjectile(Vec p, double a, double scale){
 	drawComet(p, a + 3.1415 / 4., scale);
 }
 
-void drawExplosion(vec pos, double size){
+void drawExplosion(Vec pos, double size){
 	drawComet(pos, 0., size);
 }
 
-void pushSmoke(vec &p1, vec &p2, double alpha1, double alpha2){
+void pushSmoke(Vec &p1, Vec &p2, double alpha1, double alpha2){
 	smokeVertexData.push_back(p1.x);
 	smokeVertexData.push_back(p1.y);
 	smokeVertexData.push_back(p2.x);
@@ -210,7 +235,16 @@ void pushSmoke(vec &p1, vec &p2, double alpha1, double alpha2){
 	smokeColorData.push_back(alpha2);
 }
 
-void drawSmoke(vec p1, vec p2, double alpha1, double alpha2){
+void drawSmoke(Vec p1, Vec p2, double alpha1, double alpha2){
+	auto dx = p1.x - camPos.x;
+	auto dy = p1.y - camPos.y;
+	constexpr double maxDistance = 50;
+	if (dx > maxDistance or dy > maxDistance) {
+		return;
+	}
+	if (dx < -maxDistance or dy < -maxDistance) {
+		return;
+	}
 	pushSmoke(p1, p2, alpha1, alpha2);
 }
 

@@ -3,6 +3,8 @@
 #include "graf.h"
 #include <list>
 #include <stdlib.h>
+#include "roamingbroadphase.h"
+
 
 using std::list;
 
@@ -12,7 +14,7 @@ namespace game
     {
         int cenh; //Det objektet som behandlas för tillfället
         list<Unit *> enh;
-        list<Unit *> sol; //enheter som kan kollisionstestas
+        RoamingBroadphase solids; //enheter som kan kollisionstestas
         list<Unit *> remq;
         list<Unit *> delq;
         list<enhet_list_iterator_t> remqit_nonsol; //En speciell lista med iteratorer för att snabba på processen
@@ -31,26 +33,31 @@ int kont::get(controlnum kontn)
 
 void game::Update(float t)
 {
-	for (auto it: obj::sol){
-		it->Update(t);
-	}
+//	for (auto it: obj::solids){
+//		it->update(t);
+//	}
+	obj::solids.update(t);
+
+
 	for (auto it: obj::enh){
-		it->Update(t);
+		it->update(t);
 	}
 
 	obj::flushDel();
 	obj::flushRem();
 }
 
-void game::Rendera()
+void game::Render()
 {
     camTransform();
 
-    for (auto it: obj::sol){
-    	it->Render();
-    }
+//    for (auto it: obj::solids){
+//    	it->render();
+//    }
+    obj::solids.draw();
+
     for (auto it: obj::enh){
-    	it->Render();
+    	it->render();
     }
     flushDraw();
 }
@@ -84,16 +91,17 @@ namespace game
 {
     namespace eye
     {
-        vec pos;
+        Vec pos;
         float ang;
     }
 }
 
-void game::eye::move(vec v, float a)
+void game::eye::move(Vec v, float a)
 {
     pos = v;
     ang = a;
     setCam(v, a);
+    game::obj::solids.setCenter(v);
 }
 
 void game::eye::transform()
@@ -115,8 +123,8 @@ void game::eye::transform()
 game::obj::enhet_list_iterator_t game::obj::add(Unit *e)
 {
 	if (e->isSolid()){
-		sol.push_back(e);
-		auto it = --sol.end();
+		solids.add(e);
+		auto it = --solids.end();
 		e->setIterator(it);
 		return it;
 	}
@@ -171,7 +179,7 @@ void game::obj::remd(enhet_list_iterator_t it){
 
 void game::obj::flushRem() {
 	for (auto it: remq){
-		sol.remove(it);
+//		solids.remove(it);
 		enh.remove(it);
 	}
 	remq.clear();
@@ -183,61 +191,80 @@ void game::obj::flushRem() {
 
 void game::obj::flushDel() {
 	for (auto it: delq){
+		if (it->isSolid()) {
+			solids.remove(it);
+		}
 		delete it;
 	}
 	delq.clear();
 }
 
-game::obj::Unit *game::obj::Koll(vec p, Unit *ign)
+game::obj::Unit *game::obj::Koll(Vec p, Unit *ign)
 {
-    if (ign)  //Är det något objekt som skall ignoreras?
-    {
-    	for (auto it: sol)
-        {
-            if (it->Koll(p) && it != ign) return it;
-        }
-        return 0;
-    }
-    else //inget objekt ignoreras
-    {
-    	for (auto it: sol)
-        {
-            if (it->Koll(p)) return it;
-        }
-        return 0;
-    }
+	if (UseRoamingBroadphase) {
+		return solids.collision(p, ign);
+	}
+
+	else {
+		if (ign)  //Är det något objekt som skall ignoreras?
+		{
+			for (auto it: solids)
+			{
+				if (it->Koll(p) && it != ign) return it;
+			}
+			return 0;
+		}
+		else //inget objekt ignoreras
+		{
+			for (auto it: solids)
+			{
+				if (it->Koll(p)) return it;
+			}
+			return 0;
+		}
+	}
 }
 
-game::obj::Unit *game::obj::Near(vec p, float lim, Unit *ign)
+game::obj::Unit *game::obj::Near(Vec p, float limit, Unit *ignore)
 {
-    float d = lim; //Det närmsta objektet som påträffats
-    float dm;  //det senast mätta värdet
-    Unit *e = 0;  //Det närmast mätta objektet
-    for (auto it: sol)
-    {
-        if (ign != it) //Om objektet inte skall ignoreras
-        {
-            dm = it->Distance(p);
-            if (dm < d && dm > 0)
-            {
-                e = it;
-                d = dm;
-            }
-        }
-    }
-    return e; //Objektet returneras
+	if (UseRoamingBroadphase) {
+		return solids.getNearest(p, limit, ignore);
+
+	}
+	else {
+		//Keeping old algorith for reference
+
+		float distance = limit; //Det närmsta objektet som påträffats
+		float dm;  //det senast mätta värdet
+		Unit *e = 0;  //Det närmast mätta objektet
+
+		for (auto it: solids)
+		{
+			if (ignore != it) //Om objektet inte skall ignoreras
+			{
+				dm = it->Distance(p);
+				if (dm < distance && dm > 0)
+				{
+					e = it;
+					distance = dm;
+				}
+			}
+		}
+		return e; //Objektet returneras
+
+	}
 }
 
 //---------skepp-------------------------------------------------------
 
-void game::obj::Ship::Update(float t)
+void game::obj::Ship::update(float t)
 {
     rot /= 1.2;
     vel.x *= .9;
     vel.y *= .9;
     if (kont::get(cn_left)) rot += .01;
     if (kont::get(cn_right)) rot += -.01;
-    if (kont::get(cn_up)) vel = Vector(-sin(ang)*.1, cos(ang)*.1);
+    if (kont::get(cn_up)) vel = Vec(-sin(ang)*.1, cos(ang)*.1);
     if (skott>0)
     {
         skott = skott-t;
@@ -246,7 +273,7 @@ void game::obj::Ship::Update(float t)
     {
         if (kont::get(cn_eld))
         {
-            obj::add(new Projectile(pos, vel + Vector(-sin(ang)/4, cos(ang)/4)));
+            obj::add(new Projectile(pos, vel + Vec(-sin(ang)/4, cos(ang)/4)));
             skott = .3;
         }
     }
@@ -255,30 +282,30 @@ void game::obj::Ship::Update(float t)
     ang += rot;
     
     
-    eye::move(pos + Vector(-sin(ang)*10, cos(ang)*10) , ang);
+    eye::move(pos + Vec(-sin(ang)*10, cos(ang)*10) , ang);
 }
 
-void game::obj::Ship::Render()
+void game::obj::Ship::render()
 {
 	drawShip(pos, ang);
 }
 
 game::obj::Ship::Ship()
 {
-    pos = Vector(0,0,0);
-    vel = Vector(0,0,0);
+    pos = Vec(0,0,0);
+    vel = Vec(0,0,0);
     ang = 0; rot = 0;
     skott = 0;
 }
 
 //_______________________star________________________________________
 
-void game::obj::Star::Update(float t)
+void game::obj::Star::update(float t)
 {
 
 }
 
-void game::obj::Star::Render()
+void game::obj::Star::render()
 {
 	drawStar(pos);
 //    glPointSize(2);
@@ -290,18 +317,18 @@ void game::obj::Star::Render()
 
 game::obj::Star::Star()
 {
-    pos = Vector(rand() % 1000 -500,rand() % 1000 -500, -rand()%100 / 10.);
+    pos = Vec(rand() % 1000 -500,rand() % 1000 -500, -rand()%100 / 10.);
 }
 
 //________________________komet______________________________________
 
-void game::obj::Comet::Update(float t)
+void game::obj::Comet::update(float t)
 {
     pos += vel;
     ang += rot;
 }
 
-void game::obj::Comet::Render()
+void game::obj::Comet::render()
 {
 //    glPushMatrix();
 //    glTranslatef(pos.x, pos.y, pos.z);
@@ -320,7 +347,7 @@ void game::obj::Comet::Render()
 	drawComet(pos, ang, rad);
 }
 
-bool game::obj::Comet::Koll(vec &p)
+bool game::obj::Comet::Koll(Vec &p)
 {
     float dx, dy;
     dx = pos.x - p.x;
@@ -335,7 +362,7 @@ bool game::obj::Comet::Koll(vec &p)
     }
 }
 
-float game::obj::Comet::Distance(vec &p)
+float game::obj::Comet::Distance(Vec &p)
 {
     float dx, dy;
     dx = pos.x -p.x;
@@ -344,9 +371,9 @@ float game::obj::Comet::Distance(vec &p)
     return sqrt(dx*dx+dy*dy);
 }
 
-void game::obj::Comet::Force(vec f)
+void game::obj::Comet::Force(Vec f)
 {
-    vec fo = f * .1;
+    Vec fo = f * .1;
     vel += fo;
 }
 
@@ -367,16 +394,16 @@ bool game::obj::Comet::Damage(float d)
 game::obj::Comet::Comet()
 {
     //static float x = 0;
-    //pos = Vector(++x,x);
-    pos = Vector(rand() % 1000 / 10 -50,rand() % 100 -50);
-    vel = Vector(0,0);
+    //pos = Vec(++x,x);
+    pos = Vec(rand() % 1000 / 10 -50,rand() % 100 -50);
+    vel = Vec(0,0);
     ang = 0;
     rot = rand()%1000 / 1000. - .5;
     rad = 1.5;
     liv = rad;
 }
 
-game::obj::Comet::Comet(vec p, vec v, float r)
+game::obj::Comet::Comet(Vec p, Vec v, float r)
 {
     pos = p;
     vel = v;
@@ -392,14 +419,14 @@ game::obj::Comet::~Comet()
     {
         for (int i=0; i<3; i++)
         {
-            add(new Comet(pos,vel+Vector((rand()%11-5)/100.,(rand()%11-5)/100.),rad / 1.5));
+            add(new Comet(pos,vel+Vec((rand()%11-5)/100.,(rand()%11-5)/100.),rad / 1.5));
         }
     }
 }
 
 //_______________projekt_______________________________________________
 
-void game::obj::Projectile::Update(float t)
+void game::obj::Projectile::update(float t)
 {
     pos += vel;
     ang += rot;
@@ -418,7 +445,7 @@ void game::obj::Projectile::Update(float t)
     if (e)
     {
         e->Force(vel*.01);
-        //vel = Vector(1,0);
+        //vel = Vec(1,0);
         //rem(e);
         //delete e;
         
@@ -433,7 +460,7 @@ void game::obj::Projectile::Update(float t)
     }
     else if ((e=obj::Near(pos,20,this)))
     {
-        vec v;
+        Vec v;
         v = pos - e->pos;
         //vel *= .99;
         v = v / -(v*v);
@@ -443,7 +470,7 @@ void game::obj::Projectile::Update(float t)
     }
 }
 
-void game::obj::Projectile::Render()
+void game::obj::Projectile::render()
 {
 //    glPushMatrix();
 //    glTranslatef(pos.x, pos.y, pos.z);
@@ -462,7 +489,7 @@ void game::obj::Projectile::Render()
 	drawProjectile(pos, ang, .1);
 }
 
-game::obj::Projectile::Projectile(vec p, vec v):
+game::obj::Projectile::Projectile(Vec p, Vec v):
 		rot(0),
 		ang(-atan2(v.x, v.y)),
 		varand(60)
@@ -477,7 +504,7 @@ game::obj::Projectile::~Projectile()
 
 //____________________________Explosion_________________________________________
 
-void game::obj::Explosion::Update(float t)
+void game::obj::Explosion::update(float t)
 {
     stlk /= (1+t);
     if (stlk < .01)
@@ -487,7 +514,7 @@ void game::obj::Explosion::Update(float t)
 
 }
 
-void game::obj::Explosion::Render()
+void game::obj::Explosion::render()
 {
 //    glPushMatrix();
 //    glTranslatef(pos.x,pos.y,pos.z);
@@ -503,7 +530,7 @@ void game::obj::Explosion::Render()
 	drawExplosion(pos, stlk);
 }
 
-game::obj::Explosion::Explosion(vec p, float s)
+game::obj::Explosion::Explosion(Vec p, float s)
 {
     pos = p;
     stlk = s;
@@ -513,7 +540,7 @@ game::obj::Explosion::Explosion(vec p, float s)
 //________________________________Partikel______________________________________
 
 
-void game::obj::Particle::Update(float t)
+void game::obj::Particle::update(float t)
 {
 	constexpr float step = 1. / 80;
 //    add(new LineSmoke(pos-vel, pos));
@@ -531,7 +558,7 @@ void game::obj::Particle::Update(float t)
     }
 }
 
-void game::obj::Particle::Render()
+void game::obj::Particle::render()
 {
 	//Is visible through the smoke
 //    glPointSize(2.2);
@@ -542,7 +569,7 @@ void game::obj::Particle::Render()
     drawSmoke(start, pos, alpha1, alpha2);
 }
 
-game::obj::Particle::Particle(vec p)
+game::obj::Particle::Particle(Vec p)
 {
     pos = p;
     start = p;
@@ -563,7 +590,7 @@ game::obj::Particle::Particle(vec p)
     maxDuration = duration;
 }
 
-game::obj::Particle::Particle(vec p, vec v):
+game::obj::Particle::Particle(Vec p, Vec v):
 		duration(2),
 		maxDuration(duration)
 {
@@ -573,7 +600,7 @@ game::obj::Particle::Particle(vec p, vec v):
 
 //___________________Rök på linje_______________________________________________
 
-void game::obj::LineSmoke::Update(float t)
+void game::obj::LineSmoke::update(float t)
 {
     duration -= t;
     if (duration < 0)
@@ -582,7 +609,7 @@ void game::obj::LineSmoke::Update(float t)
     }
 }
 
-void game::obj::LineSmoke::Render()
+void game::obj::LineSmoke::render()
 {
 //    glBegin(GL_LINES);
 //    glColor4f(1,1,1,varand / varandmax);
@@ -592,7 +619,7 @@ void game::obj::LineSmoke::Render()
     drawSmoke(pos, vel, duration/maxDuration, duration/maxDuration);
 }
 
-game::obj::LineSmoke::LineSmoke(vec p1, vec p2)
+game::obj::LineSmoke::LineSmoke(Vec p1, Vec p2)
 {
     pos = p1;
     vel = p2;

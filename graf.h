@@ -1,13 +1,14 @@
 #ifndef graf_h
 #define graf_h
 
-#include "vektorer.h"
+//#include "vektorer.h"
+#include "vec.h"
 #include "hant.h"
 //#include <GL/gl.h>
 //#include <GL/glu.h>
-#include "math.h"
+#include <cmath>
 #include <list>
-const float pi = 3.1415926535897932384626433832795;
+#include "common.h"
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 #include "windows.h"
@@ -40,21 +41,25 @@ enum controlnum
 };
 #endif
 
+constexpr bool UseRoamingBroadphase = true;
+
 namespace kont
 {
     int get(controlnum kontn);
 }
 
+class Space;
+
 namespace game
 {
     void Update(float t);
-    void Rendera();
+    void Render();
     void init();
     void avsl();
     
     namespace eye
     {
-        void move(vec v, float a);
+        void move(Vec v, float a);
         void transform();
     }
 
@@ -70,107 +75,119 @@ namespace game
         void remd(enhet_list_iterator_t it); //Tar bort iteratorns objekt helt (snabbare)
         void flushRem(); //Tar bort objekt som köats
         void flushDel(); //anropar del på köade objekt
-        Unit *Koll(vec, Unit *ign); //ign står för det objektet som skall ignoreras
-        Unit *Near(vec p, float lim, Unit *ign); //Hittar det närmaste objektet
+        Unit *Koll(Vec, Unit *ign); //ign står för det objektet som skall ignoreras
+        Unit *Near(Vec p, float lim, Unit *ign); //Hittar det närmaste objektet
         
         class Unit
         {
         public:
-            vec pos, vel;
-            Unit(): hasIterator(false) {};
+            Vec pos, vel;
+            Unit() {};
             virtual ~Unit() {};
             
-            virtual void Update(float t) {};
-            virtual void Render() {};
-            virtual bool Koll(vec &p) {return 0;};  //kollisionstestning
-            virtual float Distance(vec &p) {return 0;};  //Hitta avståndet
-            virtual void Force(vec f) {};
+            virtual void update(float t) {};
+            virtual void render() {};
+            virtual bool Koll(Vec &p) {return 0;};  //kollisionstestning
+            virtual float Distance(Vec &p) {return 0;};  //Hitta avståndet
+            virtual void Force(Vec f) {};
             virtual bool Damage(float d) {return 0;}; //Sant om enheten går sönder
             virtual bool isSolid() {return 0;};
+
+            virtual float radius() {return 0;}
             void setIterator(enhet_list_iterator_t);
 
+            class Space *space() {
+            	return _space;
+            }
+
+            void space (class Space *space) {
+            	_space = space;
+            }
+
         protected:
-            bool hasIterator;
+            bool hasIterator = false;
             enhet_list_iterator_t iterator; //En iterator för att snabbare kunna ta bort röken
+            class Space *_space = nullptr;
         };
         
         class Ship: public Unit
         {
         public:
-            //vector pos, vel;
+            //Vector pos, vel;
             float ang, rot;
             float skott;
             
             Ship();
-            void Update(float t);
-            void Render();
+            void update(float t) override;
+            void render() override;
         };
         
         class Star: public Unit  //Stj�rna
         {
         public:
-            //vector pos;
+            //Vector pos;
 
             Star();
-            void Update(float t);
-            void Render();
+            void update(float t) override;
+            void render() override;
         };
         
         class Comet: public Unit  //komet
         {
         public:
-            //vector pos, vel;
+            //Vector pos, vel;
             float ang, rot;
             float rad; //kometens radie
             float liv;
             
             Comet();
-            Comet(vec p, vec v, float r);
+            Comet(Vec p, Vec v, float r);
             ~Comet();
-            void Update(float t);
-            void Render();
-            bool Koll(vec &p);
-            float Distance(vec &p);
-            void Force(vec f);
-            bool Damage(float d);
-            bool isSolid() { return true; };
+            void update(float t) override;
+            void render() override;
+            bool Koll(Vec &p) override;
+            float Distance(Vec &p) override;
+            void Force(Vec f) override;
+            bool Damage(float d) override;
+            bool isSolid() override { return true; };
+            float radius() override { return rad; };
         };
         
         class Projectile: public Unit //En projektil
         {
         public:
-            //vector pos, vel;
+            //Vector pos, vel;
             float ang, rot, varand;
             
-            Projectile(vec p, vec v);
+            Projectile(Vec p, Vec v);
             ~Projectile();
-            void Update(float t);
-            void Render();
+            void update(float t) override;
+            void render() override;
         };
         
         class Explosion: public Unit //En explosion
         {
         public:
-            //vector pos;
+            //Vector pos;
             float stlk;
             
-            Explosion(vec p, float stlk);
-            void Update(float t);
-            void Render();
+            Explosion(Vec p, float stlk);
+            void update(float t) override;
+            void render() override;
         };
         
         class Particle: public Unit //skräp som mest flyger omkring
         {
         public:
-            //vector pos, vel;
-        	vec start;
+            //Vector pos, vel;
+        	Vec start;
             float duration, maxDuration;
             float alpha1, alpha2;
             
-            Particle(vec p);
-            Particle(vec p, vec v);
-            void Update(float t);
-            void Render();
+            Particle(Vec p);
+            Particle(Vec p, Vec v);
+            void update(float t) override;
+            void render() override;
             
         };
         
@@ -180,9 +197,9 @@ namespace game
             //Vel används som den andra positionen
             float duration, maxDuration;
             
-            LineSmoke(vec p1, vec p2);
-            void Update(float t);
-            void Render();
+            LineSmoke(Vec p1, Vec p2);
+            void update(float t) override;
+            void render() override;
         };
 
     }
