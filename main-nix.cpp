@@ -1,6 +1,7 @@
 #include <stdlib.h>
-#include <SDL2/SDL_opengl.h>
-#include <SDL2/SDL.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <SDL/SDL.h>
 
 #include "draw.h"
 
@@ -8,6 +9,7 @@
  
 using namespace std;
  
+// Width & Height of window
 #define width 800// 640
 #define height 600 //480
 #define framerate 50 //Hz min egen variable
@@ -16,13 +18,10 @@ using namespace std;
 
 
 // Kill program
-void endProgram(int code) {
-	SDL_Quit();
-	exit(code);
-}
+void endProgram(int code) {SDL_Quit();    exit(code);}
  
 // Handle SDL keypresses
-void handleKeys(SDL_Keysym* keysym, bool state) {
+void handleKeys(SDL_keysym* keysym, bool state) {
     switch(keysym->sym) {
         case SDLK_ESCAPE:    endProgram(0); break;
 				default: hant::setkey((int)keysym->sym, state); break;
@@ -42,13 +41,12 @@ void processEvents() {
     }
 }
  
-void mainLoop(SDL_Window *window) {
+void mainLoop() {
 		//long ttime;
     while(true) {
 				
-				//ttime = SDL_GetTicks() + frametime;
-				SDL_GetTicks();
-				long ttime =  20 + SDL_GetTicks();
+    	//ttime = SDL_GetTicks() + frametime;
+    	long ttime =  15 + SDL_GetTicks();
         processEvents();
 				
 				
@@ -59,12 +57,13 @@ void mainLoop(SDL_Window *window) {
         
         game::Render();
  
-        SDL_GL_SwapWindow(window); //Update screen
+        SDL_GL_SwapBuffers(); // Update screen
 				
         processEvents();
-//        if (SDL_GetTicks() < ttime) {
-//        	SDL_Delay(ttime - SDL_GetTicks());
-//        }
+
+        if (SDL_GetTicks() < ttime) {
+        	SDL_Delay(ttime - SDL_GetTicks());
+        }
     }
 }
  
@@ -73,7 +72,6 @@ void setupOpengl() {
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
 //    glEnable(GL_DEPTH_TEST);
-    //gluPerspective(45, (float)width/height, .1, 100);
     glMatrixMode(GL_MODELVIEW);
 		
 		
@@ -91,18 +89,13 @@ void setupOpengl() {
 // Init everything
 int main(int argc, char* argv[]) {
     SDL_Init(SDL_INIT_VIDEO);
-    //SDL_SetVideoMode(width, height, 24, SDL_OPENGL | SDL_GL_DOUBLEBUFFER);
-    auto window = SDL_CreateWindow("rym",
-    		SDL_WINDOWPOS_UNDEFINED,
-			SDL_WINDOWPOS_UNDEFINED,
-			width, height,
-			SDL_WINDOW_OPENGL | SDL_GL_DOUBLEBUFFER);
+    SDL_SetVideoMode(width, height, 24, SDL_OPENGL | SDL_GL_DOUBLEBUFFER);
     setupOpengl();
 	initDrawModule(width / height);
 		
     hant::init();
 		
-    mainLoop(window);
+    mainLoop();
 		
     hant::avsl();
 		

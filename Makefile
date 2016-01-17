@@ -17,8 +17,8 @@ ifeq ($(OS),Windows_NT)
 	#Using opengl version 1:
 	GL = 1
 else
-	LIBS =  -lSDL2 -lGL
-	OBJ+= draw.o shaderprogram.o main-nix.o
+	LIBS =  -lSDL -lGL
+	OBJ+= shaderprogram.o main-nix.o
 endif
 
 #selecting files according to opengl version
