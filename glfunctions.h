@@ -16,8 +16,17 @@
 #include <OpenGLES/ES3/glext.h>
 #else
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+//From win/GL -folder
+
+
+#include <GL/glew.h>
+
+#else
 #include <GL/gl.h>
 #include <GL/glext.h>
+
+#endif
 
 #endif //apple
 

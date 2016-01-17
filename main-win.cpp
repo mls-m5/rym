@@ -82,14 +82,14 @@ int WINAPI WinMain (HINSTANCE hInstance,
         }
         else
         {
-            graf::Tid(.1);
+            game::Update(.1);
             
             /* OpenGL animation code goes here */
 
             glClearColor (0.0f, 0.0f, 0.0f, 0.0f);
             glClear (GL_COLOR_BUFFER_BIT);
             
-            graf::Rendera();
+            game::Rendera();
             
             SwapBuffers (hDC);
 

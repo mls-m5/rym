@@ -2,35 +2,42 @@
 
 CPP  = g++
 CC   = gcc
-OBJ  = main.o hant.o graf.o vektorer.o draw.o shaderprogram.o
-LINKOBJ  = main.o hant.o graf.o vektorer.o draw.o shaderprogram.o
-LIBS =  -lSDL -lGL -lGLU
-INCS =  
-CXXINCS = 
+OBJ  = hant.o graf.o vektorer.o
+
 BIN  = rym
-CXXFLAGS = $(CXXINCS)   -std=c++0x -g -Ofast 
+CXXFLAGS = -std=c++0x -g -Ofast 
 RM = rm -f
+GL = 3 #version of opengl, standard is 3
+
+ifeq ($(OS),Windows_NT)
+	CXXFLAGS+= -Iwin
+	OBJ+= main-win.o
+	LIBS = -Llib  -lopengl32 -mwindows
+	BIN = rym.exe
+	GL = 1 #Using opengl version 1
+else
+	LIBS =  -lSDL2 -lGL
+	OBJ+= draw.o shaderprogram.o main-nix.o
+endif
+
+#selecting files according to opengl version
+ifeq ($(GL), 1)
+	OBJ+= draw-gl1.o
+else
+	OBJ+= draw.o
+endif
 
 .PHONY: all all-before all-after clean clean-custom
 
 all: $(OBJ) $(BIN)
-#all-before rym all-after
-
 
 clean: clean-custom
 	${RM} $(OBJ) $(BIN)
 
-main.o: maintub.cpp
-	$(CPP) -c maintub.cpp -o main.o $(CXXFLAGS)
+%.o: %.cpp
+	$(CPP) -c $< -o $@ $(CXXFLAGS)
 
-hant.o: hant.cpp hant.h
-	$(CPP) -c hant.cpp -o hant.o $(CXXFLAGS)
-
-graf.o: graf.cpp graf.h
-	$(CPP) -c graf.cpp -o graf.o $(CXXFLAGS)
-
-vektorer.o: vektorer.cpp vektorer.h
-	$(CPP) -c vektorer.cpp -o vektorer.o $(CXXFLAGS)
 
 $(BIN): $(OBJ)
-	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)
+	$(CPP) $(OBJ) -o $(BIN) $(LIBS)
+	
