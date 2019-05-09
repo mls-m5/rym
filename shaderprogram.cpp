@@ -5,8 +5,8 @@
  *      Author: mattias
  */
 
+#include "matgl.h"
 #include "shaderprogram.h"
-
 
 
 GLuint loadShader(GLenum shaderType, const char* pSource) {
@@ -110,3 +110,10 @@ ShaderProgram::~ShaderProgram() {
 	}
 }
 
+void ShaderProgram::use() {
+	glCall(glUseProgram(getProgram()));
+}
+
+void ShaderProgram::unuse() {
+	glUseProgram(0);
+}

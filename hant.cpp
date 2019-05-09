@@ -1,9 +1,14 @@
 #include "hant.h"
 
+#include <map>
+
+using namespace std;
+
 #define KEYCOUNT 500
 namespace hant
 {
-    int key[KEYCOUNT + 1];
+//    int key[KEYCOUNT + 1];
+	map<int ,int> key;
 }
 
 void hant::init()

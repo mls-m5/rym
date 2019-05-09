@@ -1,9 +1,13 @@
 #include <stdlib.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <SDL/SDL.h>
-
 #include "draw.h"
+//#include <GL/gl.h>
+//#include <GL/glu.h>
+#include <SDL2/SDL.h>
+//#include <SDL2/SDL_opengl.h>
+
+#include <iostream>
+#include "glfunctions.h"
+using namespace std;
 
 #include "graf.h"
  
@@ -15,13 +19,15 @@ using namespace std;
 #define framerate 50 //Hz min egen variable
 #define frametime = 1/framerate + 1000 // Hur länge varje bild ska synas
 
+SDL_Window *window = 0;
+SDL_GLContext context;
 
 
 // Kill program
 void endProgram(int code) {SDL_Quit();    exit(code);}
  
 // Handle SDL keypresses
-void handleKeys(SDL_keysym* keysym, bool state) {
+void handleKeys(SDL_Keysym* keysym, bool state) {
     switch(keysym->sym) {
         case SDLK_ESCAPE:    endProgram(0); break;
 				default: hant::setkey((int)keysym->sym, state); break;
@@ -53,11 +59,10 @@ void mainLoop() {
         game::Update(.1);
  
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT); // Clear color and depth buffer
-        glLoadIdentity();
         
         game::Render();
  
-        SDL_GL_SwapBuffers(); // Update screen
+        SDL_GL_SwapWindow(window); // Update screen
 				
         processEvents();
 
@@ -67,30 +72,57 @@ void mainLoop() {
     }
 }
  
-// Setup OpenGL perspective
-void setupOpengl() {
-    glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-//    glEnable(GL_DEPTH_TEST);
-    glMatrixMode(GL_MODELVIEW);
-		
-		
-    //Alphablend
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
-
-    //Line antialiasing
-    glEnable( GL_LINE_SMOOTH );
-    glEnable( GL_POLYGON_SMOOTH );
-    glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
-    glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
-}
+//// Setup OpenGL perspective
+//static void setupOpengl() {
+//    glViewport(0, 0, width, height);
+//    glMatrixMode(GL_PROJECTION);
+////    glEnable(GL_DEPTH_TEST);
+//    glMatrixMode(GL_MODELVIEW);
+//
+//
+//    //Alphablend
+//    glEnable(GL_BLEND);
+//    glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
+//
+//    //Line antialiasing
+//    glEnable( GL_LINE_SMOOTH );
+//    glEnable( GL_POLYGON_SMOOTH );
+//    glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
+//    glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
+//}
  
 // Init everything
 int main(int argc, char* argv[]) {
-    SDL_Init(SDL_INIT_VIDEO);
-    SDL_SetVideoMode(width, height, 24, SDL_OPENGL | SDL_GL_DOUBLEBUFFER);
-    setupOpengl();
+	if (SDL_Init(SDL_INIT_VIDEO)) {
+		cerr << "failed to init video";
+		return -1;
+	}
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    //SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+
+
+
+    window = SDL_CreateWindow("rym", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
+    if (!window) {
+    	cerr << "could not create window" << endl;
+    	return 1;
+    }
+
+
+    context = SDL_GL_CreateContext(window);
+    if (!context) {
+    	throw runtime_error("could not create context");
+    	return 1;
+    }
+    glCall(cout << "test" << endl);
+
+    SDL_GL_SetSwapInterval(1);
+
+    //setupOpengl();
 	initDrawModule(width / height);
 		
     hant::init();

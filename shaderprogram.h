@@ -23,6 +23,8 @@ public:
 	GLuint getProgram() { return gProgram; };
 	GLint getUniform( char const* name );
 	GLint getAttribute( char const* name );
+	void use();
+	static void unuse();
 	virtual ~ShaderProgram();
 
 private:

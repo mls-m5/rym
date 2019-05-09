@@ -5,9 +5,11 @@ CC   = gcc
 OBJ  = hant.o graf.o vektorer.o roamingbroadphase.o
 
 BIN  = rym
-CXXFLAGS = -std=c++0x -g -Ofast 
+CXXFLAGS = -std=c++14 -Ofast 
 RM = rm -f
 GL = 3 #version of opengl, standard is 3
+
+debug: CXXFLAGS+= -g -O0
 
 ifeq ($(OS),Windows_NT)
 	OBJ+= main-win.o
@@ -17,7 +19,7 @@ ifeq ($(OS),Windows_NT)
 	#Using opengl version 1:
 	GL = 1
 else
-	LIBS =  -lSDL -lGL
+	LIBS =  -lSDL2 -lGL
 	OBJ+= shaderprogram.o main-nix.o
 endif
 

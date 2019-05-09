@@ -30,7 +30,7 @@ enum controlnum
     cn_eld =  5
 };
 #else
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 enum controlnum
 {
     cn_up = SDLK_UP,
