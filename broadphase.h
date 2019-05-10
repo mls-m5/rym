@@ -19,7 +19,7 @@ public:
 	virtual class Unit *collision(Vec &p, Unit *ignore) = 0;
 	virtual void add(Unit* u) = 0;
 	virtual void update(double t) = 0;
-	virtual void remove(Unit *u) = 0;
+	virtual void removeDead() = 0;
 	virtual void draw() = 0;
 	virtual void setCenter(Vec center) = 0;
 };

@@ -66,15 +66,10 @@ namespace game
     namespace obj
     {
         class Unit;
-    	typedef std::list<Unit *>::iterator enhet_list_iterator_t;
         
-        enhet_list_iterator_t add(Unit *e);  //Lägger till objektet i listan
-        void rem(Unit *e);  //Tar bort objektet ur listan
-        void rem(enhet_list_iterator_t it); //Tar bort iterator ur listan (snabbare)
-        void remd(Unit *e); //Tar bort objektet helt
-        void remd(enhet_list_iterator_t it); //Tar bort iteratorns objekt helt (snabbare)
-        void flushRem(); //Tar bort objekt som köats
-        void flushDel(); //anropar del på köade objekt
+        void add(Unit *e);  //Lägger till objektet i listan
+        void addSmoke(Vec p1, Vec p2); // lägger till ett rökobjekt
+        void flushRem(); //Tar bort döda objekt
         Unit *Koll(Vec, Unit *ign); //ign står för det objektet som skall ignoreras
         Unit *Near(Vec p, float lim, Unit *ign); //Hittar det närmaste objektet
         
@@ -94,7 +89,6 @@ namespace game
             virtual bool isSolid() {return 0;};
 
             virtual float radius() {return 0;}
-            void setIterator(enhet_list_iterator_t);
 
             class Space *space() {
             	return _space;
@@ -104,9 +98,8 @@ namespace game
             	_space = space;
             }
 
+            bool dead = false;
         protected:
-            bool hasIterator = false;
-            enhet_list_iterator_t iterator; //En iterator för att snabbare kunna ta bort röken
             class Space *_space = nullptr;
         };
         
@@ -191,15 +184,18 @@ namespace game
             
         };
         
-        class LineSmoke: public Unit //Rök som ser ut som en linje
+        class LineSmoke //Rök som ser ut som en linje
         {
         public:
-            //Vel används som den andra positionen
+        	Vec pos1, pos2;
             float duration, maxDuration;
             
             LineSmoke(Vec p1, Vec p2);
-            void update(float t) override;
-            void render() override;
+            void update(float t);
+            void render();
+            bool isDead() {
+            	return duration < 0;
+            }
         };
 
     }

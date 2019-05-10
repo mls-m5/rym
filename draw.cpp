@@ -244,9 +244,6 @@ void drawComet(Vec p, double a, double r){
 
 
 void drawArea(Vec p, double a, double r){
-	auto dx = p.x - camPos.x;
-	auto dy = p.y - camPos.y;
-
 	cometVAO->bind();
 	drawShader->use();
 	modelTransform(p, a / 180., r);

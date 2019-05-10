@@ -25,7 +25,7 @@ GLuint loadShader(GLenum shaderType, const char* pSource) {
                     glGetShaderInfoLog(shader, infoLen, 0, buf);
                     LOGE("Could not compile shader %d:\n%s\n",
                             shaderType, buf);
-                    delete buf;
+                    delete [] buf;
                 }
                 glDeleteShader(shader);
                 shader = 0;
@@ -64,7 +64,7 @@ GLuint createProgram(const char* pVertexSource, const char* pFragmentSource) {
                 if (buf) {
                     glGetProgramInfoLog(program, bufLength, 0, buf);
                     LOGE("Could not link program:\n%s\n", buf);
-                    delete buf;
+                    delete [] buf;
                 }
             }
             glDeleteProgram(program);

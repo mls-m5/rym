@@ -126,7 +126,6 @@ class Vec
 		inline double distance2(Vec &v) {
 			auto tx = x - v.x;
 			auto ty = y - v.y;
-			auto tz = z - v.z;
 			return tx * tx + ty * ty;
 		}
 
@@ -137,7 +136,6 @@ class Vec
 		inline double distance2d2(Vec &v) {
 			auto tx = x - v.x;
 			auto ty = y - v.y;
-			auto tz = z - v.z;
 			return tx * tx + ty * ty;
 		}
 

@@ -79,7 +79,7 @@ public:
 	void add(Unit* u) override;
 
 	void update(double t) override;
-	void remove(Unit *u) override;
+	void removeDead() override;
 
 
 	//to get for-each to work

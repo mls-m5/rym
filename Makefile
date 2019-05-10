@@ -5,11 +5,9 @@ CC   = gcc
 OBJ  = hant.o graf.o vektorer.o roamingbroadphase.o
 
 BIN  = rym
-CXXFLAGS = -std=c++14 -Ofast 
+CXXFLAGS = -std=c++14 -Ofast -W -Wall -Wno-unused-parameter -Wno-sign-compare -Wno-shadow
 RM = rm -f
 GL = 3 #version of opengl, standard is 3
-
-debug: CXXFLAGS+= -g -O0
 
 ifeq ($(OS),Windows_NT)
 	OBJ+= main-win.o
@@ -29,6 +27,9 @@ ifeq ($(GL), 1)
 else
 	OBJ+= draw.o
 endif
+
+#debug: CXXFLAGS+= -g -O0
+debug: all
 
 .PHONY: all all-before all-after clean clean-custom
 

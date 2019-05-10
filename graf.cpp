@@ -2,22 +2,24 @@
 #include "draw.h"
 #include "graf.h"
 #include <list>
+#include <vector>
 #include <stdlib.h>
+#include <memory>
 #include "roamingbroadphase.h"
-
+#include <algorithm>
 
 using std::list;
+using std::vector;
+using std::unique_ptr;
 
 namespace game
 {
     namespace obj
     {
+    	vector<unique_ptr<Unit>> enh;
+    	vector<LineSmoke> smoke;
         int cenh; //Det objektet som behandlas för tillfället
-        list<Unit *> enh;
         RoamingBroadphase solids; //enheter som kan kollisionstestas
-        list<Unit *> remq;
-        list<Unit *> delq;
-        list<enhet_list_iterator_t> remqit_nonsol; //En speciell lista med iteratorer för att snabba på processen
     }
 }
 
@@ -33,17 +35,16 @@ int kont::get(controlnum kontn)
 
 void game::Update(float t)
 {
-//	for (auto it: obj::solids){
-//		it->update(t);
-//	}
 	obj::solids.update(t);
 
-
-	for (auto it: obj::enh){
-		it->update(t);
+	for (int i = 0; i < obj::enh.size(); ++i) {
+		obj::enh[i]->update(t);
 	}
 
-	obj::flushDel();
+	for (int i = 0; i < obj::smoke.size(); ++i) {
+		obj::smoke[i].update(t);
+	}
+
 	obj::flushRem();
 }
 
@@ -51,13 +52,13 @@ void game::Render()
 {
     camTransform();
 
-//    for (auto it: obj::solids){
-//    	it->render();
-//    }
     obj::solids.draw();
 
-    for (auto it: obj::enh){
+    for (auto &it: obj::enh){
     	it->render();
+    }
+    for (auto &s: obj::smoke) {
+    	s.render();
     }
     flushDraw();
 }
@@ -80,8 +81,6 @@ void game::init()
 
 void game::avsl()
 {
-    obj::delq = obj::remq = obj::enh;
-    obj::flushDel();
     obj::flushRem();
 }
 
@@ -106,98 +105,31 @@ void game::eye::move(Vec v, float a)
 
 void game::eye::transform()
 {
-//    glMatrixMode(GL_PROJECTION);
-//    glLoadIdentity();
-//    glScalef(.1,.1,.1);
-//
-//    glFrustum(-.1,.1, -.1, .1, 1.f, 50.f);
-//    glRotatef(-10,1,0,0);
-//    glRotatef(-ang / pi* 180.,0,0,1);
-//    glTranslatef(-pos.x, -pos.y, -pos.z-20);
-//    glMatrixMode(GL_MODELVIEW);
 	camTransform();
 }
 
 //_________________________objekt --- -... .--- . -.- - ________________
 
-game::obj::enhet_list_iterator_t game::obj::add(Unit *e)
+void game::obj::add(Unit *e)
 {
 	if (e->isSolid()){
 		solids.add(e);
-		auto it = --solids.end();
-		e->setIterator(it);
-		return it;
 	}
 	else{
-		enh.push_back(e);
-		auto it = --enh.end();
-		e->setIterator(it);
-		return it;
+		enh.emplace_back(e);
 	}
-}
-
-void game::obj::rem(Unit *e)
-{
-	for (auto it: remq){
-		if (it == e){
-			return; //Objektet redan i kö
-		}
-	}
-	remq.push_back(e);
-}
-
-void game::obj::rem(enhet_list_iterator_t it)
-{
-	for (auto tit: remqit_nonsol){
-		if (tit == it){
-			return; //enheten är redan i kö
-		}
-	}
-	remqit_nonsol.push_back(it);
-}
-
-void game::obj::remd(Unit *e)
-{
-	for (auto it: delq){
-		if (it == e){
-			return; //Objektet redan i kö
-		}
-	}
-    rem(e);
-    delq.push_back(e);
-}
-
-void game::obj::remd(enhet_list_iterator_t it){
-	for (auto tit: remqit_nonsol){
-		if (tit == it){
-			return; //Objektet redan i kö
-		}
-	}
-	rem(it);
-	delq.push_back(*it);
 }
 
 void game::obj::flushRem() {
-	for (auto it: remq){
-//		solids.remove(it);
-		enh.remove(it);
-	}
-	remq.clear();
-	for (auto it: remqit_nonsol){
-		enh.erase(it);
-	}
-	remqit_nonsol.clear();
+	solids.removeDead();
+	enh.erase(remove_if(enh.begin(), enh.end(), [] (unique_ptr<Unit> &u) {
+		return u->dead == true;
+	}), enh.end());
+	smoke.erase(remove_if(smoke.begin(), smoke.end(), [] (LineSmoke &s) {
+		return s.isDead() == true;
+	}), smoke.end());
 }
 
-void game::obj::flushDel() {
-	for (auto it: delq){
-		if (it->isSolid()) {
-			solids.remove(it);
-		}
-		delete it;
-	}
-	delq.clear();
-}
 
 game::obj::Unit *game::obj::Koll(Vec p, Unit *ign)
 {
@@ -308,11 +240,6 @@ void game::obj::Star::update(float t)
 void game::obj::Star::render()
 {
 	drawStar(pos);
-//    glPointSize(2);
-//    glBegin(GL_POINTS);
-//    glColor3f(1,1,1);
-//    glVertex3fv((float*)&pos);
-//    glEnd();
 }
 
 game::obj::Star::Star()
@@ -330,20 +257,6 @@ void game::obj::Comet::update(float t)
 
 void game::obj::Comet::render()
 {
-//    glPushMatrix();
-//    glTranslatef(pos.x, pos.y, pos.z);
-//    glRotatef(ang, 0,0,1);
-//    glScalef(rad,rad,rad);
-//
-//    glBegin(GL_QUADS);
-//    glColor3f(6.,.6,1);
-//    glVertex2f(-1,1);
-//    glVertex2f(1,1);
-//    glVertex2f(1,-1);
-//    glVertex2f(-1,-1);
-//    glEnd();
-//
-//    glPopMatrix();
 	drawComet(pos, ang, rad);
 }
 
@@ -379,10 +292,13 @@ void game::obj::Comet::Force(Vec f)
 
 bool game::obj::Comet::Damage(float d)
 {
+	if (dead) {
+		return 1;
+	}
     liv -= d;
     if (liv <= 0)
     {
-        remd(this);
+    	dead = true;
         return 1;
     }
     else
@@ -428,41 +344,36 @@ game::obj::Comet::~Comet()
 
 void game::obj::Projectile::update(float t)
 {
+	if (dead) {
+		return;
+	}
     pos += vel;
     ang += rot;
     varand -= t;
     
     Unit * e;
     
-    {
-    	auto linj = new LineSmoke(pos-vel, pos);
-    	auto it = add(linj);
-    	linj->setIterator(it);
-    }
+    addSmoke(pos-vel, pos);
 
 
     e = obj::Koll(pos, this);
     if (e)
     {
         e->Force(vel*.01);
-        //vel = Vec(1,0);
-        //rem(e);
-        //delete e;
         
         e->Damage(.4);
         
         add(new Explosion(pos,.5));
-        remd(iterator);
+        dead = true;
     }
     else if (varand <0)
     {
-        remd(iterator);
+    	dead = true;
     }
     else if ((e=obj::Near(pos,20,this)))
     {
         Vec v;
         v = pos - e->pos;
-        //vel *= .99;
         v = v / -(v*v);
         v = v *.05;
         vel += v;
@@ -472,26 +383,12 @@ void game::obj::Projectile::update(float t)
 
 void game::obj::Projectile::render()
 {
-//    glPushMatrix();
-//    glTranslatef(pos.x, pos.y, pos.z);
-//    glRotatef(ang/pi*180, 0,0,1);
-//    glScalef(.1,.1,.4);
-//
-//    glBegin(GL_QUADS);
-//    glColor3f(1,.3,.3);
-//    glVertex2f(0,1);
-//    glVertex2f(1,0);
-//    glVertex2f(0,-2);
-//    glVertex2f(-1,0);
-//    glEnd();
-//
-//    glPopMatrix();
 	drawProjectile(pos, ang, .1);
 }
 
 game::obj::Projectile::Projectile(Vec p, Vec v):
-		rot(0),
 		ang(-atan2(v.x, v.y)),
+		rot(0),
 		varand(60)
 {
 	pos = p;
@@ -509,24 +406,13 @@ void game::obj::Explosion::update(float t)
     stlk /= (1+t);
     if (stlk < .01)
     {
-        remd(iterator);
+    	dead = true;
     }
 
 }
 
 void game::obj::Explosion::render()
 {
-//    glPushMatrix();
-//    glTranslatef(pos.x,pos.y,pos.z);
-//    glScalef(stlk, stlk, stlk);
-//    glBegin(GL_QUADS);
-//    glColor3f(6.,.6,1);
-//    glVertex2f(-1,1);
-//    glVertex2f(1,1);
-//    glVertex2f(1,-1);
-//    glVertex2f(-1,-1);
-//    glEnd();
-//    glPopMatrix();
 	drawExplosion(pos, stlk);
 }
 
@@ -542,14 +428,16 @@ game::obj::Explosion::Explosion(Vec p, float s)
 
 void game::obj::Particle::update(float t)
 {
+	if (dead) {
+		return;
+	}
 	constexpr float step = 1. / 80;
-//    add(new LineSmoke(pos-vel, pos));
 	alpha1 -= step;
     if (duration < 0) 
     {
         alpha2 -= step;
         if (alpha2 <= 0) {
-        	remd(iterator);
+        	dead = true;
         }
     }
     else {
@@ -560,13 +448,9 @@ void game::obj::Particle::update(float t)
 
 void game::obj::Particle::render()
 {
-	//Is visible through the smoke
-//    glPointSize(2.2);
-//    glBegin(GL_POINTS);
-//    glColor3f(varand / varandmax,varand / varandmax,varand / varandmax);
-//    glVertex3fv((float*)&pos);
-//    glEnd();
-    drawSmoke(start, pos, alpha1, alpha2);
+	if (!dead) {
+		drawSmoke(start, pos, alpha1, alpha2);
+	}
 }
 
 game::obj::Particle::Particle(Vec p)
@@ -592,7 +476,9 @@ game::obj::Particle::Particle(Vec p)
 
 game::obj::Particle::Particle(Vec p, Vec v):
 		duration(2),
-		maxDuration(duration)
+		maxDuration(duration),
+		alpha1(1),
+		alpha2(1)
 {
 	pos = p;
 	vel = v;
@@ -600,34 +486,25 @@ game::obj::Particle::Particle(Vec p, Vec v):
 
 //___________________Rök på linje_______________________________________________
 
+void game::obj::addSmoke(Vec p1, Vec p2) {
+	game::obj::smoke.emplace_back(p1, p2);
+}
+
 void game::obj::LineSmoke::update(float t)
 {
     duration -= t;
-    if (duration < 0)
-    {
-    	remd(iterator);
-    }
 }
 
 void game::obj::LineSmoke::render()
 {
-//    glBegin(GL_LINES);
-//    glColor4f(1,1,1,varand / varandmax);
-//    glVertex3fv((float*)&pos);
-//    glVertex3fv((float*)&vel);
-//    glEnd();
-    drawSmoke(pos, vel, duration/maxDuration, duration/maxDuration);
+    drawSmoke(pos1, pos2, duration/maxDuration, duration/maxDuration);
 }
 
 game::obj::LineSmoke::LineSmoke(Vec p1, Vec p2)
 {
-    pos = p1;
-    vel = p2;
+    pos1 = p1;
+    pos2 = p2;
     duration = 12;
     maxDuration = duration;
 }
 
-void game::obj::Unit::setIterator(enhet_list_iterator_t it) {
-	iterator = it;
-	hasIterator = true;
-}

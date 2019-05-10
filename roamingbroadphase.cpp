@@ -11,6 +11,7 @@
 #include "graf.h"
 #include <limits>
 #include <cstdlib>
+#include <algorithm>
 
 constexpr bool debugView = false;
 
@@ -123,14 +124,17 @@ PartSpace* RoamingBroadphase::getNearestPart(Vec& p) {
 	return nearest;
 }
 
-void RoamingBroadphase::remove(Unit* u) {
-	if (auto space = u->space()) {
-		space->remove(u);
-	}
-//	for (auto it: _parts) {
-//		it->remove(u);
-//	}
-	_units.remove(u);
+
+void RoamingBroadphase::removeDead() {
+	_units.erase(std::remove_if(_units.begin(), _units.end(), [](Unit * u) -> bool {
+		if (u->dead) {
+			if (auto space = u->space()) {
+				space->remove(u);
+			}
+			delete u;
+		}
+		return u->dead == true;
+	}), _units.end());
 }
 
 void RoamingBroadphase::draw() {
@@ -247,6 +251,6 @@ double PartSpace::distanceToPoint(Vec p) {
 
 void PartSpace::removeAll() {
 	for (auto it: _units) {
-		game::obj::remd(it);
+		it->dead = true;
 	}
 }
