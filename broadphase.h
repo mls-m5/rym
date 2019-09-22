@@ -14,7 +14,7 @@ using game::obj::Unit;
 
 class BroadPhase {
 public:
-	virtual ~BroadPhase() {}
+    virtual ~BroadPhase() = default;
 	virtual class Unit *getNearest(Vec &p, double limit, Unit *ignore) = 0;
 	virtual class Unit *collision(Vec &p, Unit *ignore) = 0;
 	virtual void add(Unit* u) = 0;

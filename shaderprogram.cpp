@@ -12,7 +12,7 @@
 GLuint loadShader(GLenum shaderType, const char* pSource) {
     GLuint shader = glCreateShader(shaderType);
     if (shader) {
-        glShaderSource(shader, 1, &pSource, 0);
+        glShaderSource(shader, 1, &pSource, nullptr);
         glCompileShader(shader);
         GLint compiled = 0;
         glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
@@ -20,13 +20,10 @@ GLuint loadShader(GLenum shaderType, const char* pSource) {
             GLint infoLen = 0;
             glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
             if (infoLen) {
-            	char *buf = new char[infoLen];
-                if (buf) {
-                    glGetShaderInfoLog(shader, infoLen, 0, buf);
-                    LOGE("Could not compile shader %d:\n%s\n",
-                            shaderType, buf);
-                    delete [] buf;
-                }
+                std::vector<char> buf(static_cast<size_t>(infoLen));
+                glGetShaderInfoLog(shader, infoLen, nullptr, buf.data());
+                LOGE("Could not compile shader %d:\n%s\n",
+                     shaderType, buf.data());
                 glDeleteShader(shader);
                 shader = 0;
             }
@@ -60,12 +57,9 @@ GLuint createProgram(const char* pVertexSource, const char* pFragmentSource) {
             GLint bufLength = 0;
             glGetProgramiv(program, GL_INFO_LOG_LENGTH, &bufLength);
             if (bufLength) {
-            	char *buf = new char[bufLength];
-                if (buf) {
-                    glGetProgramInfoLog(program, bufLength, 0, buf);
-                    LOGE("Could not link program:\n%s\n", buf);
-                    delete [] buf;
-                }
+                std::vector<char> buf(static_cast<size_t>(bufLength));
+                glGetProgramInfoLog(program, bufLength, nullptr, &buf.front());
+                LOGE("Could not link program:\n%s\n", &buf.front());
             }
             glDeleteProgram(program);
             program = 0;

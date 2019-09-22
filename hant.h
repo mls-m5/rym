@@ -1,8 +1,5 @@
 //Här skall saker för att hålla reda på diverse grejer finnas
-#ifndef hant_h
-#define hant_h
-
-#include "graf.h"
+#pragma once
 
 namespace hant
 {
@@ -12,5 +9,3 @@ namespace hant
     int getKey(int key);
     void setkey(int key, bool val);
 }
-
-#endif

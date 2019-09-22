@@ -12,7 +12,7 @@
 #define GL_GLEXT_PROTOTYPES 1
 #define GL3_PROTOTYPES 1
 
-#if __APPLE__
+#ifdef __APPLE__
 #include <OpenGLES/ES3/glext.h>
 #else
 
@@ -30,7 +30,7 @@
 
 #endif //apple
 
-#include <stdio.h>
+#include <cstdio>
 
 
 #define  LOGI(...)  printf(__VA_ARGS__)
@@ -42,18 +42,18 @@
 #include <string>
 
 static void printGLString(const char *name, GLenum s) {
-    const char *v = (const char *) glGetString(s);
+    auto *v = glGetString(s);
     LOGE("GL %s = %s\n", name, v);
 }
 
-static int checkGlError(const char* op, bool throwError = true) {
+inline int checkGlError(const char* op, bool throwError = true) {
 #ifndef NO_GRAPHICS
 	bool ret = false;
-    for (GLint error = glGetError(); error; error
+    for (auto error = glGetError(); error; error
             = glGetError()) {
-    	const char * c;
+        const char * c = nullptr;
     	switch (error) {
-    	case 0x0500:
+        case 0x0500:
     		c = "GL_INVALID_ENUM";
     		break;
     	case 0x0501:
@@ -84,19 +84,11 @@ static int checkGlError(const char* op, bool throwError = true) {
         printf("after %s()\n glError (0x%x) %s \n\n", op, error, c);
         printGLString(op, error);
         if (throwError) {
-        	throw std::runtime_error("Opengl error: " + (std::string) c);
+            throw std::runtime_error("Opengl error: " + std::string(c));
         }
     }
     return ret;
 #endif
 }
 
-#define glCall(call) call; checkGlError(#call);
-
-//static void checkGlError(const char* op) {
-//    for (GLint error = glGetError(); error; error
-//            = glGetError()) {
-//        LOGE("after %s() glError (0x%x)\n", op, error);
-//    }
-//}
-//
+#define glCall(call) call; checkGlError(#call)

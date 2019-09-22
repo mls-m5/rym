@@ -1,20 +1,21 @@
 #include "draw.h"
 #include "glfunctions.h"
-#include <math.h>
+#include <cmath>
 #include <vector>
 #include <memory>
 
 #include "shaderprogram.h"
 #include "matgl.h"
 
-static GLfloat transformMatrix[16];
-static GLfloat cameraMatrix[16];
+using std::unique_ptr;
+
+static std::array<GLfloat, 16> transformMatrix;
+static std::array<GLfloat, 16> cameraMatrix;
 static Vec camPos;
 static double camPerspective;
 
-#define up std::unique_ptr
-typedef up<GL::VertexArrayObject> VAOPointer;
-typedef up<GL::VertexBufferObject> VBOPointer;
+using VAOPointer = unique_ptr<GL::VertexArrayObject>;
+using VBOPointer = unique_ptr<GL::VertexBufferObject>;
 
 static VAOPointer cometVAO;
 static VAOPointer shipVAO;
@@ -26,37 +27,34 @@ static VBOPointer smokeVBO;
 
 static std::vector<GLfloat> smokeVertexData;
 
-class SineClass{
+static class SineClass{
+private:
+    static const int tableLength = 1024;
+    std::array<double, tableLength> table;
 public:
-	static const int tableLength = 1024;
-	SineClass(){
-		table = new double [tableLength + 1];
-		for (int i = 0; i < tableLength; ++i){
-			table[i] = sin((double)i / tableLength * pi2);
-		}
-	}
 
-	~SineClass(){
-		delete table;
+    SineClass(){
+        for (size_t i = 0; i < table.size(); ++i){
+            table[i] = sin(static_cast<double>(i) / table.size() * pi2);
+		}
 	}
 
 	inline double operator()(double a){
 		a /= pi2;
 		a -= floor(a);
 
-		return table[(int)(tableLength * a)];
+        return table[static_cast<size_t>(tableLength * a)];
 	}
 
 	double cos(double a){
 		return (*this)(a + pi / 2);
 	}
 
-	double *table;
 
 } Sine;
 
 
-static const char standardVertexShader[] =
+static const char *standardVertexShader =
 R"_(
 #version 330 core
 layout (location = 0) in vec4 vPosition;
@@ -70,7 +68,7 @@ void main() {
 }
 )_";
 
-static const char standardFragmentShader[] =
+static const char *standardFragmentShader =
 R"_(
 #version 330 core
 uniform vec4 color;
@@ -84,7 +82,7 @@ void main() {
 )_";
 
 
-static const char smokeVertexShader[] =
+static const char *smokeVertexShader =
 R"_(
 
 
@@ -102,7 +100,7 @@ void main() {
 
 )_";
 
-static const char smokeFragmentShader[] =
+static const char *smokeFragmentShader =
 R"_(
 #version 330 core
 
@@ -118,9 +116,7 @@ void main() {
 )_";
 
 
-class StandardShader: public ShaderProgram {
-public:
-
+struct StandardShader: public ShaderProgram {
 	StandardShader(): ShaderProgram(standardVertexShader, standardFragmentShader) {
 		shaderVecPointer = getAttribute("vPosition");
 		transformMatrixPointer = getUniform("model");
@@ -131,9 +127,9 @@ public:
 	    }
 	}
 
-	GLuint shaderVecPointer;
-	GLuint transformMatrixPointer;
-	GLuint cameraMatrixPointer;
+    GLint shaderVecPointer;
+    GLint transformMatrixPointer;
+    GLint cameraMatrixPointer;
 };
 
 class SmokeShader: public ShaderProgram {
@@ -147,13 +143,12 @@ public:
 	        throw "Could not create program.";
 	    }
 	}
-	GLuint shaderVecPointer;
-//	GLuint transformMatrixPointer;
-	GLuint cameraMatrixPointer;
+    GLint shaderVecPointer;
+    GLint cameraMatrixPointer;
 };
 
-std::unique_ptr<StandardShader> drawShader;
-std::unique_ptr<SmokeShader> smokeShader;
+static std::unique_ptr<StandardShader> drawShader;
+static std::unique_ptr<SmokeShader> smokeShader;
 
 inline void identityMatrix(GLfloat *matrix){
 	for (int i = 0; i < 16; ++i){
@@ -165,41 +160,41 @@ inline void identityMatrix(GLfloat *matrix){
 }
 
 void modelTransform(Vec p, double a, double scale){
-	identityMatrix(transformMatrix);
+    identityMatrix(transformMatrix.data());
 	auto s = Sine(a);
 	auto c = Sine.cos(a);
 //	auto s = sin(a);
 //	auto c = cos(a);
 
-	transformMatrix[0] = c * scale;
-	transformMatrix[1] = s * scale;
-	transformMatrix[4] = -s * scale;
-	transformMatrix[5] = c * scale;
+    transformMatrix[0] = static_cast<float>(c * scale);
+    transformMatrix[1] = static_cast<float>(s * scale);
+    transformMatrix[4] = static_cast<float>(-s * scale);
+    transformMatrix[5] = static_cast<float>(c * scale);
 
-	transformMatrix[12] = p.x;
-	transformMatrix[13] = p.y;
-	transformMatrix[14] = p.z;
+    transformMatrix[12] = static_cast<float>(p.x);
+    transformMatrix[13] = static_cast<float>(p.y);
+    transformMatrix[14] = static_cast<float>(p.z);
 
-    glCall(glUniformMatrix4fv(drawShader->transformMatrixPointer, 1, GL_FALSE, transformMatrix));
+    glCall(glUniformMatrix4fv(drawShader->transformMatrixPointer, 1, GL_FALSE, transformMatrix.data()));
 }
 
 void resetTransform(){
-	identityMatrix(transformMatrix);
-    glCall(glUniformMatrix4fv(drawShader->transformMatrixPointer, 1, GL_FALSE, transformMatrix));
+    identityMatrix(transformMatrix.data());
+    glCall(glUniformMatrix4fv(drawShader->transformMatrixPointer, 1, GL_FALSE, transformMatrix.data()));
 }
 void setCam(Vec p, double a){
-	identityMatrix(cameraMatrix);
+    identityMatrix(cameraMatrix.data());
 
 	const double size = .05;
 	double sx, sy;
 
-	cameraMatrix[0] = (sy = cos(-a)) * size / camPerspective;
-	cameraMatrix[1] = (sx = sin(-a)) * size;
-	cameraMatrix[4] = -sx * size / camPerspective;
-	cameraMatrix[5] = sy * size;
+    cameraMatrix[0] = static_cast<float>((sy = cos(-a)) * size / camPerspective);
+    cameraMatrix[1] = static_cast<float>((sx = sin(-a)) * size);
+    cameraMatrix[4] = static_cast<float>(-sx * size / camPerspective);
+    cameraMatrix[5] = static_cast<float>(sy * size);
 
-	cameraMatrix[12] =  (-p.x * sy + p.y * sx) * size / camPerspective;
-	cameraMatrix[13] =  (-p.y * sy - p.x * sx) * size;
+    cameraMatrix[12] = static_cast<float>((-p.x * sy + p.y * sx) * size / camPerspective);
+    cameraMatrix[13] = static_cast<float>((-p.y * sy - p.x * sx) * size);
 	cameraMatrix[14] = 1; //z - translation
 
 	camPos = p;
@@ -208,9 +203,9 @@ void setCam(Vec p, double a){
 
 void camTransform(){
 	drawShader->use();
-	glUniformMatrix4fv(drawShader->cameraMatrixPointer, 1, GL_FALSE, cameraMatrix);
+    glUniformMatrix4fv(drawShader->cameraMatrixPointer, 1, GL_FALSE, cameraMatrix.data());
 	smokeShader->use();
-	glUniformMatrix4fv(smokeShader->cameraMatrixPointer, 1, GL_FALSE, cameraMatrix);
+    glUniformMatrix4fv(smokeShader->cameraMatrixPointer, 1, GL_FALSE, cameraMatrix.data());
 }
 
 void drawShip(Vec p, double a){
@@ -261,15 +256,15 @@ void drawExplosion(Vec pos, double size){
 	drawComet(pos, 0., size);
 }
 
-void pushSmoke(Vec &p1, Vec &p2, float alpha1, float alpha2){
+void pushSmoke(Vec &p1, Vec &p2, double alpha1, double alpha2){
 	auto &v = smokeVertexData;
-	v.push_back(p1.x);
-	v.push_back(p1.y);
-	v.push_back(alpha1);
+    v.push_back(static_cast<float>(p1.x));
+    v.push_back(static_cast<float>(p1.y));
+    v.push_back(static_cast<float>(alpha1));
 
-	v.push_back(p2.x);
-	v.push_back(p2.y);
-	v.push_back(alpha2);
+    v.push_back(static_cast<float>(p2.x));
+    v.push_back(static_cast<float>(p2.y));
+    v.push_back(static_cast<float>(alpha2));
 }
 
 void drawSmoke(Vec p1, Vec p2, double alpha1, double alpha2){
@@ -298,7 +293,7 @@ void flushDraw() {
 
 	smokeVBO->setData(&smokeVertexData.front(), smokeVertexData.size());
 //	smokeVBO->attribPointer(0, 3, GL_FLOAT, false);
-	glCall(glDrawArrays(GL_LINES, 0, (int)smokeVertexData.size() / 3));
+    glCall(glDrawArrays(GL_LINES, 0, static_cast<int>(smokeVertexData.size()) / 3));
 
 	smokeVertexData.clear();
 
@@ -321,7 +316,7 @@ bool initDrawModule(double perspective) {
 			-1.f, 1.f
 	};
 	const GLfloat gCometColors[] = {
-			.8, .8, 1., .8,
+            .8f, .8f, 1.f, .8f,
 	};
 
     drawShader.reset(new StandardShader);

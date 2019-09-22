@@ -1,23 +1,80 @@
 #pragma once
 
+// Really old vector implementation. Not used and only saved for nostalgia
+
 struct vec
 {
-	vec (float x, float y, float z): x(x), y(y), z(z) {}
-	vec (float x, float y) : x(x), y(y), z(0) {}
-	vec (): x(0), y(0), z(0) {};
-
-    float x,y,z;
+    double x = 0, y = 0, z = 0;
 };
 
-vec Vector(float x, float y , float z);
-vec Vector(float x, float y);
 vec operator+(vec &v1, vec &v2);
 vec operator+(vec &v1, vec v2);
 vec operator-(vec &v1, vec &v2);
-//vector operator-(vector &v1, vector v2);
-vec operator*(vec &v, float s);
-float operator*(vec &v1, vec &v2);
-//float operator*(vector &v1, vector v2);
-vec operator/(vec &v, float s);
+vec operator*(vec &v, double s);
+double operator*(vec &v1, vec &v2);
+vec operator/(vec &v, double s);
 vec &operator+=(vec &v1, vec &v2);
-vec &operator*=(vec &v1, float s);
+vec &operator*=(vec &v1, double s);
+
+vec operator+(vec &v1, vec &v2)
+{
+    return {v1.x + v2.x, v1.y + v2.y , v1.z + v2.z};
+}
+
+vec operator+(vec &v1, vec v2)
+{
+    return {v1.x + v2.x, v1.y + v2.y , v1.z + v2.z};
+}
+
+vec operator-(vec &v1, vec &v2)
+{
+    return {v1.x - v2.x, v1.y - v2.y , v1.z - v2.z};
+}
+
+vec operator-(vec &v1, vec v2)
+{
+    return {v1.x - v2.x, v1.y - v2.y , v1.z - v2.z};
+}
+vec operator*(vec &v1, double s)
+{
+    return {v1.x *s , v1.y * s , v1.z * s};
+}
+
+//Skalärprodukt
+double operator*(vec &v1, vec &v2)
+{
+    return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+}
+
+double operator*(vec &v1, vec v2)
+{
+    return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+}
+vec operator/(vec &v1, double s)
+{
+    return {v1.x /s , v1.y / s , v1.z / s};
+}
+
+vec &operator+=(vec &v1, vec &v2)
+{
+    v1.x += v2.x;
+    v1.y += v2.y;
+    v1.z += v2.z;
+    return v1;
+}
+
+vec &operator+=(vec &v1, vec v2)
+{
+    v1.x += v2.x;
+    v1.y += v2.y;
+    v1.z += v2.z;
+    return v1;
+}
+
+vec &operator*=(vec &v1, double s)
+{
+    v1.x *= s;
+    v1.y *= s;
+    v1.z *= s;
+    return v1;
+}

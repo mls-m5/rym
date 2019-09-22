@@ -4,8 +4,6 @@
 //#include "vektorer.h"
 #include "vec.h"
 #include "hant.h"
-//#include <GL/gl.h>
-//#include <GL/glu.h>
 #include <cmath>
 #include <list>
 #include "common.h"
@@ -52,14 +50,14 @@ class Space;
 
 namespace game
 {
-    void Update(float t);
+    void Update(double t);
     void Render();
     void init();
     void avsl();
     
     namespace eye
     {
-        void move(Vec v, float a);
+        void move(Vec v, double a);
         void transform();
     }
 
@@ -71,24 +69,24 @@ namespace game
         void addSmoke(Vec p1, Vec p2); // lägger till ett rökobjekt
         void flushRem(); //Tar bort döda objekt
         Unit *Koll(Vec, Unit *ign); //ign står för det objektet som skall ignoreras
-        Unit *Near(Vec p, float lim, Unit *ign); //Hittar det närmaste objektet
+        Unit *Near(Vec p, double lim, Unit *ign); //Hittar det närmaste objektet
         
         class Unit
         {
         public:
             Vec pos, vel;
-            Unit() {};
-            virtual ~Unit() {};
+            Unit() {}
+            virtual ~Unit() = default;
             
-            virtual void update(float t) {};
-            virtual void render() {};
-            virtual bool Koll(Vec &p) {return 0;};  //kollisionstestning
-            virtual float Distance(Vec &p) {return 0;};  //Hitta avståndet
-            virtual void Force(Vec f) {};
-            virtual bool Damage(float d) {return 0;}; //Sant om enheten går sönder
-            virtual bool isSolid() {return 0;};
+            virtual void update(double /*t*/) {}
+            virtual void render() {}
+            virtual bool Koll(Vec &/*p*/) {return 0;}  //kollisionstestning
+            virtual double Distance(Vec &/*p*/) {return 0;}  //Hitta avståndet
+            virtual void Force(Vec /*f*/) {}
+            virtual bool Damage(double /*d*/) {return 0;} //Sant om enheten går sönder
+            virtual bool isSolid() {return 0;}
 
-            virtual float radius() {return 0;}
+            virtual double radius() {return 0;}
 
             class Space *space() {
             	return _space;
@@ -107,11 +105,11 @@ namespace game
         {
         public:
             //Vector pos, vel;
-            float ang, rot;
-            float skott;
+            double ang, rot;
+            double skott;
             
             Ship();
-            void update(float t) override;
+            void update(double t) override;
             void render() override;
         };
         
@@ -121,7 +119,7 @@ namespace game
             //Vector pos;
 
             Star();
-            void update(float t) override;
+            void update(double t) override;
             void render() override;
         };
         
@@ -129,32 +127,32 @@ namespace game
         {
         public:
             //Vector pos, vel;
-            float ang, rot;
-            float rad; //kometens radie
-            float liv;
+            double ang, rot;
+            double rad; //kometens radie
+            double liv;
             
             Comet();
-            Comet(Vec p, Vec v, float r);
-            ~Comet();
-            void update(float t) override;
+            Comet(Vec p, Vec v, double r);
+            ~Comet() override;
+            void update(double t) override;
             void render() override;
             bool Koll(Vec &p) override;
-            float Distance(Vec &p) override;
+            double Distance(Vec &p) override;
             void Force(Vec f) override;
-            bool Damage(float d) override;
-            bool isSolid() override { return true; };
-            float radius() override { return rad; };
+            bool Damage(double d) override;
+            bool isSolid() override { return true; }
+            double radius() override { return rad; }
         };
         
         class Projectile: public Unit //En projektil
         {
         public:
             //Vector pos, vel;
-            float ang, rot, varand;
+            double ang, rot, varand;
             
             Projectile(Vec p, Vec v);
-            ~Projectile();
-            void update(float t) override;
+            ~Projectile() override;
+            void update(double t) override;
             void render() override;
         };
         
@@ -162,10 +160,10 @@ namespace game
         {
         public:
             //Vector pos;
-            float stlk;
+            double stlk;
             
-            Explosion(Vec p, float stlk);
-            void update(float t) override;
+            Explosion(Vec p, double stlk);
+            void update(double t) override;
             void render() override;
         };
         
@@ -174,12 +172,12 @@ namespace game
         public:
             //Vector pos, vel;
         	Vec start;
-            float duration, maxDuration;
-            float alpha1, alpha2;
+            double duration, maxDuration;
+            double alpha1, alpha2;
             
             Particle(Vec p);
             Particle(Vec p, Vec v);
-            void update(float t) override;
+            void update(double t) override;
             void render() override;
             
         };
@@ -188,10 +186,10 @@ namespace game
         {
         public:
         	Vec pos1, pos2;
-            float duration, maxDuration;
+            double duration, maxDuration;
             
             LineSmoke(Vec p1, Vec p2);
-            void update(float t);
+            void update(double t);
             void render();
             bool isDead() {
             	return duration < 0;

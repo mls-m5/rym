@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include <cstdlib>
 #include "draw.h"
 //#include <GL/gl.h>
 //#include <GL/glu.h>
@@ -14,23 +14,21 @@ using namespace std;
 using namespace std;
  
 // Width & Height of window
-#define width 800// 640
-#define height 600 //480
-#define framerate 50 //Hz min egen variable
-#define frametime = 1/framerate + 1000 // Hur länge varje bild ska synas
+const int width = 800;// 640
+const int height = 600; //480
 
-SDL_Window *window = 0;
-SDL_GLContext context;
+static SDL_Window *window = nullptr;
+static SDL_GLContext context;
 
 
 // Kill program
-void endProgram(int code) {SDL_Quit();    exit(code);}
+[[ noreturn ]] void endProgram(int code) {SDL_Quit();    exit(code);}
  
 // Handle SDL keypresses
 void handleKeys(SDL_Keysym* keysym, bool state) {
     switch(keysym->sym) {
-        case SDLK_ESCAPE:    endProgram(0); break;
-				default: hant::setkey((int)keysym->sym, state); break;
+        case SDLK_ESCAPE:    endProgram(0);
+        default: hant::setkey(static_cast<int>(keysym->sym), state); break;
     }
 }
  
@@ -42,20 +40,17 @@ void processEvents() {
             case SDL_KEYDOWN:    handleKeys(&event.key.keysym, true ); break;
             case SDL_KEYUP  : handleKeys(&event.key.keysym, false);    break;
 						
-            case SDL_QUIT   : endProgram(0); break;
+            case SDL_QUIT   : endProgram(0);
         }
     }
 }
  
-void mainLoop() {
+[[ noreturn ]] void mainLoop() {
 		//long ttime;
     while(true) {
-				
-    	//ttime = SDL_GetTicks() + frametime;
-    	long ttime =  15 + SDL_GetTicks();
+        Uint32 ttime =  15 + SDL_GetTicks();
         processEvents();
-				
-				
+
         game::Update(.1);
  
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT); // Clear color and depth buffer
@@ -92,7 +87,7 @@ void mainLoop() {
 //}
  
 // Init everything
-int main(int argc, char* argv[]) {
+int main(int /*argc*/, char* /*argv*/[]) {
 	if (SDL_Init(SDL_INIT_VIDEO)) {
 		cerr << "failed to init video";
 		return -1;
@@ -115,8 +110,7 @@ int main(int argc, char* argv[]) {
 
     context = SDL_GL_CreateContext(window);
     if (!context) {
-    	throw runtime_error("could not create context");
-    	return 1;
+        throw runtime_error("could not create context");
     }
     glCall(cout << "test" << endl);
 
@@ -129,8 +123,8 @@ int main(int argc, char* argv[]) {
 		
     mainLoop();
 		
-    hant::avsl();
+//    hant::avsl();
 		
-    return 0;
+//    return 0;
 }
 

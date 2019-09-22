@@ -28,12 +28,12 @@ else
 	OBJ+= draw.o
 endif
 
-#debug: CXXFLAGS+= -g -O0
-debug: all
-
 .PHONY: all all-before all-after clean clean-custom
 
 all: all-before $(OBJ) $(BIN)
+
+debug: CXXFLAGS+= -g -O0
+debug: all
 
 all-before:
 	@echo openGL version $(GL)

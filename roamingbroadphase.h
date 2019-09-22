@@ -13,7 +13,7 @@
 
 class Space {
 public:
-	virtual ~Space() {}
+    virtual ~Space() = default;
 
 	virtual void add(Unit *u) = 0;
 	virtual void remove(Unit *u) = 0;
@@ -23,12 +23,12 @@ public:
 
 class PartSpace : public Space {
 public:
-	PartSpace();
-	virtual ~PartSpace() {}
+    PartSpace();
+    ~PartSpace() override;
 
 	void add(Unit* u) override;
 
-	void remove(Unit *u) {
+	void remove(Unit *u) override {
 		_units.remove(u);
 	}
 
@@ -65,10 +65,11 @@ protected:
 	double _radius = 1;
 };
 
+
 class RoamingBroadphase : public BroadPhase {
 public:
 	RoamingBroadphase();
-	virtual ~RoamingBroadphase();
+    ~RoamingBroadphase() override;
 	
 	Unit* getNearest(Vec &p, double limit, Unit *ignore) override;
 	Unit *collision(Vec &p, Unit *ignore) override;
@@ -93,6 +94,7 @@ public:
 	void draw() override;
 	void setCenter(Vec center) override;
 
+private:
 	std::list <Unit *> _units;
 	std::list <PartSpace *> _parts;
 	Vec _center;

@@ -26,6 +26,10 @@ RoamingBroadphase::RoamingBroadphase() {
 RoamingBroadphase::~RoamingBroadphase() {
 }
 
+
+PartSpace::~PartSpace() {}
+
+
 void PartSpace::calculateCenter() {
 	Vec center;
 	if (_units.empty()) {
@@ -133,7 +137,7 @@ void RoamingBroadphase::removeDead() {
 			}
 			delete u;
 		}
-		return u->dead == true;
+        return u->dead;
 	}), _units.end());
 }
 
@@ -229,8 +233,8 @@ void RoamingBroadphase::setCenter(Vec center) {
 	_center = center;
 }
 
-PartSpace* RoamingBroadphase::getLargestSpace(Vec p) {
-	int max = 0;
+PartSpace* RoamingBroadphase::getLargestSpace(Vec /*p*/) {
+    size_t max = 0;
 	PartSpace *largestSpace = nullptr;
 
 	for (auto it: _parts) {

@@ -65,13 +65,13 @@ public:
 		init();
 	}
 
-	// For creating the object later
-	VertexArrayObject(nullptr_t t) {
+    // For creating the object later
+    VertexArrayObject(std::nullptr_t) {
 		id = 0;
 	}
 
 	VertexArrayObject(const VertexArrayObject&) = delete;
-	VertexArrayObject(VertexArrayObject && other) {
+    VertexArrayObject(VertexArrayObject && other) noexcept{
 		id = other.id;
 		other.id = 0;
 	}
@@ -126,8 +126,8 @@ public:
 			GLenum target = GL_ARRAY_BUFFER,
 			GLenum usage = GL_STATIC_DRAW):
 			VertexBufferObject(target) {
-		setData(data, usage);
-		attribPointer(index, elementSize, getType<T>(), false, stride, (void*)start);
+        setData(data, usage);
+        attribPointer(index, elementSize, getType<T>(), false, stride, reinterpret_cast<void*>(start));
 	}
 
 	// The same as above but for a standard array
@@ -135,13 +135,13 @@ public:
 	template <class T>
 	VertexBufferObject(
 			const T *data, size_t dataSize,
-			GLuint index, GLuint elementSize = 3,
-			GLuint stride = 0, size_t start = 0,
+            GLuint index, GLint elementSize = 3,
+            GLsizei stride = 0, size_t start = 0,
 			GLenum target = GL_ARRAY_BUFFER,
 			GLenum usage = GL_STATIC_DRAW):
 			VertexBufferObject(target) {
-		setData(data, dataSize, usage);
-		attribPointer(index, elementSize, getType<T>(), false, stride, (void*)start);
+        setData(data, dataSize, usage);
+        attribPointer(index, elementSize, getType<T>(), false, stride, reinterpret_cast<void*>(start));
 	}
 
 	// A specialized version for element buffers
@@ -191,8 +191,8 @@ public:
 	// Binds and set data
 	template <class T>
 	void setData(const std::vector<T> &data, GLenum usage = GL_STATIC_DRAW) {
-		bind();
-		glCall(glBufferData(target, sizeof(T) * data.size(), &data.front(), usage));
+        bind();
+        glCall(glBufferData(target, static_cast<GLsizeiptr>(sizeof(T) * data.size()), &data.front(), usage));
 	}
 
 
@@ -250,7 +250,7 @@ public:
 
 class TextureAttachment {
 public:
-	TextureAttachment(int width, int height, GLenum attachment = GL_COLOR_ATTACHMENT0) {
+    TextureAttachment(int width, int height, GLenum /*attachment*/ = GL_COLOR_ATTACHMENT0) {
 		glCall(glGenTextures(1, &id));
 		bind();
 		glCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0,

@@ -20,7 +20,7 @@ public:
 	void loadFragmentShader(char *code);
 	void linkProgram();
 
-	GLuint getProgram() { return gProgram; };
+    GLuint getProgram() { return gProgram; }
 	GLint getUniform( char const* name );
 	GLint getAttribute( char const* name );
 	void use();
