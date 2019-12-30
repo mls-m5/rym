@@ -1,4 +1,12 @@
 *.o
+*.d
 rym
 rym.exe
+
+#eclipse
 .cproject
+
+# qtcreator
+rym.pro
+rym.pro.user
+

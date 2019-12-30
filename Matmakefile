@@ -1,0 +1,15 @@
+
+rym.src +=
+    main-nix.cpp
+    hant.cpp
+    graf.cpp
+    roamingbroadphase.cpp
+    shaderprogram.cpp
+    draw.cpp
+
+rym.libs +=
+    -lSDL2
+    -lGL
+
+rym.flags +=
+    -O2
