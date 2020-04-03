@@ -23,5 +23,4 @@ void drawSmoke(Vec p1, Vec p2, double alpha1, double alpha2);
 bool initDrawModule(double perspective);
 void flushDraw();
 
-
 #endif /* GL_CODE_H_ */

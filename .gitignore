@@ -10,3 +10,10 @@ rym.exe
 rym.pro
 rym.pro.user
 
+rym.cflags
+rym.config
+rym.creator
+rym.cxxflags
+rym.files
+rym.includes
+rym.creator.user
