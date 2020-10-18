@@ -5,18 +5,17 @@
  *      Author: Mattias Larsson Sköld
  */
 
-#pragma once
+export module broadphase;
 
-#include "graf.h"
-#include "vec.h"
+import unit;
+import vec;
 
-using game::obj::Unit;
-
-class BroadPhase {
+export class BroadPhase {
 public:
+    using Unit = game::obj::Unit;
     virtual ~BroadPhase() = default;
-    virtual class Unit *getNearest(Vec &p, double limit, Unit *ignore) = 0;
-    virtual class Unit *collision(Vec &p, Unit *ignore) = 0;
+    virtual Unit *getNearest(Vec &p, double limit, Unit *ignore) = 0;
+    virtual Unit *collision(Vec &p, Unit *ignore) = 0;
     virtual void add(Unit *u) = 0;
     virtual void update(double t) = 0;
     virtual void removeDead() = 0;

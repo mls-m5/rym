@@ -7,7 +7,11 @@
  *      Author: Mattias Larsson Sköld
  */
 
-#pragma once
+// export module matgl;
+
+//#if defined(__GXX_WEAK__)
+//#include <bits/gthr-default.h>
+//#endif
 
 #define GL_GLEXT_PROTOTYPES 1
 #define GL3_PROTOTYPES 1
@@ -183,10 +187,10 @@ public:
     // and enable it if it is not GL_ELEMENT_ARRAY_BUFFER
     // Index is the index in the shader program
     // size is the total number of bytes for each element eg. 3 for a 3d
-    // position type is the data type eg. GL_FLOAT or GL_DOUBLE stride is if you
-    // have some other format like and needs the size of each element to be
-    // bigger pointer is the offset of the first element, probably used in
-    // combination with stride
+    // position type is the data type eg. GL_FLOAT or GL_DOUBLE stride is if
+    // you have some other format like and needs the size of each element to
+    // be bigger pointer is the offset of the first element, probably used
+    // in combination with stride
     void attribPointer(GLuint index,
                        GLint size,
                        GLenum type,

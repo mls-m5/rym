@@ -5,8 +5,10 @@
  *      Author: mattias
  */
 
-#include "shaderprogram.h"
 #include "matgl.h"
+
+#include "shaderprogram.h"
+//#include "matgl.cppm"
 
 GLuint loadShader(GLenum shaderType, const char *pSource) {
     GLuint shader = glCreateShader(shaderType);

@@ -1,5 +1,7 @@
 *.o
 *.d
+*.tmp
+*.pcm
 rym
 rym.exe
 

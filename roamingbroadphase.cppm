@@ -5,17 +5,119 @@
  *      Author: Mattias Larsson Sköld
  */
 
-#include "roamingbroadphase.h"
+export module roamingbroadphase;
+
+#if defined(__GXX_WEAK__)
+#include <bits/gthr-default.h>
+#endif
+
+#include "common.h"
 #include "draw.h"
-//#include "unit.h"
-#include "graf.h"
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
 #include <limits>
 
-constexpr bool debugView = false;
+#include "draw.h"
+#include <list>
+
+import broadphase;
+import vec;
+import unit;
 
 using namespace game::obj;
+
+class Space {
+public:
+    virtual ~Space() = default;
+
+    virtual void add(Unit *u) = 0;
+    virtual void remove(Unit *u) = 0;
+
+    virtual Vec &pos() = 0;
+};
+
+class PartSpace : public Space {
+public:
+    PartSpace();
+    ~PartSpace() override;
+
+    void add(Unit *u) override;
+
+    void remove(Unit *u) override {
+        _units.remove(u);
+    }
+
+    void calculateCenter();
+    void calculateRadius();
+    double distanceToPoint(Vec p);
+
+    void removeAll();
+
+    void draw();
+
+    Vec &pos() override {
+        return _pos;
+    }
+
+    void pos(Vec v) {
+        _pos = v;
+    }
+
+    bool empty() {
+        return _units.empty();
+    }
+
+    auto size() {
+        return _units.size();
+    }
+
+    Unit *getNearest(Vec &, double limit, Unit *ignore, double *returnDistance);
+    Unit *collision(Vec &p, Unit *ignore);
+
+protected:
+    std::list<Unit *> _units;
+    Vec _pos;
+    double _radius = 1;
+};
+
+export class RoamingBroadphase : public BroadPhase {
+public:
+    RoamingBroadphase();
+    ~RoamingBroadphase() override;
+
+    Unit *getNearest(Vec &p, double limit, Unit *ignore) override;
+    Unit *collision(Vec &p, Unit *ignore) override;
+
+    PartSpace *getNearestPart(Vec &p);
+    PartSpace *getLargestSpace(Vec p);
+
+    void add(Unit *u) override;
+
+    void update(double t) override;
+    void removeDead() override;
+
+    // to get for-each to work
+    auto inline begin() { // using c++14 auto-standard
+        return _units.begin();
+    }
+    auto inline end() {
+        return _units.end();
+    }
+
+    void draw() override;
+    void setCenter(Vec center) override;
+
+private:
+    std::list<Unit *> _units;
+    std::list<PartSpace *> _parts;
+    Vec _center;
+};
+
+// Source
+constexpr bool debugView = false;
+
+using game::obj::Unit;
 
 RoamingBroadphase::RoamingBroadphase() {
     for (int i = 0; i < 20; ++i) {
@@ -135,7 +237,10 @@ void RoamingBroadphase::removeDead() {
                                 _units.end(),
                                 [](Unit *u) -> bool {
                                     if (u->dead()) {
-                                        if (auto space = u->space()) {
+                                        if (auto space = static_cast<Space *>(
+                                                u->space())) {
+                                            //                                            auto s =
+                                            //                                                static_cast<Space *>(space);
                                             space->remove(u);
                                         }
                                         delete u;
@@ -183,7 +288,8 @@ void RoamingBroadphase::update(double t) {
         if (rand() % 100 > 90) { // Limit this expensive calculation
             auto part = getNearestPart(it->pos);
             if (it->space() != part) {
-                it->space()->remove(it);
+                auto space = static_cast<Space *>(it->space());
+                space->remove(it);
                 part->add(it);
             }
         }

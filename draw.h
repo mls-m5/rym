@@ -8,7 +8,8 @@
 #ifndef GL_CODE_H_
 #define GL_CODE_H_
 
-#include "vec.h"
+import vec;
+
 void modelTransform(Vec p, double a, double scale = 1);
 void resetTransform();
 void setCam(Vec p, double a);

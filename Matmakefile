@@ -1,15 +1,30 @@
 
+#flags += -stdlib=libc++
+
+rym.cpp = clang++
+
+rym.includes +=
+   /usr/include/SDL2/
+
+rym.config +=
+    c++17
+    Wall
+    modules
+
 rym.src +=
     main-nix.cpp
     hant.cpp
-    graf.cpp
+    #graf.cpp
     roamingbroadphase.cpp
     shaderprogram.cpp
     draw.cpp
+    *.cppm
 
 rym.libs +=
-    -lSDL2
     -lGL
+    -lSDL2
 
 rym.flags +=
     -O2
+
+rym.dir = build

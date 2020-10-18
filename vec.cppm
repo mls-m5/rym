@@ -3,12 +3,12 @@
  * author: Mattias Larsson Sköld
  */
 
-#pragma once
+export module vec;
 
 #include "common.h"
 #include <cmath>
 
-class Vec {
+export class Vec {
 public:
     double x = 0, y = 0, z = 0;
 

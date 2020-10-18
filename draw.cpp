@@ -1,11 +1,15 @@
 #include "draw.h"
 #include "glfunctions.h"
+#include <array>
 #include <cmath>
 #include <memory>
 #include <vector>
 
+#include "common.h"
 #include "matgl.h"
 #include "shaderprogram.h"
+
+import vec;
 
 using std::unique_ptr;
 

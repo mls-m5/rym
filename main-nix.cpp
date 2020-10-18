@@ -1,3 +1,6 @@
+
+import graf;
+
 #include "draw.h"
 #include <cstdlib>
 //#include <GL/gl.h>
@@ -9,7 +12,7 @@
 #include <iostream>
 using namespace std;
 
-#include "graf.h"
+//#include "graf.h"
 
 using namespace std;
 
@@ -98,7 +101,7 @@ void processEvents() {
 //}
 
 // Init everything
-int main(int /*argc*/, char * /*argv*/ []) {
+int main(int /*argc*/, char * /*argv*/[]) {
     if (SDL_Init(SDL_INIT_VIDEO)) {
         cerr << "failed to init video";
         return -1;
