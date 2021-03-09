@@ -3,10 +3,11 @@
  * author: Mattias Larsson Sköld
  */
 
-export module vec;
-
-#include "common.h"
 #include <cmath>
+
+import common;
+
+export module vec;
 
 export class Vec {
 public:

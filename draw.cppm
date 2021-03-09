@@ -1,15 +1,16 @@
-#include "draw.h"
 #include "glfunctions.h"
 #include <array>
 #include <cmath>
 #include <memory>
 #include <vector>
 
-#include "common.h"
 #include "matgl.h"
 #include "shaderprogram.h"
 
 import vec;
+import common;
+
+export module draw;
 
 using std::unique_ptr;
 
@@ -160,7 +161,7 @@ inline void identityMatrix(GLfloat *matrix) {
     }
 }
 
-void modelTransform(Vec p, double a, double scale) {
+export void modelTransform(Vec p, double a, double scale) {
     identityMatrix(transformMatrix.data());
     auto s = Sine(a);
     auto c = Sine.cos(a);
@@ -180,14 +181,14 @@ void modelTransform(Vec p, double a, double scale) {
                               transformMatrix.data()));
 }
 
-void resetTransform() {
+export void resetTransform() {
     identityMatrix(transformMatrix.data());
     glCall(glUniformMatrix4fv(drawShader->transformMatrixPointer,
                               1,
                               GL_FALSE,
                               transformMatrix.data()));
 }
-void setCam(Vec p, double a) {
+export void setCam(Vec p, double a) {
     identityMatrix(cameraMatrix.data());
 
     const double size = .05;
@@ -208,7 +209,7 @@ void setCam(Vec p, double a) {
     //	cameraMatrix[14] = -p.z;
 }
 
-void camTransform() {
+export void camTransform() {
     drawShader->use();
     glUniformMatrix4fv(
         drawShader->cameraMatrixPointer, 1, GL_FALSE, cameraMatrix.data());
@@ -217,18 +218,15 @@ void camTransform() {
         smokeShader->cameraMatrixPointer, 1, GL_FALSE, cameraMatrix.data());
 }
 
-void drawShip(Vec p, double a) {
+export void drawShip(Vec p, double a) {
     glCall(modelTransform(p, a, 1));
     drawShader->use();
     shipVAO->bind();
 
     glCall(glDrawArrays(GL_TRIANGLES, 0, 3));
 }
-void drawStar(Vec p) {
-    drawComet(p, 0, .01);
-}
 
-void drawComet(Vec p, double a, double r) {
+export void drawComet(Vec p, double a, double r) {
     auto dx = p.x - camPos.x;
     auto dy = p.y - camPos.y;
 
@@ -246,7 +244,11 @@ void drawComet(Vec p, double a, double r) {
     resetTransform();
 }
 
-void drawArea(Vec p, double a, double r) {
+export void drawStar(Vec p) {
+    drawComet(p, 0, .01);
+}
+
+export void drawArea(Vec p, double a, double r) {
     cometVAO->bind();
     drawShader->use();
     modelTransform(p, a / 180., r);
@@ -256,15 +258,15 @@ void drawArea(Vec p, double a, double r) {
     resetTransform();
 }
 
-void drawProjectile(Vec p, double a, double scale) {
+export void drawProjectile(Vec p, double a, double scale) {
     drawComet(p, a + 3.1415 / 4., scale);
 }
 
-void drawExplosion(Vec pos, double size) {
+export void drawExplosion(Vec pos, double size) {
     drawComet(pos, 0., size);
 }
 
-void pushSmoke(Vec &p1, Vec &p2, double alpha1, double alpha2) {
+export void pushSmoke(Vec &p1, Vec &p2, double alpha1, double alpha2) {
     auto &v = smokeVertexData;
     v.push_back(static_cast<float>(p1.x));
     v.push_back(static_cast<float>(p1.y));
@@ -275,7 +277,7 @@ void pushSmoke(Vec &p1, Vec &p2, double alpha1, double alpha2) {
     v.push_back(static_cast<float>(alpha2));
 }
 
-void drawSmoke(Vec p1, Vec p2, double alpha1, double alpha2) {
+export void drawSmoke(Vec p1, Vec p2, double alpha1, double alpha2) {
     auto dx = p1.x - camPos.x;
     auto dy = p1.y - camPos.y;
     constexpr double maxDistance = 50;
@@ -288,7 +290,7 @@ void drawSmoke(Vec p1, Vec p2, double alpha1, double alpha2) {
     pushSmoke(p1, p2, alpha1, alpha2);
 }
 
-void flushDraw() {
+export void flushDraw() {
     if (smokeVertexData.empty()) {
         return;
     }
@@ -304,7 +306,7 @@ void flushDraw() {
     smokeVertexData.clear();
 }
 
-bool initDrawModule(double perspective) {
+export bool initDrawModule(double perspective) {
     // clang-format off
     const GLfloat gShipVertices[] = {
             0.f, 1.f,

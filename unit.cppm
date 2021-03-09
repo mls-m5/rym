@@ -1,7 +1,7 @@
 
-export module unit;
-
 import vec;
+
+export module unit;
 
 namespace game {
 namespace obj {

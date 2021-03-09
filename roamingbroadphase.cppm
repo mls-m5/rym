@@ -5,25 +5,19 @@
  *      Author: Mattias Larsson Sköld
  */
 
-export module roamingbroadphase;
-
-#if defined(__GXX_WEAK__)
-#include <bits/gthr-default.h>
-#endif
-
-#include "common.h"
-#include "draw.h"
-#include <algorithm>
-#include <cmath>
-#include <cstdlib>
-#include <limits>
-
-#include "draw.h"
-#include <list>
+#import <algorithm>
+#import <cmath>
+#import <cstdlib>
+#import <limits>
+#import <list>
 
 import broadphase;
 import vec;
 import unit;
+import draw;
+import common;
+
+export module roamingbroadphase;
 
 using namespace game::obj;
 

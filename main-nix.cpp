@@ -1,20 +1,15 @@
 
 import graf;
 
-#include "draw.h"
-#include <cstdlib>
-//#include <GL/gl.h>
-//#include <GL/glu.h>
-#include <SDL2/SDL.h>
-//#include <SDL2/SDL_opengl.h>
-
 #include "glfunctions.h"
+#include <SDL2/SDL.h>
+#include <cstdlib>
 #include <iostream>
 using namespace std;
 
-//#include "graf.h"
-
-using namespace std;
+import draw;
+import hant;
+import graf;
 
 // Width & Height of window
 const int width = 800;  // 640
@@ -137,11 +132,11 @@ int main(int /*argc*/, char * /*argv*/[]) {
     // setupOpengl();
     initDrawModule(width / height);
 
-    hant::init();
+    game::init();
 
     mainLoop();
 
-    //    hant::avsl();
+    game::avsl();
 
-    //    return 0;
+    return 0;
 }

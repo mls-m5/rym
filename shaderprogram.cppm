@@ -5,10 +5,33 @@
  *      Author: mattias
  */
 
-#include "matgl.h"
+#import "glfunctions.h"
+#import "matgl.h"
+#import "shaderprogram.h"
 
-#include "shaderprogram.h"
-//#include "matgl.cppm"
+export module shaderprogram;
+
+export class ShaderProgram {
+public:
+    ShaderProgram();
+    ShaderProgram(char const *vertexCode, char const *fragmentCode);
+    void initProgram(char const *vertexCode, char const *fragmentCode);
+    void loadVertexShader(char *code);
+    void loadFragmentShader(char *code);
+    void linkProgram();
+
+    GLuint getProgram() {
+        return gProgram;
+    }
+    GLint getUniform(char const *name);
+    GLint getAttribute(char const *name);
+    void use();
+    static void unuse();
+    virtual ~ShaderProgram() = default;
+
+private:
+    GLuint gProgram;
+};
 
 GLuint loadShader(GLenum shaderType, const char *pSource) {
     GLuint shader = glCreateShader(shaderType);
@@ -67,9 +90,6 @@ GLuint createProgram(const char *pVertexSource, const char *pFragmentSource) {
         }
     }
     return program;
-}
-
-ShaderProgram::ShaderProgram() : gProgram(0) {
 }
 
 void ShaderProgram::initProgram(char const *vertexCode,

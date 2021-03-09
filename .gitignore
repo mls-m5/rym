@@ -3,19 +3,20 @@
 *.tmp
 *.pcm
 rym
-rym.exe
+build
+*.exe
 
 #eclipse
 .cproject
 
 # qtcreator
-rym.pro
-rym.pro.user
+*.pro
+*.pro.user
 
-rym.cflags
-rym.config
-rym.creator
-rym.cxxflags
-rym.files
-rym.includes
-rym.creator.user
+*.cflags
+*.config
+*.creator
+*.cxxflags
+*.files
+*.includes
+*.creator.user

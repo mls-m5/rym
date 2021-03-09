@@ -5,10 +5,10 @@
  *      Author: Mattias Larsson Sköld
  */
 
-export module broadphase;
-
 import unit;
 import vec;
+
+export module broadphase;
 
 export class BroadPhase {
 public:

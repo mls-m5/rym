@@ -1,20 +1,12 @@
-//#include "hant.h"
-//#include "graf.h"
+#include <map>
 
 export module hant;
-#if defined(__GXX_WEAK__)
-#include <bits/gthr-default.h>
-#endif
-
-#include <map>
-// import graf;
 
 namespace hant {
-export void init();
-export void avsl();
 
 export int getKey(int key);
 export void setkey(int key, bool val);
+
 } // namespace hant
 
 using namespace std;
@@ -22,14 +14,6 @@ using namespace std;
 namespace hant {
 static map<int, int> key;
 }
-
-// void hant::init() {
-//    game::init();
-//}
-
-// void hant::avsl() {
-//    game::avsl();
-//}
 
 int hant::getKey(int keyn) {
     if (key[keyn]) {

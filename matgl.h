@@ -7,12 +7,6 @@
  *      Author: Mattias Larsson Sköld
  */
 
-// export module matgl;
-
-//#if defined(__GXX_WEAK__)
-//#include <bits/gthr-default.h>
-//#endif
-
 #define GL_GLEXT_PROTOTYPES 1
 #define GL3_PROTOTYPES 1
 

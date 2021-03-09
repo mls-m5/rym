@@ -1,15 +1,5 @@
 
-export module graf;
-#if defined(__GXX_WEAK__)
-#include <bits/gthr-default.h>
-#endif
 
-//#include "vektorer.h"
-#include "common.h"
-#include "draw.h"
-//#include "graf.h"
-//#include "hant.h"
-//#include "roamingbroadphase.h"
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
@@ -19,8 +9,10 @@ export module graf;
 
 import unit;
 import vec;
+import common;
 import hant;
 import roamingbroadphase;
+import draw;
 
 #if defined(WIN32) || defined(_WIN32) ||                                       \
     defined(__WIN32) && !defined(__CYGWIN__)
@@ -51,13 +43,15 @@ enum controlnum {
 };
 #endif
 
+export module graf;
+
 namespace kont {
 int get(controlnum kontn);
 }
 
 class Space;
 
-namespace game {
+export namespace game {
 void Update(double t);
 void Render();
 void init();
