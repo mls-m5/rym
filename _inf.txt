@@ -31,3 +31,7 @@ Projektet återupptogs :) Nu med lite fräshare kunskaper
 140223
 
 Prestandaoptimeringar. Nu kan man ta bort objekt med deras iterator, och add() returnerar iteratorn för det senast tillagda objektet.
+
+210310
+
+Gjorde klart det sista i konverteringen till c++20-moduler.
