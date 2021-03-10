@@ -5,10 +5,10 @@
 #include <vector>
 
 #include "matgl.h"
-#include "shaderprogram.h"
 
 import vec;
 import common;
+import shaderprogram;
 
 export module draw;
 

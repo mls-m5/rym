@@ -9,8 +9,9 @@ namespace obj {
 export class Unit {
 public:
     Vec pos, vel;
-    Unit() {
+    Unit(Vec pos = {}, Vec vel = {}) : pos(pos), vel(vel) {
     }
+
     virtual ~Unit() = default;
 
     virtual void update(double /*t*/) {

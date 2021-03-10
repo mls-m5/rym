@@ -18,8 +18,6 @@
 #include <string>
 #include <vector>
 
-#include "shaderprogram.h"
-
 namespace GL {
 
 template <typename T>

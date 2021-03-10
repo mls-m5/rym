@@ -72,26 +72,22 @@ Unit *collision(Vec, Unit *ign); // ign står för det objektet som skall
                                  // ignoreras
 Unit *Near(Vec p, double lim, Unit *ign); // Hittar det närmaste objektet
 
-class Ship : public Unit {
-    // Vector pos, vel;
-    double ang, rot;
-
-    double skott;
-
-public:
-    Ship();
-    void update(double t) override;
-    void render() override;
-};
-
 class Star : public Unit // Stjärna
 {
 public:
     // Vector pos;
 
-    Star();
-    void update(double t) override;
-    void render() override;
+    Star() {
+        pos =
+            Vec(rand() % 1000 - 500, rand() % 1000 - 500, -rand() % 100 / 10.);
+    }
+
+    void update(double t) override {
+    }
+
+    void render() override {
+        drawStar(pos);
+    }
 };
 
 class Comet : public Unit // komet
@@ -102,44 +98,79 @@ public:
     double rad; // kometens radie
     double liv;
 
-    Comet();
-    Comet(Vec p, Vec v, double r);
-    ~Comet() override;
-    void update(double t) override;
-    void render() override;
-    bool collision(Vec &p) override;
-    double distance(Vec &p) override;
-    void Force(Vec f) override;
-    bool Damage(double d) override;
+    Comet() {
+        // static double x = 0;
+        // pos = Vec(++x,x);
+        pos = Vec(rand() % 1000 / 10 - 50, rand() % 100 - 50);
+        vel = Vec(0, 0);
+        ang = 0;
+        rot = rand() % 1000 / 1000. - .5;
+        rad = 1.5;
+        liv = rad;
+    }
+
+    Comet(Vec p, Vec v, double r) {
+        pos = p;
+        vel = v;
+        ang = 0;
+        rot = rand() % 1000 / 1000. - .5;
+        rad = r;
+        liv = rad;
+    }
+
+    ~Comet() override {
+        if (rad > .2) {
+            for (int i = 0; i < 3; i++) {
+                add(new Comet(pos,
+                              vel + Vec((rand() % 11 - 5) / 100.,
+                                        (rand() % 11 - 5) / 100.),
+                              rad / 1.5));
+            }
+        }
+    }
+
+    void update(double t) override {
+        pos += vel;
+        ang += rot;
+    }
+
+    void render() override {
+        drawComet(pos, ang, rad);
+    }
+
+    bool collision(Vec &p) override {
+        auto dx = pos.x - p.x;
+        auto dy = pos.y - p.y;
+        return ((dx * dx + dy * dy) < rad * rad);
+    }
+
+    double distance(Vec &p) override {
+        double dx, dy;
+        dx = pos.x - p.x;
+        dy = pos.y - p.y;
+
+        return sqrt(dx * dx + dy * dy);
+    }
+    void Force(Vec f) override {
+        Vec fo = f * .1;
+        vel += fo;
+    }
+    bool Damage(double d) override {
+        if (dead()) {
+            return true;
+        }
+        liv -= d;
+        if (liv <= 0) {
+            dead(true);
+        }
+        return dead();
+    }
     bool isSolid() override {
         return true;
     }
     double radius() override {
         return rad;
     }
-};
-
-class Projectile : public Unit // En projektil
-{
-public:
-    // Vector pos, vel;
-    double ang, rot, varand;
-
-    Projectile(Vec p, Vec v);
-    ~Projectile() override;
-    void update(double t) override;
-    void render() override;
-};
-
-class Explosion : public Unit // En explosion
-{
-public:
-    // Vector pos;
-    double stlk;
-
-    Explosion(Vec p, double stlk);
-    void update(double t) override;
-    void render() override;
 };
 
 class Particle : public Unit // skräp som mest flyger omkring
@@ -150,10 +181,123 @@ public:
     double duration, maxDuration;
     double alpha1, alpha2;
 
-    Particle(Vec p);
-    Particle(Vec p, Vec v);
-    void update(double t) override;
-    void render() override;
+    Particle(Vec p) {
+        pos = p;
+        start = p;
+        double vx = 0;
+        double vy = 0;
+        double vz = 0;
+        alpha1 = alpha2 = 1;
+        for (int i = 0; i < 6; i++) {
+            vx += rand() % 1000 - 500;
+            vy += rand() % 1000 - 500;
+            vz += rand() % 1000 - 500;
+        }
+        vel.x = vx / 12000.;
+        vel.y = vy / 12000.;
+        vel.z = vz / 12000.;
+        duration = 2 + rand() % 20 / 20;
+        maxDuration = duration;
+    }
+    Particle(Vec p, Vec v)
+        : duration(2), maxDuration(duration), alpha1(1), alpha2(1) {
+        pos = p;
+        vel = v;
+    }
+    void update(double t) override {
+        if (_dead) {
+            return;
+        }
+        constexpr double step = 1. / 80;
+        alpha1 -= step;
+        if (duration < 0) {
+            alpha2 -= step;
+            if (alpha2 <= 0) {
+                _dead = true;
+            }
+        }
+        else {
+            duration -= t;
+            pos += vel;
+        }
+    }
+    void render() override {
+        if (!_dead) {
+            drawSmoke(start, pos, alpha1, alpha2);
+        }
+    }
+};
+
+class Explosion : public Unit // En explosion
+{
+public:
+    // Vector pos;
+    double stlk;
+
+    Explosion(Vec p, double s) : Unit(p), stlk(s) {
+        for (int i = 1; i < 20; i++)
+            add(new Particle(pos));
+    }
+    void update(double t) override {
+        stlk /= (1 + t);
+        if (stlk < .01) {
+            _dead = true;
+        }
+    }
+    void render() override {
+        drawExplosion(pos, stlk);
+    }
+};
+
+class Projectile : public Unit // En projektil
+{
+public:
+    // Vector pos, vel;
+    double ang, rot, varand;
+
+    Projectile(Vec p, Vec v) : ang(-atan2(v.x, v.y)), rot(0), varand(60) {
+        pos = p;
+        vel = v;
+    }
+
+    ~Projectile() override = default;
+
+    void update(double t) override {
+        if (dead()) {
+            return;
+        }
+        pos += vel;
+        ang += rot;
+        varand -= t;
+
+        Unit *e;
+
+        addSmoke(pos - vel, pos);
+
+        e = obj::collision(pos, this);
+        if (e) {
+            e->Force(vel * .01);
+
+            e->Damage(.4);
+
+            add(new Explosion(pos, .5));
+            _dead = true;
+        }
+        else if (varand < 0) {
+            _dead = true;
+        }
+        else if ((e = obj::Near(pos, 20, this))) {
+            Vec v;
+            v = pos - e->pos;
+            v = v / -(v * v);
+            v = v * .05;
+            vel += v;
+        }
+    }
+
+    void render() override {
+        drawProjectile(pos, ang, .1);
+    }
 };
 
 class LineSmoke // Rök som ser ut som en linje
@@ -162,12 +306,58 @@ public:
     Vec pos1, pos2;
     double duration, maxDuration;
 
-    LineSmoke(Vec p1, Vec p2);
-    void update(double t);
-    void render();
+    LineSmoke(Vec p1, Vec p2) {
+        pos1 = p1;
+        pos2 = p2;
+        duration = 12;
+        maxDuration = duration;
+    }
+    void update(double t) {
+        duration -= t;
+    }
+    void render() {
+        drawSmoke(pos1, pos2, duration / maxDuration, duration / maxDuration);
+    }
     bool isDead() {
         return duration < 0;
     }
+};
+
+class Ship : public Unit {
+    // Vector pos, vel;
+    double ang, rot;
+
+    double skott;
+
+public:
+    Ship();
+    void update(double t) override {
+        rot /= 1.2;
+        vel.x *= .9;
+        vel.y *= .9;
+        if (kont::get(cn_left))
+            rot += .01;
+        if (kont::get(cn_right))
+            rot += -.01;
+        if (kont::get(cn_up))
+            vel = Vec(-sin(ang) * .1, cos(ang) * .1);
+        if (skott > 0) {
+            skott = skott - t;
+        }
+        else {
+            if (kont::get(cn_eld)) {
+                obj::add(new Projectile(
+                    pos, vel + Vec(-sin(ang) / 4, cos(ang) / 4)));
+                skott = .3;
+            }
+        }
+
+        pos += vel;
+        ang += rot;
+
+        eye::move(pos + Vec(-sin(ang) * 10, cos(ang) * 10), ang);
+    }
+    void render() override;
 };
 
 } // namespace obj
@@ -337,33 +527,6 @@ game::obj::Unit *game::obj::Near(Vec p, double limit, Unit *ignore) {
 
 //---------skepp-------------------------------------------------------
 
-void game::obj::Ship::update(double t) {
-    rot /= 1.2;
-    vel.x *= .9;
-    vel.y *= .9;
-    if (kont::get(cn_left))
-        rot += .01;
-    if (kont::get(cn_right))
-        rot += -.01;
-    if (kont::get(cn_up))
-        vel = Vec(-sin(ang) * .1, cos(ang) * .1);
-    if (skott > 0) {
-        skott = skott - t;
-    }
-    else {
-        if (kont::get(cn_eld)) {
-            obj::add(
-                new Projectile(pos, vel + Vec(-sin(ang) / 4, cos(ang) / 4)));
-            skott = .3;
-        }
-    }
-
-    pos += vel;
-    ang += rot;
-
-    eye::move(pos + Vec(-sin(ang) * 10, cos(ang) * 10), ang);
-}
-
 void game::obj::Ship::render() {
     drawShip(pos, ang);
 }
@@ -378,224 +541,10 @@ game::obj::Ship::Ship() {
 
 //_______________________star________________________________________
 
-void game::obj::Star::update(double /*t*/) {
-}
-
-void game::obj::Star::render() {
-    drawStar(pos);
-}
-
-game::obj::Star::Star() {
-    pos = Vec(rand() % 1000 - 500, rand() % 1000 - 500, -rand() % 100 / 10.);
-}
-
 //________________________komet______________________________________
-
-void game::obj::Comet::update(double /*t*/) {
-    pos += vel;
-    ang += rot;
-}
-
-void game::obj::Comet::render() {
-    drawComet(pos, ang, rad);
-}
-
-bool game::obj::Comet::collision(Vec &p) {
-    auto dx = pos.x - p.x;
-    auto dy = pos.y - p.y;
-    return ((dx * dx + dy * dy) < rad * rad);
-}
-
-double game::obj::Comet::distance(Vec &p) {
-    double dx, dy;
-    dx = pos.x - p.x;
-    dy = pos.y - p.y;
-
-    return sqrt(dx * dx + dy * dy);
-}
-
-void game::obj::Comet::Force(Vec f) {
-    Vec fo = f * .1;
-    vel += fo;
-}
-
-bool game::obj::Comet::Damage(double d) {
-    if (dead()) {
-        return true;
-    }
-    liv -= d;
-    if (liv <= 0) {
-        dead(true);
-    }
-    return dead();
-}
-
-game::obj::Comet::Comet() {
-    // static double x = 0;
-    // pos = Vec(++x,x);
-    pos = Vec(rand() % 1000 / 10 - 50, rand() % 100 - 50);
-    vel = Vec(0, 0);
-    ang = 0;
-    rot = rand() % 1000 / 1000. - .5;
-    rad = 1.5;
-    liv = rad;
-}
-
-game::obj::Comet::Comet(Vec p, Vec v, double r) {
-    pos = p;
-    vel = v;
-    ang = 0;
-    rot = rand() % 1000 / 1000. - .5;
-    rad = r;
-    liv = rad;
-}
-
-game::obj::Comet::~Comet() {
-    if (rad > .2) {
-        for (int i = 0; i < 3; i++) {
-            add(new Comet(
-                pos,
-                vel + Vec((rand() % 11 - 5) / 100., (rand() % 11 - 5) / 100.),
-                rad / 1.5));
-        }
-    }
-}
 
 //_______________projekt_______________________________________________
 
-void game::obj::Projectile::update(double t) {
-    if (dead()) {
-        return;
-    }
-    pos += vel;
-    ang += rot;
-    varand -= t;
-
-    Unit *e;
-
-    addSmoke(pos - vel, pos);
-
-    e = obj::collision(pos, this);
-    if (e) {
-        e->Force(vel * .01);
-
-        e->Damage(.4);
-
-        add(new Explosion(pos, .5));
-        _dead = true;
-    }
-    else if (varand < 0) {
-        _dead = true;
-    }
-    else if ((e = obj::Near(pos, 20, this))) {
-        Vec v;
-        v = pos - e->pos;
-        v = v / -(v * v);
-        v = v * .05;
-        vel += v;
-    }
-}
-
-void game::obj::Projectile::render() {
-    drawProjectile(pos, ang, .1);
-}
-
-game::obj::Projectile::Projectile(Vec p, Vec v)
-    : ang(-atan2(v.x, v.y)), rot(0), varand(60) {
-    pos = p;
-    vel = v;
-}
-
-game::obj::Projectile::~Projectile() = default;
-
-//____________________________Explosion_________________________________________
-
-void game::obj::Explosion::update(double t) {
-    stlk /= (1 + t);
-    if (stlk < .01) {
-        _dead = true;
-    }
-}
-
-void game::obj::Explosion::render() {
-    drawExplosion(pos, stlk);
-}
-
-game::obj::Explosion::Explosion(Vec p, double s) {
-    pos = p;
-    stlk = s;
-    for (int i = 1; i < 20; i++)
-        add(new Particle(pos));
-}
-
-//________________________________Partikel______________________________________
-
-void game::obj::Particle::update(double t) {
-    if (_dead) {
-        return;
-    }
-    constexpr double step = 1. / 80;
-    alpha1 -= step;
-    if (duration < 0) {
-        alpha2 -= step;
-        if (alpha2 <= 0) {
-            _dead = true;
-        }
-    }
-    else {
-        duration -= t;
-        pos += vel;
-    }
-}
-
-void game::obj::Particle::render() {
-    if (!_dead) {
-        drawSmoke(start, pos, alpha1, alpha2);
-    }
-}
-
-game::obj::Particle::Particle(Vec p) {
-    pos = p;
-    start = p;
-    double vx = 0;
-    double vy = 0;
-    double vz = 0;
-    alpha1 = alpha2 = 1;
-    for (int i = 0; i < 6; i++) {
-        vx += rand() % 1000 - 500;
-        vy += rand() % 1000 - 500;
-        vz += rand() % 1000 - 500;
-    }
-    vel.x = vx / 12000.;
-    vel.y = vy / 12000.;
-    vel.z = vz / 12000.;
-    duration = 2 + rand() % 20 / 20;
-    maxDuration = duration;
-}
-
-game::obj::Particle::Particle(Vec p, Vec v)
-    : duration(2), maxDuration(duration), alpha1(1), alpha2(1) {
-    pos = p;
-    vel = v;
-}
-
-//___________________Rök på linje_______________________________________________
-
 void game::obj::addSmoke(Vec p1, Vec p2) {
     game::obj::smoke.emplace_back(p1, p2);
-}
-
-void game::obj::LineSmoke::update(double t) {
-    duration -= t;
-}
-
-void game::obj::LineSmoke::render() {
-    drawSmoke(pos1, pos2, duration / maxDuration, duration / maxDuration);
-}
-
-game::obj::LineSmoke::LineSmoke(Vec p1, Vec p2) {
-    pos1 = p1;
-    pos2 = p2;
-    duration = 12;
-    maxDuration = duration;
 }

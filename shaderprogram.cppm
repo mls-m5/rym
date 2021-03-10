@@ -7,31 +7,8 @@
 
 #import "glfunctions.h"
 #import "matgl.h"
-#import "shaderprogram.h"
 
 export module shaderprogram;
-
-export class ShaderProgram {
-public:
-    ShaderProgram();
-    ShaderProgram(char const *vertexCode, char const *fragmentCode);
-    void initProgram(char const *vertexCode, char const *fragmentCode);
-    void loadVertexShader(char *code);
-    void loadFragmentShader(char *code);
-    void linkProgram();
-
-    GLuint getProgram() {
-        return gProgram;
-    }
-    GLint getUniform(char const *name);
-    GLint getAttribute(char const *name);
-    void use();
-    static void unuse();
-    virtual ~ShaderProgram() = default;
-
-private:
-    GLuint gProgram;
-};
 
 GLuint loadShader(GLenum shaderType, const char *pSource) {
     GLuint shader = glCreateShader(shaderType);
@@ -92,42 +69,51 @@ GLuint createProgram(const char *pVertexSource, const char *pFragmentSource) {
     return program;
 }
 
-void ShaderProgram::initProgram(char const *vertexCode,
-                                char const *fragmentCode) {
-    gProgram = createProgram(vertexCode, fragmentCode);
-}
-
-GLint ShaderProgram::getUniform(char const *name) {
-    GLint ret;
-    ret = glGetUniformLocation(gProgram, name);
-
-    checkGlError(name);
-    return ret;
-}
-
-GLint ShaderProgram::getAttribute(char const *name) {
-    GLint ret;
-    ret = glGetAttribLocation(gProgram, name);
-
-    checkGlError(name);
-
-    return ret;
-}
-
-ShaderProgram::ShaderProgram(char const *vertexCode, char const *fragmentCode) {
-    initProgram(vertexCode, fragmentCode);
-}
-
-ShaderProgram::~ShaderProgram() {
-    if (gProgram) {
-        glDeleteProgram(gProgram);
+export class ShaderProgram {
+public:
+    ShaderProgram();
+    ShaderProgram(char const *vertexCode, char const *fragmentCode) {
+        initProgram(vertexCode, fragmentCode);
     }
-}
 
-void ShaderProgram::use() {
-    glCall(glUseProgram(getProgram()));
-}
+    void initProgram(char const *vertexCode, char const *fragmentCode) {
+        gProgram = createProgram(vertexCode, fragmentCode);
+    }
 
-void ShaderProgram::unuse() {
-    glUseProgram(0);
-}
+    //    void loadVertexShader(char *code);
+    //    void loadFragmentShader(char *code);
+    //    void linkProgram();
+
+    GLuint getProgram() {
+        return gProgram;
+    }
+    GLint getUniform(char const *name) {
+        GLint ret;
+        ret = glGetUniformLocation(gProgram, name);
+
+        checkGlError(name);
+        return ret;
+    }
+    GLint getAttribute(char const *name) {
+        GLint ret;
+        ret = glGetAttribLocation(gProgram, name);
+
+        checkGlError(name);
+
+        return ret;
+    }
+    void use() {
+        glCall(glUseProgram(getProgram()));
+    }
+    static void unuse() {
+        glUseProgram(0);
+    }
+    virtual ~ShaderProgram() {
+        if (gProgram) {
+            glDeleteProgram(gProgram);
+        }
+    }
+
+private:
+    GLuint gProgram;
+};
