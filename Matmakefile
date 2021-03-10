@@ -3,17 +3,21 @@
 rym
   out = rym
   command = [exe]
+
   flags =
     -stdlib=libc++
+
   eflags =
     -stdlib=libc++
+
   config =
     c++17
     Wall
     modules
+
   src =
-    main-nix.cpp
-    *.cppm
+    src/main-nix.cpp
+    src/*.cppm
 
   ldflags =
     -lGL
