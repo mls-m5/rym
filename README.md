@@ -32,6 +32,7 @@ install clang-11
 wget https://apt.llvm.org/llvm.sh
 chmod +x llvm.sh
 sudo ./llvm.sh 11
+libc++-11-dev libc++abi-11-dev # This is needed for modules to work
 ```
 
 
