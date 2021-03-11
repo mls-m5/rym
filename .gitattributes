@@ -1,0 +1,3 @@
+
+# Make sure that github recognizes cppm-files
+*.cppm linguist-language=C++

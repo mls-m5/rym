@@ -1,10 +1,9 @@
 #include "glfunctions.h"
+#include "matgl.h"
 #include <array>
 #include <cmath>
 #include <memory>
 #include <vector>
-
-#include "matgl.h"
 
 import vec;
 import common;
