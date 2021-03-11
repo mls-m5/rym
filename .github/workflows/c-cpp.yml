@@ -16,7 +16,7 @@ jobs:
     - name: install clang
       run: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh &&  sudo ./llvm.sh 11
     - name: Install dependencies
-      run: sudo apt install libsdl2-dev libc++-dev
+      run: sudo apt update && apt install libsdl2-dev libc++-dev g++-11
     - name: clone matmake
       run: git clone https://github.com/laserskold/matmake2 --recurse-submodules
     - name: build matmake2
