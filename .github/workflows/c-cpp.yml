@@ -1,0 +1,24 @@
+name: ubuntu
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: install clang
+      run: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh &&  sudo ./llvm.sh 11
+    - name: clone matmake
+      run: git clone https://github.com/laserskold/matmake2 --recurse-submodules
+    - name: build matmake2
+      run: ./build-linux clang++-11
+      working-directory: matmake2
+    - name: build
+      run: matmake2/build/matmake2 --target clang
