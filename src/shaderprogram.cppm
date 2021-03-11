@@ -5,8 +5,8 @@
  *      Author: mattias
  */
 
-#import "glfunctions.h"
-#import "matgl.h"
+#include "glfunctions.h"
+#include "matgl.h"
 
 export module shaderprogram;
 
