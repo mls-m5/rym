@@ -1,4 +1,4 @@
-name: ubuntu
+name: ubuntu modules (matmake + clang)
 
 on:
   push:

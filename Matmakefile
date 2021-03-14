@@ -30,3 +30,5 @@ all
   in = @rym
   includes =
     /usr/include/SDL2/
+  copy =
+    rym.ico
