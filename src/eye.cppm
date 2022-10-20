@@ -1,9 +1,10 @@
 
+
+export module eye;
+
 import vec;
 import draw;
 import obj;
-
-export module eye;
 
 namespace game {
 namespace eye {

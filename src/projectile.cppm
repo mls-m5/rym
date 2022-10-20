@@ -1,13 +1,14 @@
+module;
 
 #include <cmath>
+
+export module projectile;
 
 import unit;
 import draw;
 import vec;
 import obj;
 import explosion;
-
-export module projectile;
 
 namespace game {
 namespace obj {

@@ -3,10 +3,12 @@
  *
  **************************/
 
-#include <windows.h>
-#include <gl/gl.h>
+#if 0
+
 #include "graf.h"
 #include "hant.h"
+#include <gl/gl.h>
+#include <windows.h>
 
 
 /**************************
@@ -235,3 +237,5 @@ void DisableOpenGL (HWND hWnd, HDC hDC, HGLRC hRC)
     wglDeleteContext (hRC);
     ReleaseDC (hWnd, hDC);
 }
+
+#endif

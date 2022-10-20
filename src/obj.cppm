@@ -1,15 +1,16 @@
+module;
 
 #include <list>
 #include <memory>
 #include <vector>
+
+export module obj;
 
 import unit;
 import vec;
 import roamingbroadphase;
 import linesmoke;
 import common;
-
-export module obj;
 
 using std::unique_ptr;
 using std::vector;
@@ -58,7 +59,7 @@ export Unit *collision(Vec p,
         return solids.collision(p, ign);
     }
 
-    if (ign) //Är det något objekt som skall ignoreras?
+    if (ign) // Är det något objekt som skall ignoreras?
     {
         for (auto it : solids) {
             if (it->collision(p) && it != ign)

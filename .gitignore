@@ -20,3 +20,4 @@ build
 *.files
 *.includes
 *.creator.user
+.qtc_clangd/

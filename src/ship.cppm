@@ -1,5 +1,8 @@
+module;
 
 #include <cmath>
+
+export module ship;
 
 import vec;
 import unit;
@@ -8,8 +11,6 @@ import hant;
 import projectile;
 import obj;
 import eye;
-
-export module ship;
 
 namespace game {
 namespace obj {

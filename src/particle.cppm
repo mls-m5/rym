@@ -1,12 +1,13 @@
+module;
 
 #include <cmath>
+
+export module particle;
 
 import draw;
 import vec;
 import unit;
 import obj;
-
-export module particle;
 
 namespace game {
 namespace obj {

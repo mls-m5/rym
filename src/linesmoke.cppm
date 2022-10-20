@@ -1,8 +1,9 @@
 
-import vec;
-import draw;
 
 export module linesmoke;
+
+import vec;
+import draw;
 
 namespace game {
 namespace obj {

@@ -1,11 +1,11 @@
 
+export module explosion;
+
 import draw;
 import unit;
 import vec;
 import particle;
 import obj;
-
-export module explosion;
 
 namespace game {
 namespace obj {

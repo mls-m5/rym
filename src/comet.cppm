@@ -1,12 +1,13 @@
+module;
 
 #include <cmath>
+
+export module comet;
 
 import unit;
 import vec;
 import draw;
 import obj;
-
-export module comet;
 
 namespace game {
 namespace obj {

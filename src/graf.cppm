@@ -1,11 +1,6 @@
+module;
 
-
-#include <algorithm>
-#include <cmath>
-#include <cstdlib>
-#include <list>
-#include <memory>
-#include <vector>
+export module graf;
 
 import vec;
 import draw;
@@ -14,8 +9,6 @@ import star;
 import comet;
 import ship;
 import eye;
-
-export module graf;
 
 class Space;
 
