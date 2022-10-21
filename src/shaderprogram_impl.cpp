@@ -3,13 +3,16 @@ module;
 #include "glfunctions.h"
 #include <GL/gl.h>
 // #include <GL/glext.h>;
-#include <SDL2/SDL_opengl_glext.h>
-#include <vector>
+// #include <SDL2/SDL_opengl_glext.h>
 
 module shaderprogram;
 
 import matgl;
 import glapi;
+import <vector>;
+// import <iostream>;
+
+#define glCall(x) x;
 
 GLuint createProgram(const char *pVertexSource, const char *pFragmentSource) {
     GLuint vertexShader = loadShader(GL_VERTEX_SHADER, pVertexSource);

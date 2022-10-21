@@ -16,9 +16,8 @@ module;
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include <SDL2/SDL.h>
-#include <iostream>
+// #include <iostream>
 #include <stdexcept>
-#include <string>
 #include <vector>
 
 export module matgl;

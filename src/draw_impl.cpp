@@ -2,11 +2,6 @@ module;
 
 #include <GL/gl.h>
 #include <GL/glext.h>
-#include <array>
-#include <cmath>
-#include <cstddef>
-#include <memory>
-#include <vector>
 
 module draw;
 
@@ -15,6 +10,11 @@ import common;
 import shaderprogram;
 import matgl;
 import glapi;
+import <array>;
+import <cmath>;
+import <cstddef>;
+import <memory>;
+import <vector>;
 
 #define glCall(x) x
 

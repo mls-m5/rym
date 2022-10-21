@@ -1,16 +1,21 @@
 
 
-#include "glfunctions.h"
+// #include "glfunctions.h"
+#include <GL/gl.h>
 #include <SDL2/SDL.h>
-#include <cstdlib>
-#include <iostream>
-using namespace std;
+// #include <cstdio>
 
 import graf;
 import draw;
 import hant;
 import graf;
 import glapi;
+
+// import <cstdlib>;
+// import <iostream>;
+import <stdexcept>;
+
+using namespace std;
 
 // Width & Height of window
 const int width = 800;  // 640
@@ -77,29 +82,10 @@ void processEvents() {
     }
 }
 
-//// Setup OpenGL perspective
-// static void setupOpengl() {
-//    glViewport(0, 0, width, height);
-//    glMatrixMode(GL_PROJECTION);
-////    glEnable(GL_DEPTH_TEST);
-//    glMatrixMode(GL_MODELVIEW);
-//
-//
-//    //Alphablend
-//    glEnable(GL_BLEND);
-//    glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
-//
-//    //Line antialiasing
-//    glEnable( GL_LINE_SMOOTH );
-//    glEnable( GL_POLYGON_SMOOTH );
-//    glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
-//    glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
-//}
-
 // Init everything
 int main(int /*argc*/, char * /*argv*/[]) {
     if (SDL_Init(SDL_INIT_VIDEO)) {
-        cerr << "failed to init video";
+        fprintf(stderr, "&s", "failed to init video\n");
         return -1;
     }
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -118,7 +104,7 @@ int main(int /*argc*/, char * /*argv*/[]) {
                               height,
                               SDL_WINDOW_OPENGL);
     if (!window) {
-        cerr << "could not create window" << endl;
+        fprintf(stderr, "%s", "could not create window\n");
         return 1;
     }
 
@@ -126,7 +112,7 @@ int main(int /*argc*/, char * /*argv*/[]) {
     if (!context) {
         throw runtime_error("could not create context");
     }
-    glCall(cout << "test" << endl);
+    //    glCall(cout << "test" << endl);
 
     SDL_GL_SetSwapInterval(1);
 

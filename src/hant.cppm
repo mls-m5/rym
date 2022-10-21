@@ -1,7 +1,5 @@
 module;
 
-#include <map>
-
 #if defined(__ANDROID__) || defined(__APPLE__)
 
 #else
@@ -11,6 +9,8 @@ module;
 #endif
 
 export module hant;
+
+import <map>;
 
 #if defined(WIN32) || defined(_WIN32) ||                                       \
     defined(__WIN32) && !defined(__CYGWIN__)

@@ -5,11 +5,10 @@
 
 module;
 
-#include <cmath>
-
 export module vec;
 
 import common;
+import <cmath>;
 
 export class Vec {
 public:

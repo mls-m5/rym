@@ -6,44 +6,6 @@ module;
 
 export module glapi;
 
-// #if defined(__ANDROID__)
-// #include <GLES2/gl2.h>
-// #include <android/log.h>
-
-// #define LOG_TAG "libgl2jni"
-// #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
-// #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG,
-// __VA_ARGS__)
-
-// #else
-// #define GL_GLEXT_PROTOTYPES 1
-// #define GL3_PROTOTYPES 1
-
-// #ifdef __APPLE__
-// #include <OpenGLES/ES3/glext.h>
-// #else
-
-//#if defined(WIN32) || defined(_WIN32) ||                                       \
-//    defined(__WIN32) && !defined(__CYGWIN__)
-//// From win/GL -folder
-
-// #include <GL/glew.h>
-
-// #else
-// #include <GL/gl.h>
-// #include <GL/glext.h>
-
-// #endif
-
-// #endif // apple
-
-// #include <cstdio>
-
-#define LOGI(...) printf(__VA_ARGS__)
-#define LOGE(...) printf(__VA_ARGS__)
-
-// #endif
-
 import <stdexcept>;
 import <string>;
 
@@ -81,6 +43,10 @@ export struct Gl {
                            GLsizei count,
                            const GLchar *const *string,
                            const GLint *length);
+    void (*glGetProgramInfoLog)(GLuint program,
+                                GLsizei bufSize,
+                                GLsizei *length,
+                                GLchar *infoLog);
 
     Gl() {
         SDL_GL_LoadLibrary(nullptr);
@@ -104,14 +70,24 @@ export struct Gl {
         load(glCreateShader);
         load(glGetAttribLocation);
         load(glShaderSource);
+        load(glGetProgramInfoLog);
     }
 };
 
 export Gl gl;
 
+export template <typename... Args>
+void LOGI(Args... args) {
+}
+
+export template <typename... Args>
+void LOGE(Args... args) {
+}
+
 static void printGLString(const char *name, GLenum s) {
     auto *v = glGetString(s);
-    LOGE("GL %s = %s\n", name, v);
+    //    LOGE("GL %s = %s\n", name, v);
+    LOGE("GL ", name, " = ", v);
 }
 
 export inline int checkGlError(const char *op, bool throwError = true) {
