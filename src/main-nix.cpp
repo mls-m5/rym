@@ -1,5 +1,4 @@
 
-import graf;
 
 #include "glfunctions.h"
 #include <SDL2/SDL.h>
@@ -7,9 +6,11 @@ import graf;
 #include <iostream>
 using namespace std;
 
+import graf;
 import draw;
 import hant;
 import graf;
+import glapi;
 
 // Width & Height of window
 const int width = 800;  // 640

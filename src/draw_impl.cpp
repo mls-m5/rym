@@ -14,19 +14,15 @@ import vec;
 import common;
 import shaderprogram;
 import matgl;
+import glapi;
 
 #define glCall(x) x
 
-extern "C" {
-// GLAPI void APIENTRY glUniform4fv(GLint location,
-//                                  GLsizei count,
-//                                  const GLfloat *value);
-
-void glUniformMatrix4fv(int location,
-                        std::size_t count,
-                        bool transpose,
-                        const float *value);
-}
+// extern "C" {
+//  GLAPI void APIENTRY glUniform4fv(GLint location,
+//                                   GLsizei count,
+//                                   const GLfloat *value);
+// }
 
 using std::unique_ptr;
 
@@ -191,18 +187,18 @@ void modelTransform(Vec p, double a, double scale) {
     transformMatrix[13] = static_cast<float>(p.y);
     transformMatrix[14] = static_cast<float>(p.z);
 
-    glCall(glUniformMatrix4fv(drawShader->transformMatrixPointer,
-                              1,
-                              GL_FALSE,
-                              transformMatrix.data()));
+    glCall(gl.glUniformMatrix4fv(drawShader->transformMatrixPointer,
+                                 1,
+                                 GL_FALSE,
+                                 transformMatrix.data()));
 }
 
 void resetTransform() {
     identityMatrix(transformMatrix.data());
-    glCall(glUniformMatrix4fv(drawShader->transformMatrixPointer,
-                              1,
-                              GL_FALSE,
-                              transformMatrix.data()));
+    glCall(gl.glUniformMatrix4fv(drawShader->transformMatrixPointer,
+                                 1,
+                                 GL_FALSE,
+                                 transformMatrix.data()));
 }
 void setCam(Vec p, double a) {
     identityMatrix(cameraMatrix.data());
@@ -226,10 +222,10 @@ void setCam(Vec p, double a) {
 }
 void camTransform() {
     drawShader->use();
-    glUniformMatrix4fv(
+    gl.glUniformMatrix4fv(
         drawShader->cameraMatrixPointer, 1, GL_FALSE, cameraMatrix.data());
     smokeShader->use();
-    glUniformMatrix4fv(
+    gl.glUniformMatrix4fv(
         smokeShader->cameraMatrixPointer, 1, GL_FALSE, cameraMatrix.data());
 }
 
@@ -353,7 +349,7 @@ bool initDrawModule(double perspective) {
     cometVBO =
         std::make_unique<GL::VertexBufferObject>(gCometVertices, 4 * 2, 0, 2);
     int colorIndex = drawShader->getUniform("color");
-    glUniform4fv(colorIndex, 1, gCometColors);
+    gl.glUniform4fv(colorIndex, 1, gCometColors);
 
     shipVAO = std::make_unique<GL::VertexArrayObject>();
     shipVBO =

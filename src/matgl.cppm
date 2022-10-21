@@ -23,6 +23,8 @@ module;
 
 export module matgl;
 
+import glapi;
+
 export namespace GL {
 
 template <typename T>

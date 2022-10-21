@@ -1,14 +1,15 @@
 module;
 
+#include "glfunctions.h"
 #include <GL/gl.h>
-// #include "glfunctions.h"
-#include "glfunctions.h";
-#include <GL/glext.h>;
-#include <vector>;
+// #include <GL/glext.h>;
+#include <SDL2/SDL_opengl_glext.h>
+#include <vector>
 
 module shaderprogram;
 
 import matgl;
+import glapi;
 
 GLuint createProgram(const char *pVertexSource, const char *pFragmentSource) {
     GLuint vertexShader = loadShader(GL_VERTEX_SHADER, pVertexSource);
@@ -21,24 +22,25 @@ GLuint createProgram(const char *pVertexSource, const char *pFragmentSource) {
         return 0;
     }
 
-    GLuint program = glCreateProgram();
+    GLuint program = gl.glCreateProgram();
     if (program) {
-        glAttachShader(program, vertexShader);
+        gl.glAttachShader(program, vertexShader);
         checkGlError("glAttachShader");
-        glAttachShader(program, pixelShader);
+        gl.glAttachShader(program, pixelShader);
         checkGlError("glAttachShader");
-        glLinkProgram(program);
+        gl.glLinkProgram(program);
         GLint linkStatus = GL_FALSE;
-        glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
+        gl.glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
         if (linkStatus != GL_TRUE) {
             GLint bufLength = 0;
-            glGetProgramiv(program, GL_INFO_LOG_LENGTH, &bufLength);
+            gl.glGetProgramiv(program, GL_INFO_LOG_LENGTH, &bufLength);
             if (bufLength) {
                 std::vector<char> buf(static_cast<size_t>(bufLength));
-                glGetProgramInfoLog(program, bufLength, nullptr, &buf.front());
+                gl.glGetProgramInfoLog(
+                    program, bufLength, nullptr, &buf.front());
                 LOGE("Could not link program:\n%s\n", &buf.front());
             }
-            glDeleteProgram(program);
+            gl.glDeleteProgram(program);
             program = 0;
         }
     }
@@ -46,22 +48,22 @@ GLuint createProgram(const char *pVertexSource, const char *pFragmentSource) {
 }
 
 GLuint loadShader(GLenum shaderType, const char *pSource) {
-    GLuint shader = glCreateShader(shaderType);
+    GLuint shader = gl.glCreateShader(shaderType);
     if (shader) {
-        glShaderSource(shader, 1, &pSource, nullptr);
-        glCompileShader(shader);
+        gl.glShaderSource(shader, 1, &pSource, nullptr);
+        gl.glCompileShader(shader);
         GLint compiled = 0;
-        glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+        gl.glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
         if (!compiled) {
             GLint infoLen = 0;
-            glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
+            gl.glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
             if (infoLen) {
                 std::vector<char> buf(static_cast<size_t>(infoLen));
-                glGetShaderInfoLog(shader, infoLen, nullptr, buf.data());
+                gl.glGetShaderInfoLog(shader, infoLen, nullptr, buf.data());
                 LOGE("Could not compile shader %d:\n%s\n",
                      shaderType,
                      buf.data());
-                glDeleteShader(shader);
+                gl.glDeleteShader(shader);
                 shader = 0;
             }
         }
@@ -70,22 +72,22 @@ GLuint loadShader(GLenum shaderType, const char *pSource) {
 }
 
 void ShaderProgram::use() {
-    glCall(glUseProgram(getProgram()));
+    glCall(gl.glUseProgram(getProgram()));
 }
 
 void ShaderProgram::unuse() {
-    glUseProgram(0);
+    gl.glUseProgram(0);
 }
 
 ShaderProgram::~ShaderProgram() {
     if (gProgram) {
-        glDeleteProgram(gProgram);
+        gl.glDeleteProgram(gProgram);
     }
 }
 
 GLint ShaderProgram::getUniform(const char *name) {
     GLint ret;
-    ret = glGetUniformLocation(gProgram, name);
+    ret = gl.glGetUniformLocation(gProgram, name);
 
     checkGlError(name);
     return ret;
@@ -93,7 +95,7 @@ GLint ShaderProgram::getUniform(const char *name) {
 
 int ShaderProgram::getAttribute(const char *name) {
     GLint ret;
-    ret = glGetAttribLocation(gProgram, name);
+    ret = gl.glGetAttribLocation(gProgram, name);
 
     checkGlError(name);
 
