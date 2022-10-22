@@ -38,7 +38,6 @@
 #endif
 
 #include <stdexcept>
-#include <string>
 #define glCall(call)                                                           \
     call;                                                                      \
     checkGlError(#call)

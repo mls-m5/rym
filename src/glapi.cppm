@@ -2,12 +2,11 @@ module;
 
 #include <GL/gl.h>
 #include <SDL2/SDL_video.h>
-#include <stdexcept>
 
 export module glapi;
 
 import <stdexcept>;
-import <string>;
+import <iostream>;
 
 #define glCall(call)                                                           \
     call;                                                                      \

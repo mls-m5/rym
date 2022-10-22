@@ -1,9 +1,5 @@
-
-
-// #include "glfunctions.h"
 #include <GL/gl.h>
 #include <SDL2/SDL.h>
-// #include <cstdio>
 
 import graf;
 import draw;
@@ -11,8 +7,7 @@ import hant;
 import graf;
 import glapi;
 
-// import <cstdlib>;
-// import <iostream>;
+import <iostream>;
 import <stdexcept>;
 
 using namespace std;
@@ -85,7 +80,7 @@ void processEvents() {
 // Init everything
 int main(int /*argc*/, char * /*argv*/[]) {
     if (SDL_Init(SDL_INIT_VIDEO)) {
-        fprintf(stderr, "&s", "failed to init video\n");
+        std::cerr << "failed to init video\n";
         return -1;
     }
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -104,7 +99,7 @@ int main(int /*argc*/, char * /*argv*/[]) {
                               height,
                               SDL_WINDOW_OPENGL);
     if (!window) {
-        fprintf(stderr, "%s", "could not create window\n");
+        std::cerr << "could not create window\n";
         return 1;
     }
 

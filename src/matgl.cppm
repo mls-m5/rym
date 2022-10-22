@@ -16,13 +16,12 @@ module;
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include <SDL2/SDL.h>
-// #include <iostream>
-#include <stdexcept>
-#include <vector>
 
 export module matgl;
 
 import glapi;
+import <stdexcept>;
+import <vector>;
 
 export namespace GL {
 
