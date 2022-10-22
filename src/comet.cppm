@@ -10,7 +10,6 @@ import draw;
 import obj;
 
 namespace game {
-namespace obj {
 
 export class Comet : public Unit // komet
 {
@@ -99,5 +98,4 @@ public:
     }
 };
 
-} // namespace obj
 } // namespace game

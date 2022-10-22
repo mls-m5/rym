@@ -11,7 +11,6 @@ import obj;
 import explosion;
 
 namespace game {
-namespace obj {
 
 export class Projectile : public Unit // En projektil
 {
@@ -38,7 +37,7 @@ public:
 
         addSmoke(pos - vel, pos);
 
-        e = obj::collision(pos, this);
+        e = game::collision(pos, this);
         if (e) {
             e->Force(vel * .01);
 
@@ -50,7 +49,7 @@ public:
         else if (varand < 0) {
             _dead = true;
         }
-        else if ((e = obj::Near(pos, 20, this))) {
+        else if ((e = Near(pos, 20, this))) {
             Vec v;
             v = pos - e->pos;
             v = v / -(v * v);
@@ -64,5 +63,4 @@ public:
     }
 };
 
-} // namespace obj
 } // namespace game

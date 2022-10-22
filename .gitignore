@@ -21,3 +21,4 @@ build
 *.includes
 *.creator.user
 .qtc_clangd/
+.ninja_log

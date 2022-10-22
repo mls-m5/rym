@@ -16,7 +16,7 @@ export void move(Vec v, double a) {
     pos = v;
     ang = a;
     setCam(v, a);
-    game::obj::setCenter(v);
+    game::setCenter(v);
 }
 
 export void transform() {

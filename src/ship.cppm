@@ -13,7 +13,6 @@ import obj;
 import eye;
 
 namespace game {
-namespace obj {
 
 export class Ship : public Unit {
     // Vector pos, vel;
@@ -44,8 +43,8 @@ public:
         }
         else {
             if (hant::getKey(cn_eld)) {
-                obj::add(new Projectile(
-                    pos, vel + Vec(-sin(ang) / 4, cos(ang) / 4)));
+                add(new Projectile(pos,
+                                   vel + Vec(-sin(ang) / 4, cos(ang) / 4)));
                 skott = .3;
             }
         }
@@ -60,5 +59,4 @@ public:
     }
 };
 
-} // namespace obj
 } // namespace game

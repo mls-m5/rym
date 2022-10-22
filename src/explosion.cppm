@@ -8,7 +8,6 @@ import particle;
 import obj;
 
 namespace game {
-namespace obj {
 
 export class Explosion : public Unit // En explosion
 {
@@ -31,5 +30,4 @@ public:
     }
 };
 
-} // namespace obj
 } // namespace game

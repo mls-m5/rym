@@ -22,8 +22,7 @@ import common;
 import <cmath>;
 import <list>;
 
-using namespace game::obj;
-using game::obj::Unit;
+using game::Unit;
 
 constexpr bool debugView = false;
 

@@ -9,7 +9,6 @@ import vec;
 import unit;
 
 namespace game {
-namespace obj {
 
 export class Star : public Unit // Stjärna
 {
@@ -29,5 +28,4 @@ public:
     }
 };
 
-} // namespace obj
 } // namespace game

@@ -5,7 +5,6 @@ export module unit;
 import vec;
 
 namespace game {
-namespace obj {
 
 export class Unit {
 public:
@@ -59,5 +58,4 @@ protected:
     void *_space = nullptr;
     bool _dead = false;
 };
-} // namespace obj
 } // namespace game

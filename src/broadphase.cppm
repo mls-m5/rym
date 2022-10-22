@@ -5,7 +5,6 @@
  *      Author: Mattias Larsson Sköld
  */
 
-
 export module broadphase;
 
 import unit;
@@ -13,7 +12,7 @@ import vec;
 
 export class BroadPhase {
 public:
-    using Unit = game::obj::Unit;
+    using Unit = game::Unit;
     virtual ~BroadPhase() = default;
     virtual Unit *getNearest(Vec &p, double limit, Unit *ignore) = 0;
     virtual Unit *collision(Vec &p, Unit *ignore) = 0;

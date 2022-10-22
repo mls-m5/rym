@@ -6,7 +6,6 @@ import vec;
 import draw;
 
 namespace game {
-namespace obj {
 
 export class LineSmoke // Rök som ser ut som en linje
 {
@@ -31,5 +30,4 @@ public:
     }
 };
 
-} // namespace obj
 } // namespace game

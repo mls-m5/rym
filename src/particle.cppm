@@ -10,7 +10,6 @@ import unit;
 import obj;
 
 namespace game {
-namespace obj {
 
 export class Particle : public Unit // skräp som mest flyger omkring
 {
@@ -67,5 +66,4 @@ public:
     }
 };
 
-} // namespace obj
 } // namespace game
