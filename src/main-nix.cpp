@@ -1,5 +1,3 @@
-#include <GL/gl.h>
-#include <SDL2/SDL.h>
 
 import graf;
 import draw;
@@ -7,6 +5,8 @@ import hant;
 import graf;
 import glapi;
 
+import <GL/gl.h>;
+import <SDL2/SDL.h>;
 import <iostream>;
 import <stdexcept>;
 

@@ -1,8 +1,7 @@
 module;
 
-#include <GL/gl.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_error.h>
+import <GL/gl.h>;
+import <SDL2/SDL.h>;
 
 export module glapi;
 

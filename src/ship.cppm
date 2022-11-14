@@ -1,9 +1,8 @@
 module;
 
-#include <cmath>
-
 export module ship;
 
+import <cmath>;
 import vec;
 import unit;
 import draw;

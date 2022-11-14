@@ -9,13 +9,12 @@
 
 module;
 
-#define GL_GLEXT_PROTOTYPES 1
-#define GL3_PROTOTYPES 1
+// #define GL_GLEXT_PROTOTYPES 1
+// #define GL3_PROTOTYPES 1
 
-#include "glfunctions.h"
-#include <GL/gl.h>
-// #include <GL/glext.h>
-#include <SDL2/SDL.h>
+import "glfunctions.h";
+import <GL/gl.h>;
+import <SDL2/SDL.h>;
 
 export module matgl;
 

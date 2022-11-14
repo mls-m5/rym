@@ -1,9 +1,8 @@
 module;
 
-#include <cmath>
-
 export module projectile;
 
+import <cmath>;
 import unit;
 import draw;
 import vec;

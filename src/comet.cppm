@@ -1,6 +1,6 @@
 module;
 
-#include <cmath>
+import <cmath>;
 
 export module comet;
 

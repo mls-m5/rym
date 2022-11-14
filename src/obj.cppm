@@ -1,11 +1,10 @@
 module;
 
-#include <list>
-#include <memory>
-#include <vector>
-
 export module obj;
 
+import <list>;
+import <memory>;
+import <vector>;
 import unit;
 import vec;
 import roamingbroadphase;

@@ -1,9 +1,8 @@
 module;
 
-#include <cmath>
-
 export module particle;
 
+import <cmath>;
 import draw;
 import vec;
 import unit;

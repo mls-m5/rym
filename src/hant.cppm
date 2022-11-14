@@ -4,7 +4,7 @@ module;
 
 #else
 
-#include <SDL2/SDL.h>
+import <SDL2/SDL.h>;
 
 #endif
 
