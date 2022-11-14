@@ -48,7 +48,7 @@ sudo apt install libsdl2-dev
 
 Build with
 ```bash
-path/to/matmake3 --link -lSDL2 --link -lSDL2_image --link -lGL -j 1 --debug --flag "-DGL_GLEXT_PROTOTYPES=1 -DGL3_PROTOTYPES=1"
+path/to/matmake3 --link -lSDL2 --link -lGL -j 1 --debug --flag "-DGL_GLEXT_PROTOTYPES=1 -DGL3_PROTOTYPES=1"
 ```
 
 Install on android

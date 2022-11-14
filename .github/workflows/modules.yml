@@ -14,13 +14,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: install clang
-      run: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh &&  sudo ./llvm.sh 11
+      run: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh &&  sudo ./llvm.sh 16
     - name: Install dependencies
-      run: sudo apt update && sudo apt install libsdl2-dev libc++-11-dev libc++abi-11-dev
-    - name: clone matmake
-      run: git clone https://github.com/laserskold/matmake2 --recurse-submodules
-    - name: build matmake2
-      run: ./build-linux.sh clang++-11
-      working-directory: matmake2
+      run: sudo apt update && sudo apt install libsdl2-dev libc++-16-dev libc++abi-16-dev ninja-build
+    - name: clone matmake3
+      run: git clone https://github.com/mls-m5/matmake3 /tmp/matmake3
+    - name: build matmake3
+      run: cmake . && cmake --build .
+      working-directory: /tmp/matmake3
     - name: build
-      run: matmake2/build/matmake2 --target clang
+      run: /tmp/matmake3/matmake3 --link -lSDL2 --link -lGL -j 1 --debug --flag "-DGL_GLEXT_PROTOTYPES=1 -DGL3_PROTOTYPES=1 -I/usr/include/SDL2/"
