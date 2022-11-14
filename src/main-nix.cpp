@@ -107,7 +107,6 @@ int main(int /*argc*/, char * /*argv*/[]) {
     if (!context) {
         throw runtime_error("could not create context");
     }
-    //    glCall(cout << "test" << endl);
 
     SDL_GL_SetSwapInterval(1);
 
