@@ -1,7 +1,8 @@
 module;
 
 #include <GL/gl.h>
-#include <SDL2/SDL_video.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_error.h>
 
 export module glapi;
 
@@ -48,7 +49,12 @@ export struct Gl {
                                 GLchar *infoLog);
 
     Gl() {
-        SDL_GL_LoadLibrary(nullptr);
+        SDL_Init(SDL_INIT_VIDEO);
+        if (SDL_GL_LoadLibrary(nullptr)) {
+            std::cerr << "could not load open gl library\n";
+            std::cerr << SDL_GetError() << "\n";
+            std::exit(1);
+        }
 
 #define load(name)                                                             \
     name = reinterpret_cast<decltype(name)>(SDL_GL_GetProcAddress(#name))

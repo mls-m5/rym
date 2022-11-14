@@ -13,7 +13,7 @@
 #define GL3_PROTOTYPES 1
 
 #ifdef __APPLE__
-#include <OpenGLES/ES3/glext.h>
+// #include <OpenGLES/ES3/glext.h>
 #else
 
 #if defined(WIN32) || defined(_WIN32) ||                                       \
@@ -24,7 +24,7 @@
 
 #else
 #include <GL/gl.h>
-#include <GL/glext.h>
+// #include <GL/glext.h>
 
 #endif
 

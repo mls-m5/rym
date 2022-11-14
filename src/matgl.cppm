@@ -14,7 +14,7 @@ module;
 
 #include "glfunctions.h"
 #include <GL/gl.h>
-#include <GL/glext.h>
+// #include <GL/glext.h>
 #include <SDL2/SDL.h>
 
 export module matgl;

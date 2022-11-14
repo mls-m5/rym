@@ -1,7 +1,6 @@
 module;
 
-#include <GL/gl.h>
-#include <GL/glext.h>
+import <GL/gl.h>;
 
 export module draw;
 

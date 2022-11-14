@@ -60,7 +60,7 @@ sudo apt install libsdl2-dev
 
 Build with
 ```
-matmake2 --target clang
+path/to/matmake3 --link -lSDL2 --link -lSDL2_image --link -lGL
 ```
 
 Install on android
