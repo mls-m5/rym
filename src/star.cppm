@@ -1,14 +1,13 @@
+module;
 
-#include <cmath>
+export module star;
 
+import <cmath>;
 import draw;
 import vec;
 import unit;
 
-export module star;
-
 namespace game {
-namespace obj {
 
 export class Star : public Unit // Stjärna
 {
@@ -28,5 +27,4 @@ public:
     }
 };
 
-} // namespace obj
 } // namespace game

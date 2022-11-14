@@ -1,15 +1,14 @@
+module;
 
-#include <cmath>
+export module particle;
 
+import <cmath>;
 import draw;
 import vec;
 import unit;
 import obj;
 
-export module particle;
-
 namespace game {
-namespace obj {
 
 export class Particle : public Unit // skräp som mest flyger omkring
 {
@@ -66,5 +65,4 @@ public:
     }
 };
 
-} // namespace obj
 } // namespace game

@@ -4,23 +4,19 @@
  *  Created on: 3 maj 2015
  *      Author: Mattias Larsson Sköld
  */
+module;
 
-#include <algorithm>
-#include <cmath>
-#include <cstdlib>
-#include <limits>
-#include <list>
+export module roamingbroadphase;
 
 import broadphase;
 import vec;
 import unit;
 import draw;
 import common;
+import <cmath>;
+import <list>;
 
-export module roamingbroadphase;
-
-using namespace game::obj;
-using game::obj::Unit;
+using game::Unit;
 
 constexpr bool debugView = false;
 

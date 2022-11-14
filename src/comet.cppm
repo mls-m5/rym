@@ -1,15 +1,15 @@
+module;
 
-#include <cmath>
+import <cmath>;
+
+export module comet;
 
 import unit;
 import vec;
 import draw;
 import obj;
 
-export module comet;
-
 namespace game {
-namespace obj {
 
 export class Comet : public Unit // komet
 {
@@ -98,5 +98,4 @@ public:
     }
 };
 
-} // namespace obj
 } // namespace game

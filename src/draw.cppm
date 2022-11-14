@@ -1,15 +1,21 @@
-#include "glfunctions.h"
-#include "matgl.h"
-#include <array>
-#include <cmath>
-#include <memory>
-#include <vector>
+module;
+
+import <GL/gl.h>;
+
+export module draw;
 
 import vec;
 import common;
 import shaderprogram;
+import matgl;
+import glapi;
+import <array>;
+import <cmath>;
+import <cstddef>;
+import <memory>;
+import <vector>;
 
-export module draw;
+#define glCall(x) x
 
 using std::unique_ptr;
 
@@ -63,10 +69,10 @@ layout (location = 0) in vec4 vPosition;
 uniform	 mat4 model;	 // model-view-projection matrix
 uniform	 mat4 view;	 // camera matrix
 void main() {
-	gl_Position = view * model * vPosition;
-	float perspective = (gl_Position.z + gl_Position.y / 5.);
-	gl_Position.x /= perspective;
-	gl_Position.y /= perspective;
+    gl_Position = view * model * vPosition;
+    float perspective = (gl_Position.z + gl_Position.y / 5.);
+    gl_Position.x /= perspective;
+    gl_Position.y /= perspective;
 }
 )_";
 
@@ -92,11 +98,11 @@ layout (location = 0) in vec3 vPosition;
 out float fAlpha;
 uniform	 mat4 view;	 // camera matrix
 void main() {
-	fAlpha = vPosition.z;
-	gl_Position = view *vec4(vPosition.xy, 0, 1);
-	float perspective = (gl_Position.z + gl_Position.y / 5.);
-	gl_Position.x /= perspective;
-	gl_Position.y /= perspective;
+    fAlpha = vPosition.z;
+    gl_Position = view *vec4(vPosition.xy, 0, 1);
+    float perspective = (gl_Position.z + gl_Position.y / 5.);
+    gl_Position.x /= perspective;
+    gl_Position.y /= perspective;
 }
 
 )_";
@@ -108,10 +114,10 @@ static const char *smokeFragmentShader =
 in float fAlpha;
 
 void main() {
-	if (fAlpha < .1) {
-		discard;
-	}
-	gl_FragColor = vec4(1, 1, 1, fAlpha);
+    if (fAlpha < .1) {
+        discard;
+    }
+    gl_FragColor = vec4(1, 1, 1, fAlpha);
 }
 
 )_";
@@ -160,7 +166,7 @@ inline void identityMatrix(GLfloat *matrix) {
     }
 }
 
-export void modelTransform(Vec p, double a, double scale) {
+void modelTransform(Vec p, double a, double scale) {
     identityMatrix(transformMatrix.data());
     auto s = Sine(a);
     auto c = Sine.cos(a);
@@ -174,18 +180,18 @@ export void modelTransform(Vec p, double a, double scale) {
     transformMatrix[13] = static_cast<float>(p.y);
     transformMatrix[14] = static_cast<float>(p.z);
 
-    glCall(glUniformMatrix4fv(drawShader->transformMatrixPointer,
-                              1,
-                              GL_FALSE,
-                              transformMatrix.data()));
+    glCall(gl.glUniformMatrix4fv(drawShader->transformMatrixPointer,
+                                 1,
+                                 GL_FALSE,
+                                 transformMatrix.data()));
 }
 
-export void resetTransform() {
+void resetTransform() {
     identityMatrix(transformMatrix.data());
-    glCall(glUniformMatrix4fv(drawShader->transformMatrixPointer,
-                              1,
-                              GL_FALSE,
-                              transformMatrix.data()));
+    glCall(gl.glUniformMatrix4fv(drawShader->transformMatrixPointer,
+                                 1,
+                                 GL_FALSE,
+                                 transformMatrix.data()));
 }
 export void setCam(Vec p, double a) {
     identityMatrix(cameraMatrix.data());
@@ -207,13 +213,12 @@ export void setCam(Vec p, double a) {
     camPos = p;
     //	cameraMatrix[14] = -p.z;
 }
-
 export void camTransform() {
     drawShader->use();
-    glUniformMatrix4fv(
+    gl.glUniformMatrix4fv(
         drawShader->cameraMatrixPointer, 1, GL_FALSE, cameraMatrix.data());
     smokeShader->use();
-    glUniformMatrix4fv(
+    gl.glUniformMatrix4fv(
         smokeShader->cameraMatrixPointer, 1, GL_FALSE, cameraMatrix.data());
 }
 
@@ -265,7 +270,7 @@ export void drawExplosion(Vec pos, double size) {
     drawComet(pos, 0., size);
 }
 
-export void pushSmoke(Vec &p1, Vec &p2, double alpha1, double alpha2) {
+void pushSmoke(Vec &p1, Vec &p2, double alpha1, double alpha2) {
     auto &v = smokeVertexData;
     v.push_back(static_cast<float>(p1.x));
     v.push_back(static_cast<float>(p1.y));
@@ -337,7 +342,7 @@ export bool initDrawModule(double perspective) {
     cometVBO =
         std::make_unique<GL::VertexBufferObject>(gCometVertices, 4 * 2, 0, 2);
     int colorIndex = drawShader->getUniform("color");
-    glUniform4fv(colorIndex, 1, gCometColors);
+    gl.glUniform4fv(colorIndex, 1, gCometColors);
 
     shipVAO = std::make_unique<GL::VertexArrayObject>();
     shipVBO =

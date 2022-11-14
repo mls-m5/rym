@@ -1,14 +1,13 @@
 
+export module explosion;
+
 import draw;
 import unit;
 import vec;
 import particle;
 import obj;
 
-export module explosion;
-
 namespace game {
-namespace obj {
 
 export class Explosion : public Unit // En explosion
 {
@@ -31,5 +30,4 @@ public:
     }
 };
 
-} // namespace obj
 } // namespace game

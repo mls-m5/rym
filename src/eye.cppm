@@ -1,9 +1,10 @@
 
+
+export module eye;
+
 import vec;
 import draw;
 import obj;
-
-export module eye;
 
 namespace game {
 namespace eye {
@@ -15,7 +16,7 @@ export void move(Vec v, double a) {
     pos = v;
     ang = a;
     setCam(v, a);
-    game::obj::setCenter(v);
+    game::setCenter(v);
 }
 
 export void transform() {

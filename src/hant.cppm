@@ -1,18 +1,20 @@
-#include <map>
+module;
 
 #if defined(__ANDROID__) || defined(__APPLE__)
 
 #else
 
-#include <SDL2/SDL.h>
+import <SDL2/SDL.h>;
 
 #endif
 
 export module hant;
 
+import <map>;
+
 #if defined(WIN32) || defined(_WIN32) ||                                       \
     defined(__WIN32) && !defined(__CYGWIN__)
-//#include "windows.h"
+// #include "windows.h"
 export enum controlnum {
     cn_up = VK_UP,
     cn_down = VK_DOWN,

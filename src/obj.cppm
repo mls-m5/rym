@@ -1,21 +1,20 @@
+module;
 
-#include <list>
-#include <memory>
-#include <vector>
+export module obj;
 
+import <list>;
+import <memory>;
+import <vector>;
 import unit;
 import vec;
 import roamingbroadphase;
 import linesmoke;
 import common;
 
-export module obj;
-
 using std::unique_ptr;
 using std::vector;
 
 namespace game {
-namespace obj {
 
 static vector<unique_ptr<Unit>> enh;
 static vector<LineSmoke> smoke;
@@ -33,7 +32,7 @@ export void add(Unit *e) { // Lägger till objektet i listan
 }
 
 export void addSmoke(Vec p1, Vec p2) { // lägger till ett rökobjekt
-    game::obj::smoke.emplace_back(p1, p2);
+    game::smoke.emplace_back(p1, p2);
 }
 
 export void flushRem() { // Tar bort döda objekt
@@ -58,7 +57,7 @@ export Unit *collision(Vec p,
         return solids.collision(p, ign);
     }
 
-    if (ign) //Är det något objekt som skall ignoreras?
+    if (ign) // Är det något objekt som skall ignoreras?
     {
         for (auto it : solids) {
             if (it->collision(p) && it != ign)
@@ -110,21 +109,21 @@ export void update(double t) {
         }
     }
 
-    for (auto &smoke : obj::smoke) {
+    for (auto &smoke : smoke) {
         smoke.update(t);
     }
 
-    obj::flushRem();
+    flushRem();
 }
 
 export void render() {
 
-    obj::solids.draw();
+    solids.draw();
 
-    for (auto &it : obj::enh) {
+    for (auto &it : enh) {
         it->render();
     }
-    for (auto &s : obj::smoke) {
+    for (auto &s : smoke) {
         s.render();
     }
 }
@@ -133,5 +132,4 @@ export void setCenter(Vec p) {
     solids.setCenter(p);
 }
 
-} // namespace obj
 } // namespace game

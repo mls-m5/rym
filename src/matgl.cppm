@@ -7,20 +7,22 @@
  *      Author: Mattias Larsson Sköld
  */
 
-#pragma once
+module;
 
-#define GL_GLEXT_PROTOTYPES 1
-#define GL3_PROTOTYPES 1
+// #define GL_GLEXT_PROTOTYPES 1
+// #define GL3_PROTOTYPES 1
 
-#include <GL/gl.h>
-#include <GL/glext.h>
-#include <SDL2/SDL.h>
-#include <iostream>
-#include <stdexcept>
-#include <string>
-#include <vector>
+import "glfunctions.h";
+import <GL/gl.h>;
+import <SDL2/SDL.h>;
 
-namespace GL {
+export module matgl;
+
+import glapi;
+import <stdexcept>;
+import <vector>;
+
+export namespace GL {
 
 template <typename T>
 GLenum getType();

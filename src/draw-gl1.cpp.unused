@@ -5,6 +5,8 @@
  *      Author: Mattias Larsson SKöld
  */
 
+#if 0
+
 #include "GL/gl.h"
 #include "draw.h"
 
@@ -102,3 +104,5 @@ bool initDrawModule(double /*perspective*/) {
 }
 void flushDraw() {
 }
+
+#endif

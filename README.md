@@ -18,36 +18,24 @@ In 2020-2021 I did a push to convert the whole project to c++20 modules, and
 that will probably make compilation to other platforms more difficult for the
 nearest future.
 
+2022-11-14 Finalized real c++-20 modules using newest features of clang
 
 
-Alternative 1. Build on ubuntu with make
---------------------------------------
-
-#### Install SDL2
-```bash
-sudo apt install libsdl2-dev
-```
-
-#### Build
-```bash
-make
-```
-
-Alternative 2. Build on ubuntu using matmake2
+Build on ubuntu using matmake2
 ---------------
 
-#### install matmake2
+#### install matmake3
 
 ```http
-https://github.com/Laserskold/matmake2
+https://github.com/mls-m5/matmake3/
 ```
 
-#### install clang-11
+#### install clang-16
 ```bash
 wget https://apt.llvm.org/llvm.sh
 chmod +x llvm.sh
-sudo ./llvm.sh 11
-sudo apt install libc++-11-dev libc++abi-11-dev # This is needed for modules to work
+sudo ./llvm.sh 16
+sudo apt install libc++-16-dev libc++abi-16-dev # This is needed for modules to work
 sudo apt install libsdl2-dev
 ```
 
@@ -59,8 +47,8 @@ sudo apt install libsdl2-dev
 ```
 
 Build with
-```
-matmake2 --target clang
+```bash
+path/to/matmake3 --link -lSDL2 --link -lGL -j 1 --debug --flag "-DGL_GLEXT_PROTOTYPES=1 -DGL3_PROTOTYPES=1"
 ```
 
 Install on android

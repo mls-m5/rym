@@ -1,11 +1,6 @@
+module;
 
-
-#include <algorithm>
-#include <cmath>
-#include <cstdlib>
-#include <list>
-#include <memory>
-#include <vector>
+export module graf;
 
 import vec;
 import draw;
@@ -15,38 +10,36 @@ import comet;
 import ship;
 import eye;
 
-export module graf;
-
 class Space;
 
 export namespace game {
 
 void Update(double t) {
-    obj::update(t);
+    update(t);
 }
 
 void Render() {
     camTransform();
 
-    obj::render();
+    render();
 
     flushDraw();
 }
 
 void init() {
     for (int i = 1; i < 500; i++) {
-        obj::add(new obj::Star);
+        add(new Star);
     }
 
     for (int i = 0; i < 50; i++) {
-        obj::add(new obj::Comet);
+        add(new Comet);
     }
 
-    obj::add(new obj::Ship);
+    add(new Ship);
 }
 
 void avsl() {
-    obj::flushRem();
+    flushRem();
 }
 
 } // namespace game
