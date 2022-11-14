@@ -7,7 +7,7 @@
 
 #include "graf.h"
 #include "hant.h"
-#include <gl/gl.h>
+#include <GL/gl.h>
 #include <windows.h>
 
 

@@ -2,6 +2,7 @@ module;
 
 export module unit;
 
+import <new>;
 import vec;
 
 namespace game {
