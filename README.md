@@ -51,6 +51,12 @@ Build with
 path/to/matmake3
 ```
 
+Or without using modules at all (does not a that new version of clang but a version
+of libc++abi-dev installed.
+```
+./non-module-build.sh clang++
+```
+
 Install on android
 ------------------
 

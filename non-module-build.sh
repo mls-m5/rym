@@ -44,4 +44,6 @@ cat src/main-nix.cpp | filter > ${tmpdir}/src/main.cpp
 cp src/*.h ${tmpdir}/src
 
 echo building...
-${CXX} ${tmpdir}/src/main.cpp -o build/rym -lGL -lSDL2 -std=c++17 -DGL_GLEXT_PROTOTYPES=1 -DGL3_PROTOTYPES=1
+${CXX} ${tmpdir}/src/main.cpp -o build/rym -lGL -lSDL2 -std=c++17 -DGL_GLEXT_PROTOTYPES=1 -DGL3_PROTOTYPES=1  -stdlib=libc++
+
+# Why it is not possible to compile without libc++ is beyond my understanding
