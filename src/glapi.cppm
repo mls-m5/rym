@@ -7,10 +7,11 @@ export module glapi;
 
 import <stdexcept>;
 import <iostream>;
+#include "glfunctions.h"
 
-#define glCall(call)                                                           \
-    call;                                                                      \
-    checkGlError(#call)
+//#define glCall(call)                                                           \
+//    call;                                                                      \
+//    checkGlError(#call)
 
 export struct Gl {
 
@@ -94,7 +95,7 @@ static void printGLString(const char *name, GLenum s) {
     LOGE("GL ", name, " = ", v);
 }
 
-export inline int checkGlError(const char *op, bool throwError = true) {
+export int checkGlError(const char *op, bool throwError = true) {
 #ifndef NO_GRAPHICS
     bool ret = false;
     for (auto error = glGetError(); error; error = glGetError()) {

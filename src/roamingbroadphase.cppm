@@ -14,6 +14,7 @@ import unit;
 import draw;
 import common;
 import <cmath>;
+import <algorithm>;
 import <list>;
 
 using game::Unit;

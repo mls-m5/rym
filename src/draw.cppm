@@ -14,8 +14,9 @@ import <cmath>;
 import <cstddef>;
 import <memory>;
 import <vector>;
+import "glfunctions.h";
 
-#define glCall(x) x
+// #define glCall(x) x
 
 using std::unique_ptr;
 

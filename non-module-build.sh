@@ -12,12 +12,18 @@ function header {
 }
 
 function filter {
+  sed -E "s/import (<.*>);/#include \1/" | \
+  sed -E "s/import (\".*\");/#include \1/" | \
   sed -E "s/import (.*);/#include \"\1.h\"/" | \
   sed -E "s/export module.*//g" | \
   sed -E "s/export class /class /g" | \
   sed -E "s/export namespace /namespace /g" | \
   sed -E "s/export enum /enum /g" | \
-  sed -E "s/export /inline /g"
+  sed -E "s/export struct /struct /g" | \
+  sed -E "s/export template /template /g" | \
+  sed -E "s/module;/\/\/module/g" |
+  sed -E "s/export / /g" 
+#  sed -E "s/export /inline /g" | \
 }
 
 tmpdir=build/.tmp
@@ -38,4 +44,4 @@ cat src/main-nix.cpp | filter > ${tmpdir}/src/main.cpp
 cp src/*.h ${tmpdir}/src
 
 echo building...
-${CXX} ${tmpdir}/src/main.cpp -o build/rym -lGL -lSDL2 -std=c++17
+${CXX} ${tmpdir}/src/main.cpp -o build/rym -lGL -lSDL2 -std=c++17 -DGL_GLEXT_PROTOTYPES=1 -DGL3_PROTOTYPES=1

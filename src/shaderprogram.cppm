@@ -9,8 +9,6 @@ import glapi;
 import matgl;
 import <vector>;
 
-#define glCall(x) x;
-
 GLuint loadShader(GLenum shaderType, const char *pSource) {
     GLuint shader = gl.glCreateShader(shaderType);
     if (shader) {
