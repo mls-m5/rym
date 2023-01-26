@@ -9,10 +9,6 @@ import <stdexcept>;
 import <iostream>;
 #include "glfunctions.h"
 
-//#define glCall(call)                                                           \
-//    call;                                                                      \
-//    checkGlError(#call)
-
 export struct Gl {
 
     void (*glUniformMatrix4fv)(GLint location,
@@ -48,6 +44,36 @@ export struct Gl {
                                 GLsizei *length,
                                 GLchar *infoLog);
 
+    void (*glGenVertexArrays)(GLsizei n, GLuint *arrays);
+
+    void (*glDeleteVertexArrays)(GLsizei n, const GLuint *arrays);
+
+    void (*glBindVertexArray)(GLuint array);
+    void (*glGenBuffers)(GLsizei n, GLuint *buffers);
+    void (*glDeleteBuffers)(GLsizei n, const GLuint *buffers);
+    void (*glBindBuffer)(GLenum target, GLuint buffer);
+    void (*glVertexAttribPointer)(GLuint index,
+                                  GLint size,
+                                  GLenum type,
+                                  GLboolean normalized,
+                                  GLsizei stride,
+                                  const void *pointer);
+
+    void (*glEnableVertexAttribArray)(GLuint index);
+
+    void (*glBufferData)(GLenum target,
+                         GLsizeiptr size,
+                         const void *data,
+                         GLenum usage);
+
+    // ...
+    void (*glEnable)(GLenum cap);
+    void (*glClear)(GLbitfield mask);
+    void (*glDrawArrays)(GLenum mode, GLint first, GLsizei count);
+    const GLubyte *(*glGetString)(GLenum name);
+    GLenum (*glGetError)(void);
+    void (*glBlendFunc)(GLenum sfactor, GLenum dfactor);
+
     Gl() {
         SDL_Init(SDL_INIT_VIDEO);
         if (SDL_GL_LoadLibrary(nullptr)) {
@@ -76,8 +102,25 @@ export struct Gl {
         load(glGetAttribLocation);
         load(glShaderSource);
         load(glGetProgramInfoLog);
+        load(glGenVertexArrays);
+        load(glDeleteVertexArrays);
+        load(glBindVertexArray);
+        load(glGenBuffers);
+        load(glDeleteBuffers);
+        load(glBindBuffer);
+        load(glVertexAttribPointer);
+        load(glEnableVertexAttribArray);
+        load(glBufferData);
+        load(glEnable);
+        load(glClear);
+        load(glDrawArrays);
+        load(glGetString);
+        load(glGetError);
+        load(glBlendFunc);
     }
 };
+
+#undef load // For when haxxor-building without modules
 
 export Gl gl;
 
@@ -90,7 +133,7 @@ void LOGE(Args... args) {
 }
 
 static void printGLString(const char *name, GLenum s) {
-    auto *v = glGetString(s);
+    auto *v = gl.glGetString(s);
     //    LOGE("GL %s = %s\n", name, v);
     LOGE("GL ", name, " = ", v);
 }
@@ -98,7 +141,7 @@ static void printGLString(const char *name, GLenum s) {
 export int checkGlError(const char *op, bool throwError = true) {
 #ifndef NO_GRAPHICS
     bool ret = false;
-    for (auto error = glGetError(); error; error = glGetError()) {
+    for (auto error = gl.glGetError(); error; error = gl.glGetError()) {
         const char *c = nullptr;
         switch (error) {
         case 0x0500:

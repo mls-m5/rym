@@ -4,12 +4,7 @@ executable {
     src = {
        "src/*.cpp"
     },
-    flags = {
-       "-DGL_GLEXT_PROTOTYPES=1",
-       "-DGL3_PROTOTYPES=1",
-    },
     link = {
        "SDL2",
-       "GL",
     }
 }

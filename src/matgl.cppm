@@ -75,20 +75,20 @@ public:
     }
 
     void init() {
-        glCall(glGenVertexArrays(1, &id));
+        glCall(gl.glGenVertexArrays(1, &id));
         bind();
     }
 
     void bind() {
-        glCall(glBindVertexArray(id));
+        glCall(gl.glBindVertexArray(id));
     }
 
     void unbind() {
-        glCall(glBindVertexArray(0));
+        glCall(gl.glBindVertexArray(0));
     }
 
     void clear() {
-        glCall(glDeleteVertexArrays(1, &id));
+        glCall(gl.glDeleteVertexArrays(1, &id));
     }
 
     ~VertexArrayObject() {
@@ -104,7 +104,7 @@ public:
     // More info on
     // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glBufferData.xhtml
     VertexBufferObject(GLenum target = GL_ARRAY_BUFFER) : target(target) {
-        glCall(glGenBuffers(1, &id));
+        glCall(gl.glGenBuffers(1, &id));
         bind();
     }
 
@@ -168,15 +168,15 @@ public:
     VertexBufferObject(const VertexBufferObject &) = delete;
 
     ~VertexBufferObject() {
-        glCall(glDeleteBuffers(1, &id));
+        glCall(gl.glDeleteBuffers(1, &id));
     }
 
     void bind() {
-        glCall(glBindBuffer(target, id));
+        glCall(gl.glBindBuffer(target, id));
     }
 
     void unbind() {
-        glCall(glBindBuffer(target, 0));
+        glCall(gl.glBindBuffer(target, 0));
     }
 
     // Set attribute pointer
@@ -193,10 +193,10 @@ public:
                        GLboolean normalized = false,
                        GLsizei stride = 0,
                        const void *pointer = nullptr) {
-        glCall(glVertexAttribPointer(
+        glCall(gl.glVertexAttribPointer(
             index, size, type, normalized, stride, pointer));
         if (type != GL_ELEMENT_ARRAY_BUFFER) {
-            glCall(glEnableVertexAttribArray(index));
+            glCall(gl.glEnableVertexAttribArray(index));
         }
     }
 
@@ -204,10 +204,10 @@ public:
     template <class T>
     void setData(const std::vector<T> &data, GLenum usage = GL_STATIC_DRAW) {
         bind();
-        glCall(glBufferData(target,
-                            static_cast<GLsizeiptr>(sizeof(T) * data.size()),
-                            &data.front(),
-                            usage));
+        glCall(gl.glBufferData(target,
+                               static_cast<GLsizeiptr>(sizeof(T) * data.size()),
+                               &data.front(),
+                               usage));
     }
 
     // Binds and set data
@@ -217,243 +217,249 @@ public:
             return;
         }
         bind();
-        glCall(glBufferData(target, sizeof(T) * size, data, usage));
+        glCall(gl.glBufferData(target, sizeof(T) * size, data, usage));
     }
 
     GLuint id;
     GLenum target;
 };
 
-class FrameBufferObject {
-public:
-    FrameBufferObject(int width, int height) : width(width), height(height) {
-        glCall(glGenFramebuffers(1, &id));
-        glCall(glBindFramebuffer(GL_FRAMEBUFFER, id));
-        glCall(glDrawBuffer(GL_COLOR_ATTACHMENT0));
-    }
+// class FrameBufferObject {
+// public:
+//     FrameBufferObject(int width, int height) : width(width), height(height) {
+//         glCall(glGenFramebuffers(1, &id));
+//         glCall(glBindFramebuffer(GL_FRAMEBUFFER, id));
+//         glCall(glDrawBuffer(GL_COLOR_ATTACHMENT0));
+//     }
 
-    // Setup opengl to render to this framebuffer
-    void bind() {
-        glBindTexture(GL_TEXTURE_2D, 0); // Make sure to unbind any textures
-        glCall(glBindFramebuffer(GL_FRAMEBUFFER, id));
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) !=
-            GL_FRAMEBUFFER_COMPLETE) {
-            throw std::runtime_error("Framebuffer is not complete");
-        }
-        glCall(glViewport(0, 0, width, height));
-    }
+//    // Setup opengl to render to this framebuffer
+//    void bind() {
+//        glBindTexture(GL_TEXTURE_2D, 0); // Make sure to unbind any textures
+//        glCall(glBindFramebuffer(GL_FRAMEBUFFER, id));
+//        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) !=
+//            GL_FRAMEBUFFER_COMPLETE) {
+//            throw std::runtime_error("Framebuffer is not complete");
+//        }
+//        glCall(glViewport(0, 0, width, height));
+//    }
 
-    // Sets opengl to render to the default framebuffer (the screen)
-    static void unBind() {
-        glCall(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-    }
+//    // Sets opengl to render to the default framebuffer (the screen)
+//    static void unBind() {
+//        glCall(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+//    }
 
-    static void unBind(int w, int h) {
-        unBind();
-        glCall(glViewport(0, 0, w, h));
-    }
+//    static void unBind(int w, int h) {
+//        unBind();
+//        glCall(glViewport(0, 0, w, h));
+//    }
 
-    ~FrameBufferObject() {
-        glDeleteFramebuffers(1, &id);
-    }
+//    ~FrameBufferObject() {
+//        glDeleteFramebuffers(1, &id);
+//    }
 
-    GLuint id;
-    int width, height;
-};
+//    GLuint id;
+//    int width, height;
+//};
 
-class TextureAttachment {
-public:
-    TextureAttachment(int width,
-                      int height,
-                      GLenum /*attachment*/ = GL_COLOR_ATTACHMENT0) {
-        glCall(glGenTextures(1, &id));
-        bind();
-        glCall(glTexImage2D(GL_TEXTURE_2D,
-                            0,
-                            GL_RGB,
-                            width,
-                            height,
-                            0,
-                            GL_RGB,
-                            GL_UNSIGNED_BYTE,
-                            nullptr));
-        glCall(
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-        glCall(
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-        glCall(
-            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, id, 0));
-        unbind();
-    }
+// class TextureAttachment {
+// public:
+//     TextureAttachment(int width,
+//                       int height,
+//                       GLenum /*attachment*/ = GL_COLOR_ATTACHMENT0) {
+//         glCall(glGenTextures(1, &id));
+//         bind();
+//         glCall(glTexImage2D(GL_TEXTURE_2D,
+//                             0,
+//                             GL_RGB,
+//                             width,
+//                             height,
+//                             0,
+//                             GL_RGB,
+//                             GL_UNSIGNED_BYTE,
+//                             nullptr));
+//         glCall(
+//             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+//             GL_LINEAR));
+//         glCall(
+//             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+//             GL_LINEAR));
+//         glCall(
+//             glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, id,
+//             0));
+//         unbind();
+//     }
 
-    ~TextureAttachment() {
-        glCall(glDeleteTextures(1, &id));
-    }
+//    ~TextureAttachment() {
+//        glCall(glDeleteTextures(1, &id));
+//    }
 
-    void bind() {
-        glCall(glBindTexture(GL_TEXTURE_2D, id));
-    }
+//    void bind() {
+//        glCall(glBindTexture(GL_TEXTURE_2D, id));
+//    }
 
-    void unbind() {
-        glCall(glBindTexture(GL_TEXTURE_2D, 0));
-    }
+//    void unbind() {
+//        glCall(glBindTexture(GL_TEXTURE_2D, 0));
+//    }
 
-    GLuint id;
-};
+//    GLuint id;
+//};
 
-// A depth buffer that may be used to render somewhere else
-class DepthTextureAttachment {
-public:
-    DepthTextureAttachment(int width, int height) {
-        glCall(glGenTextures(1, &id));
-        bind();
-        glCall(glTexImage2D(GL_TEXTURE_2D,
-                            0,
-                            GL_DEPTH_COMPONENT32,
-                            width,
-                            height,
-                            0,
-                            GL_DEPTH_COMPONENT,
-                            GL_UNSIGNED_INT,
-                            nullptr));
-        glCall(
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-        glCall(
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-        glCall(
-            glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, id, 0));
-        unbind();
-    }
+//// A depth buffer that may be used to render somewhere else
+// class DepthTextureAttachment {
+// public:
+//     DepthTextureAttachment(int width, int height) {
+//         glCall(glGenTextures(1, &id));
+//         bind();
+//         glCall(glTexImage2D(GL_TEXTURE_2D,
+//                             0,
+//                             GL_DEPTH_COMPONENT32,
+//                             width,
+//                             height,
+//                             0,
+//                             GL_DEPTH_COMPONENT,
+//                             GL_UNSIGNED_INT,
+//                             nullptr));
+//         glCall(
+//             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+//             GL_LINEAR));
+//         glCall(
+//             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+//             GL_LINEAR));
+//         glCall(
+//             glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, id,
+//             0));
+//         unbind();
+//     }
 
-    ~DepthTextureAttachment() {
-        glCall(glDeleteTextures(1, &id));
-    }
+//    ~DepthTextureAttachment() {
+//        glCall(glDeleteTextures(1, &id));
+//    }
 
-    void bind() {
-        glCall(glBindTexture(GL_TEXTURE_2D, id));
-    }
+//    void bind() {
+//        glCall(glBindTexture(GL_TEXTURE_2D, id));
+//    }
 
-    void unbind() {
-        glCall(glBindTexture(GL_TEXTURE_2D, 0));
-    }
+//    void unbind() {
+//        glCall(glBindTexture(GL_TEXTURE_2D, 0));
+//    }
 
-    GLuint id;
-};
+//    GLuint id;
+//};
 
-// A depth buffer that is not used to render to anywhere else
-class DepthBufferAttachment {
-public:
-    DepthBufferAttachment(int width, int height) {
-        glGenRenderbuffers(1, &id);
-        bind();
-        glCall(glRenderbufferStorage(
-            GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height));
-        glCall(glFramebufferRenderbuffer(
-            GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, id));
-        unbind();
-    }
+//// A depth buffer that is not used to render to anywhere else
+// class DepthBufferAttachment {
+// public:
+//     DepthBufferAttachment(int width, int height) {
+//         glGenRenderbuffers(1, &id);
+//         bind();
+//         glCall(glRenderbufferStorage(
+//             GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height));
+//         glCall(glFramebufferRenderbuffer(
+//             GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, id));
+//         unbind();
+//     }
 
-    ~DepthBufferAttachment() {
-        glCall(glDeleteRenderbuffers(1, &id));
-    }
+//    ~DepthBufferAttachment() {
+//        glCall(glDeleteRenderbuffers(1, &id));
+//    }
 
-    void bind() {
-        glCall(glBindRenderbuffer(GL_RENDERBUFFER, id));
-    }
+//    void bind() {
+//        glCall(glBindRenderbuffer(GL_RENDERBUFFER, id));
+//    }
 
-    void unbind() {
-        glCall(glBindRenderbuffer(GL_RENDERBUFFER, 0));
-    }
+//    void unbind() {
+//        glCall(glBindRenderbuffer(GL_RENDERBUFFER, 0));
+//    }
 
-    GLuint id;
-};
+//    GLuint id;
+//};
 
-class Texture {
-public:
-    Texture() {
-        glGenTextures(1, &id);
-    }
+// class Texture {
+// public:
+//     Texture() {
+//         glGenTextures(1, &id);
+//     }
 
-    // Shorthand function
-    // Possible formats: GL_ALPHA, GL_RGB, GL_RGBA, GL_LUMINANCE, and
-    // GL_LUMINANCE_ALPHA
-    template <typename T>
-    Texture(std::vector<T> data,
-            int width,
-            int height,
-            GLenum format = GL_RGB,
-            bool generateMipmap = true,
-            bool linearInterpolation = true)
-        : Texture() {
-        setData(data, width, height, format);
-        if (generateMipmap) {
-            this->generateMipmap();
-        }
-        if (linearInterpolation) {
-            setParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            setParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        }
-        else {
-            setParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            setParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        }
-        setWrap();
-    }
+//    // Shorthand function
+//    // Possible formats: GL_ALPHA, GL_RGB, GL_RGBA, GL_LUMINANCE, and
+//    // GL_LUMINANCE_ALPHA
+//    template <typename T>
+//    Texture(std::vector<T> data,
+//            int width,
+//            int height,
+//            GLenum format = GL_RGB,
+//            bool generateMipmap = true,
+//            bool linearInterpolation = true)
+//        : Texture() {
+//        setData(data, width, height, format);
+//        if (generateMipmap) {
+//            this->generateMipmap();
+//        }
+//        if (linearInterpolation) {
+//            setParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//            setParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//        }
+//        else {
+//            setParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//            setParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+//        }
+//        setWrap();
+//    }
 
-    // Possible formats: GL_ALPHA, GL_RGB, GL_RGBA, GL_LUMINANCE, and
-    // GL_LUMINANCE_ALPHA
-    template <typename T>
-    void setData(std::vector<T> data,
-                 int width,
-                 int height,
-                 GLenum format = GL_RGB) {
-        bind();
-        glCall(glTexImage2D(GL_TEXTURE_2D,
-                            0,
-                            format,
-                            width,
-                            height,
-                            0,
-                            format,
-                            getType<T>(),
-                            &data.front()));
-    }
+//    // Possible formats: GL_ALPHA, GL_RGB, GL_RGBA, GL_LUMINANCE, and
+//    // GL_LUMINANCE_ALPHA
+//    template <typename T>
+//    void setData(std::vector<T> data,
+//                 int width,
+//                 int height,
+//                 GLenum format = GL_RGB) {
+//        bind();
+//        glCall(glTexImage2D(GL_TEXTURE_2D,
+//                            0,
+//                            format,
+//                            width,
+//                            height,
+//                            0,
+//                            format,
+//                            getType<T>(),
+//                            &data.front()));
+//    }
 
-    void generateMipmap() {
-        bind();
-        glCall(glGenerateMipmap(GL_TEXTURE_2D));
-    }
+//    void generateMipmap() {
+//        bind();
+//        glCall(glGenerateMipmap(GL_TEXTURE_2D));
+//    }
 
-    Texture(Texture &&other) {
-        id = other.id;
-        other.id = 0;
-    }
+//    Texture(Texture &&other) {
+//        id = other.id;
+//        other.id = 0;
+//    }
 
-    void bind() {
-        glBindTexture(GL_TEXTURE_2D, id);
-    }
+//    void bind() {
+//        glBindTexture(GL_TEXTURE_2D, id);
+//    }
 
-    // Note that you need to bind before using these functions
-    static void setParameteri(GLenum paramName, GLint value) {
-        glTexParameteri(GL_TEXTURE_2D, paramName, value);
-    }
+//    // Note that you need to bind before using these functions
+//    static void setParameteri(GLenum paramName, GLint value) {
+//        glTexParameteri(GL_TEXTURE_2D, paramName, value);
+//    }
 
-    static void setWrap() {
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    }
+//    static void setWrap() {
+//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+//    }
 
-    void unbind() {
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
+//    void unbind() {
+//        glBindTexture(GL_TEXTURE_2D, 0);
+//    }
 
-    ~Texture() {
-        if (id) {
-            glDeleteTextures(1, &id);
-        }
-    }
+//    ~Texture() {
+//        if (id) {
+//            glDeleteTextures(1, &id);
+//        }
+//    }
 
-    GLuint id;
-};
+//    GLuint id;
+//};
 
 } // namespace GL

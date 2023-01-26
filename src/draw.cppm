@@ -15,8 +15,6 @@ import <memory>;
 import <vector>;
 import "glfunctions.h";
 
-// #define glCall(x) x
-
 using std::unique_ptr;
 
 static std::array<GLfloat, 16> transformMatrix;
@@ -227,7 +225,7 @@ export void drawShip(Vec p, double a) {
     drawShader->use();
     shipVAO->bind();
 
-    glCall(glDrawArrays(GL_TRIANGLES, 0, 3));
+    glCall(gl.glDrawArrays(GL_TRIANGLES, 0, 3));
 }
 
 export void drawComet(Vec p, double a, double r) {
@@ -243,7 +241,7 @@ export void drawComet(Vec p, double a, double r) {
 
     modelTransform(p, a / 180., r);
 
-    glCall(glDrawArrays(GL_TRIANGLE_FAN, 0, 4));
+    glCall(gl.glDrawArrays(GL_TRIANGLE_FAN, 0, 4));
 
     resetTransform();
 }
@@ -257,7 +255,7 @@ export void drawArea(Vec p, double a, double r) {
     drawShader->use();
     modelTransform(p, a / 180., r);
 
-    glCall(glDrawArrays(GL_LINE_LOOP, 0, 4));
+    glCall(gl.glDrawArrays(GL_LINE_LOOP, 0, 4));
 
     resetTransform();
 }
@@ -304,7 +302,7 @@ export void flushDraw() {
 
     smokeVBO->setData(&smokeVertexData.front(), smokeVertexData.size());
     //	smokeVBO->attribPointer(0, 3, GL_FLOAT, false);
-    glCall(glDrawArrays(
+    glCall(gl.glDrawArrays(
         GL_LINES, 0, static_cast<int>(smokeVertexData.size()) / 3));
 
     smokeVertexData.clear();
@@ -358,8 +356,8 @@ export bool initDrawModule(double perspective) {
     smokeVertexData.reserve(100000);
     camPerspective = perspective;
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    gl.glEnable(GL_BLEND);
+    gl.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     return false;
 }
