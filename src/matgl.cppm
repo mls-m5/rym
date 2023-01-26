@@ -9,15 +9,11 @@
 
 module;
 
-// #define GL_GLEXT_PROTOTYPES 1
-// #define GL3_PROTOTYPES 1
+export module matgl;
 
 import "glfunctions.h";
 import <GL/gl.h>;
 import <SDL2/SDL.h>;
-
-export module matgl;
-
 import glapi;
 import <stdexcept>;
 import <vector>;

@@ -301,7 +301,6 @@ export void flushDraw() {
     smokeShader->use();
 
     smokeVBO->setData(&smokeVertexData.front(), smokeVertexData.size());
-    //	smokeVBO->attribPointer(0, 3, GL_FLOAT, false);
     glCall(gl.glDrawArrays(
         GL_LINES, 0, static_cast<int>(smokeVertexData.size()) / 3));
 

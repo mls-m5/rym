@@ -1,12 +1,12 @@
 module;
 
-import <GL/gl.h>;
-import <SDL2/SDL.h>;
-
 export module glapi;
 
+import <GL/gl.h>;
+import <SDL2/SDL.h>;
 import <stdexcept>;
 import <iostream>;
+
 #include "glfunctions.h"
 
 export struct Gl {
