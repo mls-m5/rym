@@ -28,14 +28,14 @@ void Render() {
 
 void init() {
     for (int i = 1; i < 500; i++) {
-        add(new Star);
+        add<Star>();
     }
 
     for (int i = 0; i < 50; i++) {
-        add(new Comet);
+        add<Comet>();
     }
 
-    add(new Ship);
+    add<Ship>();
 }
 
 void avsl() {

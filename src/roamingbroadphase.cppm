@@ -37,6 +37,9 @@ public:
     }
     ~PartSpace() override = default;
 
+    PartSpace(const PartSpace &) = delete;
+    PartSpace(PartSpace &&) = default;
+
     void add(Unit *u) override {
         _units.push_back(u);
         u->space(this);
@@ -156,7 +159,8 @@ public:
     }
 
 protected:
-    std::list<Unit *> _units;
+    std::list<Unit *>
+        _units; // TODO: Evaluate if using a list vs vector is a good idea
     Vec _pos;
     double _radius = 1;
 };
@@ -164,9 +168,7 @@ protected:
 export class RoamingBroadphase : public BroadPhase {
 public:
     RoamingBroadphase() {
-        for (int i = 0; i < 20; ++i) {
-            _parts.push_back(new PartSpace);
-        }
+        _parts.resize(20);
     }
 
     ~RoamingBroadphase() override = default;
@@ -175,9 +177,9 @@ public:
         auto nearestDistance = limit * limit;
         Unit *unit = nullptr;
 
-        for (auto it : _parts) {
+        for (auto &it : _parts) {
             double t;
-            auto tu = it->getNearest(p, limit, ignore, &t);
+            auto tu = it.getNearest(p, limit, ignore, &t);
             if (t < nearestDistance) {
                 nearestDistance = t;
                 unit = tu;
@@ -187,8 +189,8 @@ public:
         return unit;
     }
     Unit *collision(Vec &p, Unit *ignore) override {
-        for (auto it : _parts) {
-            auto tu = it->collision(p, ignore);
+        for (auto &it : _parts) {
+            auto tu = it.collision(p, ignore);
             if (tu) {
                 return tu;
             }
@@ -201,10 +203,10 @@ public:
         PartSpace *nearest = nullptr;
         double distance2 = std::numeric_limits<double>::max();
 
-        for (auto it : _parts) {
-            auto t = it->pos().distance2d2(p);
+        for (auto &it : _parts) {
+            auto t = it.pos().distance2d2(p);
             if (t < distance2) {
-                nearest = it;
+                nearest = &it;
                 distance2 = t;
             }
         }
@@ -215,62 +217,64 @@ public:
         size_t max = 0;
         PartSpace *largestSpace = nullptr;
 
-        for (auto it : _parts) {
-            auto s = it->size();
+        for (auto &it : _parts) {
+            auto s = it.size();
             if (s > max) {
                 max = s;
-                largestSpace = it;
+                largestSpace = &it;
             }
         }
 
         return largestSpace;
     }
 
-    auto inline begin() { // using c++14 auto-standard
+    auto inline begin() {
         return _units.begin();
     }
     auto inline end() {
         return _units.end();
     }
 
-    void add(Unit *u) override {
-        _units.push_back(u);
+    void add(std::unique_ptr<Unit> u) override {
+        auto tmp = u.get();
 
-        auto part = getNearestPart(u->pos);
-        part->add(u);
+        _units.push_back(std::move(u));
+
+        auto part = getNearestPart(tmp->pos);
+        part->add(tmp);
     }
 
     void update(double t) override {
-        for (auto it : _parts) {
-            if (it->empty()) {
+        for (auto &it : _parts) {
+            if (it.empty()) {
                 // Move to a place with more objects
-                if (auto largestSpace = getLargestSpace(it->pos())) {
+                if (auto largestSpace = getLargestSpace(it.pos())) {
                     auto newPos = largestSpace->pos();
                     newPos.x += rand() % 2 - 1;
                     newPos.y += rand() % 2 - 1;
-                    it->pos(newPos);
+                    it.pos(newPos);
                 }
             }
             else {
-                it->calculateCenter();
+                it.calculateCenter();
             }
 
-            if (it->distanceToPoint(_center) > 100) {
-                it->removeAll();
+            if (it.distanceToPoint(_center) > 100) {
+                it.removeAll();
             }
 
-            it->calculateRadius();
+            it.calculateRadius();
         }
 
-        for (auto it : *this) {
+        for (auto &it : *this) {
             it->update(t);
 
             if (rand() % 100 > 90) { // Limit this expensive calculation
                 auto part = getNearestPart(it->pos);
                 if (it->space() != part) {
                     auto space = static_cast<Space *>(it->space());
-                    space->remove(it);
-                    part->add(it);
+                    space->remove(it.get());
+                    part->add(it.get());
                 }
             }
         }
@@ -279,15 +283,14 @@ public:
         _units.erase(
             std::remove_if(_units.begin(),
                            _units.end(),
-                           [](Unit *u) -> bool {
+                           [](auto &u) -> bool {
                                if (u->dead()) {
                                    if (auto space =
                                            static_cast<Space *>(u->space())) {
                                        //                                            auto s =
                                        //                                                static_cast<Space *>(space);
-                                       space->remove(u);
+                                       space->remove(u.get());
                                    }
-                                   delete u;
                                }
                                return u->dead();
                            }),
@@ -295,12 +298,12 @@ public:
     }
 
     void draw() override {
-        for (auto it : *this) {
+        for (auto &it : *this) {
             it->render();
         }
 
-        for (auto it : _parts) {
-            it->draw();
+        for (auto &it : _parts) {
+            it.draw();
         }
     }
     void setCenter(Vec center) override {
@@ -308,7 +311,7 @@ public:
     }
 
 private:
-    std::list<Unit *> _units;
-    std::list<PartSpace *> _parts;
+    std::list<std::unique_ptr<Unit>> _units;
+    std::list<PartSpace> _parts;
     Vec _center;
 };

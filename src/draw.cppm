@@ -332,7 +332,7 @@ export bool initDrawModule(double perspective) {
         .8f,
     };
 
-    drawShader.reset(new StandardShader);
+    drawShader = std::make_unique<StandardShader>();
     drawShader->use();
 
     cometVAO = std::make_unique<GL::VertexArrayObject>();
@@ -345,7 +345,7 @@ export bool initDrawModule(double perspective) {
     shipVBO =
         std::make_unique<GL::VertexBufferObject>(gShipVertices, 3 * 2, 0, 2);
 
-    smokeShader.reset(new SmokeShader);
+    smokeShader = std::make_unique<SmokeShader>();
     smokeShader->use();
     smokeVAO = std::make_unique<GL::VertexArrayObject>();
     smokeVBO =

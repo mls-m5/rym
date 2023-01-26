@@ -3,6 +3,7 @@ module;
 export module projectile;
 
 import <cmath>;
+import <memory>;
 import unit;
 import draw;
 import vec;
@@ -42,7 +43,7 @@ public:
 
             e->Damage(.4);
 
-            add(new Explosion(pos, .5));
+            add(std::make_unique<Explosion>(pos, .5));
             _dead = true;
         }
         else if (varand < 0) {

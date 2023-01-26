@@ -1,9 +1,9 @@
 module;
 
-import <cmath>;
-
 export module comet;
 
+import <cmath>;
+import <memory>;
 import unit;
 import vec;
 import draw;
@@ -39,13 +39,15 @@ public:
         liv = rad;
     }
 
-    ~Comet() override {
+    ~Comet() override = default;
+
+    void spawnChildComets() {
         if (rad > .2) {
             for (int i = 0; i < 3; i++) {
-                add(new Comet(pos,
-                              vel + Vec((rand() % 11 - 5) / 100.,
-                                        (rand() % 11 - 5) / 100.),
-                              rad / 1.5));
+                add(std::make_unique<Comet>(pos,
+                                            vel + Vec((rand() % 11 - 5) / 100.,
+                                                      (rand() % 11 - 5) / 100.),
+                                            rad / 1.5));
             }
         }
     }
@@ -85,6 +87,7 @@ public:
         liv -= d;
         if (liv <= 0) {
             dead(true);
+            spawnChildComets();
         }
         return dead();
     }

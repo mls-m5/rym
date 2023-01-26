@@ -3,6 +3,7 @@ module;
 export module ship;
 
 import <cmath>;
+import <memory>;
 import vec;
 import unit;
 import draw;
@@ -42,8 +43,8 @@ public:
         }
         else {
             if (hant::getKey(cn_eld)) {
-                add(new Projectile(pos,
-                                   vel + Vec(-sin(ang) / 4, cos(ang) / 4)));
+                add(std::make_unique<Projectile>(
+                    pos, vel + Vec(-sin(ang) / 4, cos(ang) / 4)));
                 skott = .3;
             }
         }

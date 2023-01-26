@@ -9,6 +9,7 @@ export module broadphase;
 
 import unit;
 import vec;
+import <memory>;
 
 export class BroadPhase {
 public:
@@ -16,7 +17,7 @@ public:
     virtual ~BroadPhase() = default;
     virtual Unit *getNearest(Vec &p, double limit, Unit *ignore) = 0;
     virtual Unit *collision(Vec &p, Unit *ignore) = 0;
-    virtual void add(Unit *u) = 0;
+    virtual void add(std::unique_ptr<Unit> u) = 0;
     virtual void update(double t) = 0;
     virtual void removeDead() = 0;
     virtual void draw() = 0;

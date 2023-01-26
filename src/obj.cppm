@@ -22,14 +22,25 @@ static RoamingBroadphase solids; // enheter som kan kollisionstestas
 
 //_________________________objekt --- -... .--- . -.- - ________________
 
-export void add(Unit *e) { // Lägger till objektet i listan
+export void add(std::unique_ptr<Unit> e) { // Lägger till objektet i listan
     if (e->isSolid()) {
-        solids.add(e);
+        solids.add(std::move(e));
     }
     else {
-        enh.emplace_back(e);
+        enh.push_back(std::move(e));
     }
 }
+
+export template <typename T>
+void add() {
+    add(std::make_unique<T>());
+}
+
+// Does not work with modules as of jan 2023
+// export template <typename T, typename... Args>
+// void add(Args &&...args) {
+//     add(std::make_unique<T>(std::forward<Args...>(args...)));
+// }
 
 export void addSmoke(Vec p1, Vec p2) { // lägger till ett rökobjekt
     game::smoke.emplace_back(p1, p2);
@@ -59,16 +70,16 @@ export Unit *collision(Vec p,
 
     if (ign) // Är det något objekt som skall ignoreras?
     {
-        for (auto it : solids) {
-            if (it->collision(p) && it != ign)
-                return it;
+        for (auto &it : solids) {
+            if (it->collision(p) && it.get() != ign)
+                return it.get();
         }
     }
     else // inget objekt ignoreras
     {
-        for (auto it : solids) {
+        for (auto &it : solids) {
             if (it->collision(p))
-                return it;
+                return it.get();
         }
     }
 
@@ -87,12 +98,12 @@ export Unit *Near(Vec p,
     double dm;               // det senast mätta värdet
     Unit *e = nullptr;       // Det närmast mätta objektet
 
-    for (auto it : solids) {
-        if (ignore != it) // Om objektet inte skall ignoreras
+    for (auto &it : solids) {
+        if (ignore != it.get()) // Om objektet inte skall ignoreras
         {
             dm = it->distance(p);
             if (dm < distance && dm > 0) {
-                e = it;
+                e = it.get();
                 distance = dm;
             }
         }
