@@ -44,6 +44,9 @@ namespace hant {
 
 export int getKey(int key);
 export void setkey(int key, bool val);
+export double getAnalogSteering();
+export double getAnalogThrust();
+export void setAnalogInput(double steering, double thrust);
 
 } // namespace hant
 
@@ -51,6 +54,8 @@ using namespace std;
 
 namespace hant {
 static map<int, int> key;
+static double analogSteering = 0;
+static double analogThrust = 0;
 }
 
 int hant::getKey(int keyn) {
@@ -67,4 +72,17 @@ void hant::setkey(int keyn, bool val) {
     else {
         key[keyn] = 0;
     }
+}
+
+double hant::getAnalogSteering() {
+    return analogSteering;
+}
+
+double hant::getAnalogThrust() {
+    return analogThrust;
+}
+
+void hant::setAnalogInput(double steering, double thrust) {
+    analogSteering = steering;
+    analogThrust = thrust;
 }

@@ -29,15 +29,28 @@ public:
         skott = 0;
     }
     void update(double t) override {
+        auto clampInput = [](double value) {
+            return value < -1 ? -1. : value > 1 ? 1. : value;
+        };
+
+        const double keyboardSteering =
+            (hant::getKey(cn_right) ? 1. : 0.) -
+            (hant::getKey(cn_left) ? 1. : 0.);
+        const double keyboardThrust =
+            (hant::getKey(cn_up) ? 1. : 0.) -
+            (hant::getKey(cn_down) ? 1. : 0.);
+        const double steering =
+            clampInput(keyboardSteering + hant::getAnalogSteering());
+        const double thrust =
+            clampInput(keyboardThrust + hant::getAnalogThrust());
+
         rot /= 1.2;
         vel.x *= .9;
         vel.y *= .9;
-        if (hant::getKey(cn_left))
-            rot += .01;
-        if (hant::getKey(cn_right))
-            rot += -.01;
-        if (hant::getKey(cn_up))
-            vel = Vec(-sin(ang) * .1, cos(ang) * .1);
+        rot -= steering * .01;
+        if (thrust != 0) {
+            vel = Vec(-sin(ang) * .1 * thrust, cos(ang) * .1 * thrust);
+        }
         if (skott > 0) {
             skott = skott - t;
         }

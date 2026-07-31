@@ -16,6 +16,13 @@ import <emscripten/html5.h>;
 
 using namespace std;
 
+#ifdef __EMSCRIPTEN__
+extern "C" EMSCRIPTEN_KEEPALIVE void
+rym_set_analog_input(double steering, double thrust) {
+    hant::setAnalogInput(steering, thrust);
+}
+#endif
+
 // Width & Height of window
 const int width = 800;  // 640
 const int height = 600; // 480

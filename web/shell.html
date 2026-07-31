@@ -207,9 +207,14 @@
       }));
     }
 
+    function setAnalogInput(steering, thrust) {
+      if (typeof Module._rym_set_analog_input === "function") {
+        Module._rym_set_analog_input(steering, thrust);
+      }
+    }
+
     function releaseMovement() {
-      ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"]
-        .forEach(code => sendKey(code, false));
+      setAnalogInput(0, 0);
     }
 
     const moveControl = document.getElementById("move-control");
@@ -225,13 +230,9 @@
       const scale = distance > radius ? radius / distance : 1;
       const knobX = x * scale;
       const knobY = y * scale;
-      const threshold = rect.width * .1;
 
       moveKnob.style.transform = `translate(${knobX}px, ${knobY}px)`;
-      sendKey("ArrowLeft", x < -threshold);
-      sendKey("ArrowRight", x > threshold);
-      sendKey("ArrowUp", y < -threshold);
-      sendKey("ArrowDown", y > threshold);
+      setAnalogInput(knobX / radius, -knobY / radius);
     }
 
     moveControl.addEventListener("pointerdown", event => {
