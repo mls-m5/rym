@@ -139,6 +139,13 @@ static void printGLString(const char *name, GLenum s) {
 }
 
 export int checkGlError(const char *op, bool throwError = true) {
+#ifdef __EMSCRIPTEN__
+    // glGetError() is synchronous in WebGL and forces a costly
+    // Wasm-to-JavaScript-to-browser round trip for every checked GL call.
+    (void)op;
+    (void)throwError;
+    return 0;
+#else
 #ifndef NO_GRAPHICS
     bool ret = false;
     for (auto error = gl.glGetError(); error; error = gl.glGetError()) {
@@ -179,5 +186,6 @@ export int checkGlError(const char *op, bool throwError = true) {
         }
     }
     return ret;
+#endif
 #endif
 }
