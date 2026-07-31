@@ -7,6 +7,7 @@ export module shaderprogram;
 
 import glapi;
 import matgl;
+import <cstdio>;
 import <vector>;
 
 GLuint loadShader(GLenum shaderType, const char *pSource) {
@@ -22,9 +23,10 @@ GLuint loadShader(GLenum shaderType, const char *pSource) {
             if (infoLen) {
                 std::vector<char> buf(static_cast<size_t>(infoLen));
                 gl.glGetShaderInfoLog(shader, infoLen, nullptr, buf.data());
-                LOGE("Could not compile shader %d:\n%s\n",
-                     shaderType,
-                     buf.data());
+                std::fprintf(stderr,
+                             "Could not compile shader %u:\n%s\n",
+                             shaderType,
+                             buf.data());
                 gl.glDeleteShader(shader);
                 shader = 0;
             }
@@ -111,7 +113,8 @@ GLuint createProgram(const char *pVertexSource, const char *pFragmentSource) {
                 std::vector<char> buf(static_cast<size_t>(bufLength));
                 gl.glGetProgramInfoLog(
                     program, bufLength, nullptr, &buf.front());
-                LOGE("Could not link program:\n%s\n", &buf.front());
+                std::fprintf(
+                    stderr, "Could not link program:\n%s\n", &buf.front());
             }
             gl.glDeleteProgram(program);
             program = 0;

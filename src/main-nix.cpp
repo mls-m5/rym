@@ -9,6 +9,9 @@ import <GL/gl.h>;
 import <SDL2/SDL.h>;
 import <iostream>;
 import <stdexcept>;
+#ifdef __EMSCRIPTEN__
+import <emscripten/emscripten.h>;
+#endif
 
 using namespace std;
 
@@ -54,28 +57,53 @@ void processEvents() {
     }
 }
 
+void runFrame() {
+#ifndef __EMSCRIPTEN__
+    Uint32 ttime = 15 + SDL_GetTicks();
+#endif
+    processEvents();
+
+#ifdef __EMSCRIPTEN__
+    static double previousFrameTime = 0;
+    const double currentFrameTime = emscripten_get_now();
+    double elapsedMilliseconds =
+        previousFrameTime == 0 ? 15 : currentFrameTime - previousFrameTime;
+    previousFrameTime = currentFrameTime;
+
+    // Avoid a huge simulation jump after the tab has been suspended.
+    if (elapsedMilliseconds > 50) {
+        elapsedMilliseconds = 50;
+    }
+
+    // The original desktop loop advances 0.1 simulation units per 15 ms.
+    game::Update(0.1 * elapsedMilliseconds / 15.0);
+#else
+    game::Update(.1);
+#endif
+
+    gl.glClear(GL_DEPTH_BUFFER_BIT |
+               GL_COLOR_BUFFER_BIT); // Clear color and depth buffer
+
+    game::Render();
+
+    SDL_GL_SwapWindow(window); // Update screen
+
+    processEvents();
+
+#ifndef __EMSCRIPTEN__
+    if (SDL_GetTicks() < ttime) {
+        SDL_Delay(ttime - SDL_GetTicks());
+    }
+#endif
+}
+
+#ifndef __EMSCRIPTEN__
 [[noreturn]] void mainLoop() {
-    // long ttime;
     while (true) {
-        Uint32 ttime = 15 + SDL_GetTicks();
-        processEvents();
-
-        game::Update(.1);
-
-        gl.glClear(GL_DEPTH_BUFFER_BIT |
-                   GL_COLOR_BUFFER_BIT); // Clear color and depth buffer
-
-        game::Render();
-
-        SDL_GL_SwapWindow(window); // Update screen
-
-        processEvents();
-
-        if (SDL_GetTicks() < ttime) {
-            SDL_Delay(ttime - SDL_GetTicks());
-        }
+        runFrame();
     }
 }
+#endif
 
 // Init everything
 int main(int /*argc*/, char * /*argv*/[]) {
@@ -85,12 +113,17 @@ int main(int /*argc*/, char * /*argv*/[]) {
     }
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    // SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
-    // SDL_GL_CONTEXT_PROFILE_ES);
+#ifdef __EMSCRIPTEN__
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
+                        SDL_GL_CONTEXT_PROFILE_ES);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+#else
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
                         SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+#endif
 
     window = SDL_CreateWindow("rym",
                               SDL_WINDOWPOS_CENTERED,
@@ -108,14 +141,20 @@ int main(int /*argc*/, char * /*argv*/[]) {
         throw runtime_error("could not create context");
     }
 
+#ifndef __EMSCRIPTEN__
     SDL_GL_SetSwapInterval(1);
+#endif
 
     // setupOpengl();
     initDrawModule(width / height);
 
     game::init();
 
+#ifdef __EMSCRIPTEN__
+    emscripten_set_main_loop(runFrame, 0, true);
+#else
     mainLoop();
+#endif
 
     game::avsl();
 

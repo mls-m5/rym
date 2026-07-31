@@ -37,13 +37,14 @@ cp src/*.h "${generated_dir}/"
     "${generated_dir}/main.cpp" \
     -I"${generated_dir}" \
     -std=c++20 \
-    -O2 \
+    -fexceptions \
+    -O3 \
     -sUSE_SDL=2 \
-    -sFULL_ES3=1 \
-    -sASYNCIFY \
+    -sMAX_WEBGL_VERSION=2 \
+    -sASSERTIONS=0 \
+    -sNO_DISABLE_EXCEPTION_CATCHING \
     -sALLOW_MEMORY_GROWTH=1 \
     -sEXIT_RUNTIME=0 \
     -o "${output_dir}/rym.html"
 
 echo "built ${output_dir}/rym.html"
-

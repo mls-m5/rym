@@ -60,9 +60,62 @@ public:
 
 } Sine;
 
+#ifdef __EMSCRIPTEN__
 static const char *standardVertexShader =
-    R"_(
-#version 330 core
+    R"_(#version 300 es
+layout (location = 0) in vec4 vPosition;
+uniform mat4 model;
+uniform mat4 view;
+void main() {
+    gl_Position = view * model * vPosition;
+    float perspective = (gl_Position.z + gl_Position.y / 5.);
+    gl_Position.x /= perspective;
+    gl_Position.y /= perspective;
+}
+)_";
+
+static const char *standardFragmentShader =
+    R"_(#version 300 es
+precision mediump float;
+uniform vec4 color;
+out vec4 fragmentColor;
+void main() {
+  if (gl_FragCoord.z < 0.1) {
+    discard;
+  }
+  fragmentColor = color;
+}
+)_";
+
+static const char *smokeVertexShader =
+    R"_(#version 300 es
+layout (location = 0) in vec3 vPosition;
+out float fAlpha;
+uniform mat4 view;
+void main() {
+    fAlpha = vPosition.z;
+    gl_Position = view * vec4(vPosition.xy, 0, 1);
+    float perspective = (gl_Position.z + gl_Position.y / 5.);
+    gl_Position.x /= perspective;
+    gl_Position.y /= perspective;
+}
+)_";
+
+static const char *smokeFragmentShader =
+    R"_(#version 300 es
+precision mediump float;
+in float fAlpha;
+out vec4 fragmentColor;
+void main() {
+    if (fAlpha < .1) {
+        discard;
+    }
+    fragmentColor = vec4(1, 1, 1, fAlpha);
+}
+)_";
+#else
+static const char *standardVertexShader =
+    R"_(#version 330 core
 layout (location = 0) in vec4 vPosition;
 uniform	 mat4 model;	 // model-view-projection matrix
 uniform	 mat4 view;	 // camera matrix
@@ -75,8 +128,7 @@ void main() {
 )_";
 
 static const char *standardFragmentShader =
-    R"_(
-#version 330 core
+    R"_(#version 330 core
 uniform vec4 color;
 void main() {
   if (gl_FragCoord.z < 0.1) {
@@ -88,10 +140,7 @@ void main() {
 )_";
 
 static const char *smokeVertexShader =
-    R"_(
-
-
-#version 330 core
+    R"_(#version 330 core
 layout (location = 0) in vec3 vPosition;
 out float fAlpha;
 uniform	 mat4 view;	 // camera matrix
@@ -106,8 +155,7 @@ void main() {
 )_";
 
 static const char *smokeFragmentShader =
-    R"_(
-#version 330 core
+    R"_(#version 330 core
 
 in float fAlpha;
 
@@ -119,17 +167,18 @@ void main() {
 }
 
 )_";
+#endif
 
 struct StandardShader : public ShaderProgram {
     StandardShader()
         : ShaderProgram(standardVertexShader, standardFragmentShader) {
+        if (!getProgram()) {
+            throw "Could not create standard shader program.";
+        }
+
         shaderVecPointer = getAttribute("vPosition");
         transformMatrixPointer = getUniform("model");
         cameraMatrixPointer = getUniform("view");
-
-        if (!getProgram()) {
-            throw "Could not create program.";
-        }
     }
 
     GLint shaderVecPointer;
@@ -140,13 +189,13 @@ struct StandardShader : public ShaderProgram {
 class SmokeShader : public ShaderProgram {
 public:
     SmokeShader() : ShaderProgram(smokeVertexShader, smokeFragmentShader) {
+        if (!getProgram()) {
+            throw "Could not create smoke shader program.";
+        }
+
         shaderVecPointer = getAttribute("vPosition");
         //		transformMatrixPointer = getUniform("mvp_matrix");
         cameraMatrixPointer = getUniform("view");
-
-        if (!getProgram()) {
-            throw "Could not create program.";
-        }
     }
     GLint shaderVecPointer;
     GLint cameraMatrixPointer;
