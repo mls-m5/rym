@@ -1,0 +1,19 @@
+{
+  "name": "Rym",
+  "short_name": "Rym",
+  "description": "A game about beauty, explosions, lines, squares and a triangle.",
+  "start_url": "./rym.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "rym-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

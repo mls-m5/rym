@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Rym">
+  <meta name="application-name" content="Rym">
+  <meta name="description"
+        content="A game about beauty, explosions, lines, squares and a triangle.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="rym-logo.png">
+  <link rel="apple-touch-icon" href="rym-logo.png">
+  <title>Rym</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      background: #000;
+      overscroll-behavior: none;
+      touch-action: none;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #000;
+    }
+
+    #canvas {
+      position: fixed;
+      inset: 0;
+      display: block;
+      width: 100vw;
+      height: 100dvh;
+      border: 0;
+      outline: 0;
+      background: #000;
+    }
+
+    #status {
+      position: fixed;
+      top: max(12px, env(safe-area-inset-top));
+      left: 50%;
+      z-index: 3;
+      translate: -50% 0;
+      color: rgb(255 255 255 / 70%);
+      font: 13px/1.4 system-ui, sans-serif;
+      pointer-events: none;
+    }
+
+    #touch-controls {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .control {
+      position: absolute;
+      bottom: max(28px, env(safe-area-inset-bottom));
+      width: min(34vw, 180px);
+      aspect-ratio: 1;
+      border: 2px solid rgb(255 255 255 / 22%);
+      border-radius: 50%;
+      background: rgb(255 255 255 / 5%);
+      box-shadow: inset 0 0 28px rgb(255 255 255 / 4%);
+      pointer-events: auto;
+      touch-action: none;
+    }
+
+    #move-control {
+      left: max(24px, env(safe-area-inset-left));
+    }
+
+    #fire-control {
+      right: max(24px, env(safe-area-inset-right));
+    }
+
+    .knob {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 44%;
+      aspect-ratio: 1;
+      translate: -50% -50%;
+      border-radius: 50%;
+      border: 2px solid rgb(255 255 255 / 40%);
+      background: rgb(255 255 255 / 13%);
+      transition: background 100ms, border-color 100ms;
+      pointer-events: none;
+    }
+
+    #fire-control::before {
+      content: "FIRE";
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: rgb(255 255 255 / 48%);
+      font: 600 12px/1 system-ui, sans-serif;
+      letter-spacing: .16em;
+    }
+
+    #fire-control.locked {
+      border-color: rgb(255 120 90 / 70%);
+      background: rgb(255 80 50 / 18%);
+    }
+
+    #fire-control.locked::after {
+      content: "LOCKED";
+      position: absolute;
+      top: -28px;
+      left: 50%;
+      translate: -50% 0;
+      color: rgb(255 150 120 / 85%);
+      font: 600 10px/1 system-ui, sans-serif;
+      letter-spacing: .14em;
+    }
+
+    @media (orientation: portrait) {
+      #touch-controls {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas" tabindex="-1" oncontextmenu="event.preventDefault()"></canvas>
+  <div id="status">Loading…</div>
+
+  <div id="touch-controls" aria-label="Touch controls">
+    <div id="move-control" class="control" aria-label="Movement control">
+      <div class="knob"></div>
+    </div>
+    <div id="fire-control" class="control" aria-label="Fire control">
+      <div class="knob"></div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const statusElement = document.getElementById("status");
+
+    var Module = {
+      canvas,
+      setStatus(text) {
+        statusElement.textContent = text;
+        statusElement.hidden = !text;
+      },
+      monitorRunDependencies(remaining) {
+        this.setStatus(remaining ? `Loading… (${remaining})` : "");
+      },
+      printErr(text) {
+        console.error(text);
+      }
+    };
+
+    const activeKeys = new Set();
+
+    function sendKey(code, pressed) {
+      if (pressed === activeKeys.has(code)) {
+        return;
+      }
+
+      if (pressed) {
+        activeKeys.add(code);
+      } else {
+        activeKeys.delete(code);
+      }
+
+      const keyByCode = {
+        ArrowUp: "ArrowUp",
+        ArrowDown: "ArrowDown",
+        ArrowLeft: "ArrowLeft",
+        ArrowRight: "ArrowRight",
+        Space: " "
+      };
+      const keyCodeByCode = {
+        ArrowUp: 38,
+        ArrowDown: 40,
+        ArrowLeft: 37,
+        ArrowRight: 39,
+        Space: 32
+      };
+
+      window.dispatchEvent(new KeyboardEvent(pressed ? "keydown" : "keyup", {
+        key: keyByCode[code],
+        code,
+        keyCode: keyCodeByCode[code],
+        which: keyCodeByCode[code],
+        bubbles: true,
+        cancelable: true
+      }));
+    }
+
+    function releaseMovement() {
+      ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"]
+        .forEach(code => sendKey(code, false));
+    }
+
+    const moveControl = document.getElementById("move-control");
+    const moveKnob = moveControl.querySelector(".knob");
+    let movePointer = null;
+
+    function updateMovement(event) {
+      const rect = moveControl.getBoundingClientRect();
+      const x = event.clientX - (rect.left + rect.width / 2);
+      const y = event.clientY - (rect.top + rect.height / 2);
+      const radius = rect.width * .31;
+      const distance = Math.hypot(x, y);
+      const scale = distance > radius ? radius / distance : 1;
+      const knobX = x * scale;
+      const knobY = y * scale;
+      const threshold = rect.width * .1;
+
+      moveKnob.style.transform = `translate(${knobX}px, ${knobY}px)`;
+      sendKey("ArrowLeft", x < -threshold);
+      sendKey("ArrowRight", x > threshold);
+      sendKey("ArrowUp", y < -threshold);
+      sendKey("ArrowDown", y > threshold);
+    }
+
+    moveControl.addEventListener("pointerdown", event => {
+      event.preventDefault();
+      movePointer = event.pointerId;
+      moveControl.setPointerCapture(event.pointerId);
+      updateMovement(event);
+    });
+
+    moveControl.addEventListener("pointermove", event => {
+      if (event.pointerId === movePointer) {
+        event.preventDefault();
+        updateMovement(event);
+      }
+    });
+
+    function stopMovement(event) {
+      if (event.pointerId !== movePointer) {
+        return;
+      }
+      movePointer = null;
+      moveKnob.style.transform = "";
+      releaseMovement();
+    }
+
+    moveControl.addEventListener("pointerup", stopMovement);
+    moveControl.addEventListener("pointercancel", stopMovement);
+
+    const fireControl = document.getElementById("fire-control");
+    const fireKnob = fireControl.querySelector(".knob");
+    let firePointer = null;
+    let fireStartY = 0;
+    let fireLocked = false;
+
+    fireControl.addEventListener("pointerdown", event => {
+      event.preventDefault();
+
+      if (fireLocked) {
+        fireLocked = false;
+        fireControl.classList.remove("locked");
+        fireKnob.style.transform = "";
+        sendKey("Space", false);
+        return;
+      }
+
+      firePointer = event.pointerId;
+      fireStartY = event.clientY;
+      fireControl.setPointerCapture(event.pointerId);
+      sendKey("Space", true);
+    });
+
+    fireControl.addEventListener("pointermove", event => {
+      if (event.pointerId !== firePointer) {
+        return;
+      }
+
+      event.preventDefault();
+      const rect = fireControl.getBoundingClientRect();
+      const offset = Math.max(-rect.height * .55,
+                              Math.min(0, event.clientY - fireStartY));
+      fireKnob.style.transform = `translateY(${offset}px)`;
+
+      fireLocked = offset <= -rect.height * .38;
+      fireControl.classList.toggle("locked", fireLocked);
+    });
+
+    function stopFiring(event) {
+      if (event.pointerId !== firePointer) {
+        return;
+      }
+
+      firePointer = null;
+      if (!fireLocked) {
+        fireKnob.style.transform = "";
+        sendKey("Space", false);
+      }
+    }
+
+    fireControl.addEventListener("pointerup", stopFiring);
+    fireControl.addEventListener("pointercancel", stopFiring);
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        releaseMovement();
+        if (!fireLocked) {
+          sendKey("Space", false);
+        }
+      }
+    });
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js")
+          .catch(error => console.warn("Service worker registration failed", error));
+      });
+    }
+  </script>
+
+  {{{ SCRIPT }}}
+</body>
+</html>

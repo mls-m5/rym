@@ -45,6 +45,10 @@ cp src/*.h "${generated_dir}/"
     -sNO_DISABLE_EXCEPTION_CATCHING \
     -sALLOW_MEMORY_GROWTH=1 \
     -sEXIT_RUNTIME=0 \
+    --shell-file web/shell.html \
     -o "${output_dir}/rym.html"
+
+cp web/manifest.webmanifest web/service-worker.js "${output_dir}/"
+cp rym-logo.png "${output_dir}/rym-logo.png"
 
 echo "built ${output_dir}/rym.html"

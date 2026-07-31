@@ -8,5 +8,7 @@ RUN ./emscripten-build.sh
 RUN mkdir -p /artifacts \
     && cp build/emscripten/rym.html /artifacts/ \
     && cp build/emscripten/rym.js /artifacts/ \
-    && cp build/emscripten/rym.wasm /artifacts/
-
+    && cp build/emscripten/rym.wasm /artifacts/ \
+    && cp build/emscripten/manifest.webmanifest /artifacts/ \
+    && cp build/emscripten/service-worker.js /artifacts/ \
+    && cp build/emscripten/rym-logo.png /artifacts/

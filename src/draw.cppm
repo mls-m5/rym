@@ -409,3 +409,7 @@ export bool initDrawModule(double perspective) {
 
     return false;
 }
+
+export void resizeDrawModule(double perspective) {
+    camPerspective = perspective;
+}

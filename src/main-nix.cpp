@@ -11,6 +11,7 @@ import <iostream>;
 import <stdexcept>;
 #ifdef __EMSCRIPTEN__
 import <emscripten/emscripten.h>;
+import <emscripten/html5.h>;
 #endif
 
 using namespace std;
@@ -21,6 +22,28 @@ const int height = 600; // 480
 
 static SDL_Window *window = nullptr;
 static SDL_GLContext context;
+
+#ifdef __EMSCRIPTEN__
+EM_BOOL resizeCanvas(int, const EmscriptenUiEvent *, void *) {
+    double cssWidth = 0;
+    double cssHeight = 0;
+    emscripten_get_element_css_size("#canvas", &cssWidth, &cssHeight);
+
+    const double pixelRatio = emscripten_get_device_pixel_ratio();
+    const int drawableWidth = static_cast<int>(cssWidth * pixelRatio);
+    const int drawableHeight = static_cast<int>(cssHeight * pixelRatio);
+
+    emscripten_set_canvas_element_size(
+        "#canvas", drawableWidth, drawableHeight);
+    glViewport(0, 0, drawableWidth, drawableHeight);
+
+    if (cssHeight > 0) {
+        resizeDrawModule(cssWidth / cssHeight);
+    }
+
+    return true;
+}
+#endif
 
 // Kill program
 [[noreturn]] void endProgram(int code) {
@@ -146,11 +169,14 @@ int main(int /*argc*/, char * /*argv*/[]) {
 #endif
 
     // setupOpengl();
-    initDrawModule(width / height);
+    initDrawModule(static_cast<double>(width) / height);
 
     game::init();
 
 #ifdef __EMSCRIPTEN__
+    emscripten_set_resize_callback(
+        EMSCRIPTEN_EVENT_TARGET_WINDOW, nullptr, false, resizeCanvas);
+    resizeCanvas(0, nullptr, nullptr);
     emscripten_set_main_loop(runFrame, 0, true);
 #else
     mainLoop();
