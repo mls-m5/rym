@@ -2,7 +2,7 @@
   "name": "Rym",
   "short_name": "Rym",
   "description": "A game about beauty, explosions, lines, squares and a triangle.",
-  "start_url": "./rym.html",
+  "start_url": "./",
   "scope": "./",
   "display": "fullscreen",
   "orientation": "any",

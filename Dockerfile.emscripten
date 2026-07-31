@@ -6,6 +6,7 @@ COPY . .
 RUN ./emscripten-build.sh
 
 RUN mkdir -p /artifacts \
+    && cp build/emscripten/index.html /artifacts/ \
     && cp build/emscripten/rym.html /artifacts/ \
     && cp build/emscripten/rym.js /artifacts/ \
     && cp build/emscripten/rym.wasm /artifacts/ \

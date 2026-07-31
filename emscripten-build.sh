@@ -48,7 +48,14 @@ cp src/*.h "${generated_dir}/"
     --shell-file web/shell.html \
     -o "${output_dir}/rym.html"
 
-cp web/manifest.webmanifest web/service-worker.js "${output_dir}/"
+cp "${output_dir}/rym.html" "${output_dir}/index.html"
+cp web/manifest.webmanifest "${output_dir}/"
+cp web/service-worker.js "${output_dir}/service-worker.js"
 cp rym-logo.png "${output_dir}/rym-logo.png"
+
+# Changing the cache name whenever the Wasm changes ensures an installed PWA
+# updates after a new GitHub Pages deployment.
+wasm_hash=$(sha256sum "${output_dir}/rym.wasm" | cut -c1-12)
+sed -i "s/rym-v1/rym-${wasm_hash}/" "${output_dir}/service-worker.js"
 
 echo "built ${output_dir}/rym.html"

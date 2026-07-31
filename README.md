@@ -64,3 +64,27 @@ If you search for rym on google play stor you should probably find a installer.
 
 ![Gameplay](rym1.png)
 ![Gameplay](rym2.png)
+
+GitHub Pages
+------------
+
+The Emscripten application is built and deployed by
+`.github/workflows/emscripten-pages.yml` whenever a change is pushed to
+`master`. Pull requests run the same build without deploying it.
+
+To enable deployment for this repository:
+
+1. Open the repository on GitHub.
+2. Go to **Settings → Pages**.
+3. Under **Build and deployment**, set **Source** to **GitHub Actions**.
+4. Push to `master`, or run **Emscripten build and GitHub Pages** manually
+   from the **Actions** tab.
+
+The project site will be available at:
+
+```text
+https://mls-m5.github.io/rym/
+```
+
+GitHub Pages serves the application over HTTPS, so its service worker and
+installable-app features are available on supported phones and browsers.

@@ -1,6 +1,7 @@
 const CACHE_NAME = "rym-v1";
 const APP_FILES = [
   "./",
+  "./index.html",
   "./rym.html",
   "./rym.js",
   "./rym.wasm",
