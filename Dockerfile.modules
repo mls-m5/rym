@@ -1,0 +1,58 @@
+FROM ubuntu:22.04 AS toolchain
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG LLVM_VERSION=16
+ARG CMAKE_VERSION=3.28.3
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        cmake \
+        curl \
+        git \
+        gnupg \
+        lsb-release \
+        ninja-build \
+        software-properties-common \
+    && curl -fsSL https://apt.llvm.org/llvm.sh -o /tmp/llvm.sh \
+    && chmod +x /tmp/llvm.sh \
+    && /tmp/llvm.sh "${LLVM_VERSION}" \
+    && apt-get install -y --no-install-recommends \
+        clang-"${LLVM_VERSION}" \
+        libc++-"${LLVM_VERSION}"-dev \
+        libc++abi-"${LLVM_VERSION}"-dev \
+        libgl1-mesa-dev \
+        libsdl2-dev \
+    && rm -rf /var/lib/apt/lists/* /tmp/llvm.sh
+
+RUN curl -fsSL \
+        "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz" \
+        -o /tmp/cmake.tar.gz \
+    && tar -xzf /tmp/cmake.tar.gz -C /opt \
+    && ln -sf "/opt/cmake-${CMAKE_VERSION}-linux-x86_64/bin/cmake" /usr/local/bin/cmake \
+    && rm /tmp/cmake.tar.gz
+
+RUN git clone --depth 1 --recurse-submodules --shallow-submodules \
+        https://github.com/mls-m5/matmake3.git /opt/matmake3-src \
+    && cmake -S /opt/matmake3-src -B /opt/matmake3-build -G Ninja \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_C_COMPILER=clang-16 \
+        -DCMAKE_CXX_COMPILER=clang++-16 \
+    && cmake --build /opt/matmake3-build --parallel \
+    && cp /opt/matmake3-build/matmake3 /usr/local/bin/matmake3
+
+FROM toolchain AS build
+WORKDIR /workspace
+COPY . .
+
+ENV CXX=clang++-16
+
+RUN matmake3 \
+    --link -lSDL2 \
+    --link -lGL \
+    -j 1 \
+    --flag "-std=c++20 -stdlib=libc++ -static-libstdc++ -DGL_GLEXT_PROTOTYPES=1 -DGL3_PROTOTYPES=1 -I/usr/include/SDL2/"
+
+RUN mkdir -p /artifacts \
+    && find /workspace -type f -name rym -executable \
+        -exec cp {} /artifacts/rym \; -quit \
+    && test -x /artifacts/rym

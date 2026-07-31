@@ -1,0 +1,12 @@
+FROM emscripten/emsdk:6.0.4 AS build
+
+WORKDIR /workspace
+COPY . .
+
+RUN ./emscripten-build.sh
+
+RUN mkdir -p /artifacts \
+    && cp build/emscripten/rym.html /artifacts/ \
+    && cp build/emscripten/rym.js /artifacts/ \
+    && cp build/emscripten/rym.wasm /artifacts/
+

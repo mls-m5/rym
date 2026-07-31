@@ -1,17 +1,17 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
-# This script supposed to be called by make to build the project with a
+# This script is intended to be called by make to build the project with a
 # compiler that does not support modules.
 # Usage:
-# ./non-module-build.sh g++
+# ./non-module-build.sh [compiler]
 
-CXX=$1
+set -euo pipefail
 
-function header {
-  echo "#pragma once"
-}
+compiler=${1:-${CXX:-c++}}
+tmpdir=build/.tmp
+output=build/rym
 
-function filter {
+filter() {
   sed -E "s/import (<.*>);/#include \1/" | \
   sed -E "s/import (\".*\");/#include \1/" | \
   sed -E "s/import (.*);/#include \"\1.h\"/" | \
@@ -21,29 +21,33 @@ function filter {
   sed -E "s/export enum /enum /g" | \
   sed -E "s/export struct /struct /g" | \
   sed -E "s/export template /template /g" | \
-  sed -E "s/module;/\/\/module/g" |
-  sed -E "s/export / /g" 
-#  sed -E "s/export /inline /g" | \
+  sed -E "s/module;/\/\/ module;/g" | \
+  sed -E "s/export / /g"
 }
 
-tmpdir=build/.tmp
-
-mkdir -p ${tmpdir}/src
+mkdir -p "${tmpdir}/src"
 
 echo processing module to non-module code
 
 for f in src/*.cppm
 do
-  in=$f
-  out=$tmpdir/${f%%.*}.h
-  (header && cat $in) | filter > $out
+  out="${tmpdir}/${f%.cppm}.h"
+  {
+    echo "#pragma once"
+    filter < "${f}"
+  } > "${out}"
 done
 
-cat src/main-nix.cpp | filter > ${tmpdir}/src/main.cpp
+filter < src/main-nix.cpp > "${tmpdir}/src/main.cpp"
 
-cp src/*.h ${tmpdir}/src
+cp src/*.h "${tmpdir}/src"
 
 echo building...
-${CXX} ${tmpdir}/src/main.cpp -o build/rym -lSDL2 -std=c++17 -stdlib=libc++
+"${compiler}" \
+  "${tmpdir}/src/main.cpp" \
+  -o "${output}" \
+  -std=c++20 \
+  $(pkg-config --cflags --libs sdl2) \
+  -lGL
 
-# Why it is not possible to compile without libc++ is beyond my understanding
+echo "built ${output}"
